@@ -2800,8 +2800,9 @@
       }
 
       /**
-       * 智能AI决策系统 - 增强版
-       * 优先级：躲避刺球 > 安全区威胁 > 躲避威胁 > 追捕猎物 > 寻找食物 > 智能巡逻
+       * 智能AI决策系统 - 食物优先版
+       * 优先级：躲避刺球 > 安全区威胁 > 防御性战斗 > 吃食物 > 智能巡逻
+       * 设计理念：前期中期专注吃食物发育，战斗仅限防御性或机会性
        */
       decideDirection(player, allEnemies, foods, spikes) {
         const now = performance.now();
@@ -2829,7 +2830,7 @@
           return;
         }
 
-        // 3. 检测威胁并智能逃跑
+        // 3. 检测威胁并智能逃跑（防御优先）
         const threat = this.findThreatAdvanced(player, allEnemies);
         if (threat) {
           this.handleThreatSmart(threat, player, allEnemies, spikes, now);
@@ -2838,25 +2839,32 @@
           return;
         }
 
-        // 4. 根据大小对比决定策略
-        const sizeComparison = this.analyzeSizeComparison(player, allEnemies);
+        // 4. 检测是否有更小的实体主动靠近（机会性战斗）
+        const approachingPrey = this.findApproachingPrey(player, allEnemies);
+        if (approachingPrey) {
+          this.huntWithPrediction(approachingPrey);
+          this.changeDirInterval = 0.2 + Math.random() * 0.1;
+          this.currentStrategy = 'hunt';
+          return;
+        }
         
-        // 5. 主动寻找可吞噬的目标
-        const bestTarget = this.findBestTarget(player, allEnemies, foods);
-        if (bestTarget) {
-          if (bestTarget.isFood) {
-            this.targetX = bestTarget.target.x;
-            this.targetY = bestTarget.target.y;
-            this.changeDirInterval = 0.3 + Math.random() * 0.2;
-            this.currentStrategy = 'develop';
-          } else {
-            // 智能追击：预测路径拦截
-            this.huntWithPrediction(bestTarget.target);
-            this.changeDirInterval = 0.25 + Math.random() * 0.15;
-            this.currentStrategy = 'hunt';
-          }
-          this.targetMemory = bestTarget.target;
-          this.targetMemoryTime = now;
+        // 5. 最高优先级：吃食物发育
+        const bestFood = this.findBestFood(foods);
+        if (bestFood) {
+          this.targetX = bestFood.x;
+          this.targetY = bestFood.y;
+          this.changeDirInterval = 0.25 + Math.random() * 0.15;
+          this.currentStrategy = 'develop';
+          return;
+        }
+
+        // 6. 寻找食物密集区域
+        const foodCluster = this.findFoodCluster(foods);
+        if (foodCluster) {
+          this.targetX = foodCluster.x;
+          this.targetY = foodCluster.y;
+          this.changeDirInterval = 0.4 + Math.random() * 0.3;
+          this.currentStrategy = 'develop';
           return;
         }
 
@@ -2951,6 +2959,112 @@
         }
         
         return nearestThreat;
+      }
+      
+      /**
+       * 检测是否有更小的实体主动靠近（机会性战斗）
+       * 只有当猎物主动靠近AI时，AI才会发起攻击
+       */
+      findApproachingPrey(player, allEnemies) {
+        const detectionRadius = this.radius * 12;
+        let bestPrey = null;
+        let highestApproachScore = -Infinity;
+        
+        // 检测玩家（只有玩家比AI小且主动靠近时）
+        if (canEat(this.radius, player.radius)) {
+          const dist = distance(this.x, this.y, player.x, player.y);
+          if (dist < detectionRadius) {
+            // 计算玩家是否在靠近AI（通过计算相对速度）
+            const approachSpeed = this.calculateApproachSpeed(player);
+            if (approachSpeed > 0.5) {
+              const score = this.calculatePreyScore(player, dist, approachSpeed);
+              if (score > highestApproachScore) {
+                highestApproachScore = score;
+                bestPrey = player;
+              }
+            }
+          }
+        }
+        
+        // 检测其他敌人
+        for (const enemy of allEnemies) {
+          if (enemy === this) continue;
+          if (!canEat(this.radius, enemy.radius)) continue;
+          
+          const dist = distance(this.x, this.y, enemy.x, enemy.y);
+          if (dist < detectionRadius * 1.2) {
+            const approachSpeed = this.calculateApproachSpeed(enemy);
+            if (approachSpeed > 0.3) {
+              const score = this.calculatePreyScore(enemy, dist, approachSpeed);
+              if (score > highestApproachScore) {
+                highestApproachScore = score;
+                bestPrey = enemy;
+              }
+            }
+          }
+        }
+        
+        return bestPrey;
+      }
+      
+      /**
+       * 计算猎物接近AI的速度
+       */
+      calculateApproachSpeed(entity) {
+        const dx = entity.x - this.x;
+        const dy = entity.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 1) return 0;
+        
+        const dvx = entity.vx - this.vx;
+        const dvy = entity.vy - this.vy;
+        const approachRate = -(dx * dvx + dy * dy) / dist;
+        return Math.max(0, approachRate);
+      }
+      
+      /**
+       * 计算猎物评分（基于距离和接近速度）
+       */
+      calculatePreyScore(prey, dist, approachSpeed) {
+        const distanceScore = (500 - dist) / 500;
+        const approachScore = approachSpeed * 2;
+        const sizeGain = (prey.radius ** 3) / (this.radius ** 3);
+        
+        return distanceScore * 50 + approachScore * 30 + sizeGain * 100;
+      }
+      
+      /**
+       * 寻找最佳食物（专注于吃食物发育）
+       */
+      findBestFood(foods) {
+        if (foods.length === 0) return null;
+        
+        const searchRadius = this.radius * 15;
+        let bestFood = null;
+        let bestScore = -Infinity;
+        
+        for (const food of foods) {
+          const dist = distance(this.x, this.y, food.x, food.y);
+          if (dist > searchRadius) continue;
+          
+          // 检查食物位置是否安全（不在刺球附近）
+          let dangerPenalty = 0;
+          if (this.isPositionInDanger(food.x, food.y)) {
+            dangerPenalty = 150;
+          }
+          
+          // 计算食物评分
+          const distScore = (searchRadius - dist) * 0.5;
+          const valueScore = food.radius * 15;
+          const totalScore = distScore + valueScore - dangerPenalty;
+          
+          if (totalScore > bestScore) {
+            bestScore = totalScore;
+            bestFood = food;
+          }
+        }
+        
+        return bestFood;
       }
       
       /**
@@ -3508,14 +3622,20 @@
         const dist = distance(this.x, this.y, threat.x, threat.y);
         const threatApproaching = canEat(threat.radius, this.radius);
         
-        // 只有在特定条件下才分裂：
-        // 1. 足够大可以分裂
-        // 2. 威胁很近
-        // 3. 性格不是太谨慎
-        return this.radius >= CONFIG.MIN_SPLIT_RADIUS * 1.2 &&
-               dist < this.radius * 3 &&
+        // 只有在非常严格的条件下才分裂：
+        // 1. 足够大可以分裂（至少是最小分裂半径的1.5倍）
+        // 2. 威胁确实比自己大（canEat判断）
+        // 3. 威胁体积明显更大（超过1.3倍）
+        // 4. 威胁非常近（小于自身半径的2倍）
+        // 5. 性格必须是激进型才会分裂
+        // 6. 当前分身数量未达上限
+        const threatSizeRatio = threat.radius / this.radius;
+        
+        return this.radius >= CONFIG.MIN_SPLIT_RADIUS * 1.5 &&
                threatApproaching &&
-               this.personality !== 'cautious' &&
+               threatSizeRatio > 1.3 &&
+               dist < this.radius * 2 &&
+               this.personality === 'aggressive' &&
                state.splitCount < CONFIG.MAX_SPLITS;
       }
 
