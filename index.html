@@ -2,10 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
-  <meta name="screen-orientation" content="landscape">
-  <meta name="x5-orientation" content="landscape">
-  <meta name="orientation" content="landscape">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0a0e27">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,9 +18,16 @@
     /* ==================== 全局重置 ==================== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
     body {
       background: #0a0e27;
-      overflow: hidden;
       font-family: 'Microsoft YaHei', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       color: #fff;
       user-select: none;
@@ -31,15 +35,25 @@
       -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
       touch-action: none;
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh; /* iOS 11+ */
       position: fixed;
-      /* Safari 15+ 适配 */
-      padding-top: env(safe-area-inset-top);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-      padding-bottom: env(safe-area-inset-bottom);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    @supports (height: 100dvh) {
+      body {
+        height: 100dvh;
+      }
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      body {
+        min-height: -webkit-fill-available;
+      }
     }
 
     /* ==================== 游戏画布 ==================== */
@@ -123,15 +137,30 @@
     /* ==================== 开始界面 ==================== */
     .overlay {
       position: fixed;
-      inset: 0;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      min-height: 100% !important;
+      display: grid !important;
+      place-items: center !important;
+      background: rgba(10, 14, 39, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 200;
+      transition: opacity 0.3s ease;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: none !important;
+    }
+    
+    .overlay-content {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(10, 14, 39, 0.95);
-      backdrop-filter: blur(10px);
-      z-index: 200;
-      transition: opacity 0.3s ease;
     }
 
     .overlay.hidden {
@@ -403,6 +432,9 @@
       display: none;
       align-items: center;
       justify-content: center;
+      flex-direction: column;
+      padding: 0;
+      margin: 0;
       z-index: 150;
       box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
       cursor: pointer;
@@ -417,10 +449,33 @@
 
     @media (max-width: 768px), (hover: none) and (pointer: coarse) {
       .split-btn {
-        display: flex;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-direction: column !important;
       }
       .hint {
         display: none !important;  /* 移动端隐藏键盘提示 */
+      }
+      
+      .overlay {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-direction: column !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        transform: none !important;
+        box-sizing: border-box !important;
       }
     }
 
@@ -521,6 +576,32 @@
       }
     }
 
+    /* iPhone刘海屏/灵动岛横屏适配 */
+    @supports (-webkit-touch-callout: none) {
+      @media (orientation: landscape) {
+        body {
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
+        }
+        
+        .ui-panel {
+          left: max(8px, env(safe-area-inset-left));
+        }
+        
+        .leaderboard-container {
+          right: max(8px, env(safe-area-inset-right));
+        }
+        
+        .joystick-container {
+          left: max(15px, calc(env(safe-area-inset-left) + 15px));
+        }
+        
+        .split-btn {
+          right: max(15px, calc(env(safe-area-inset-right) + 15px));
+        }
+      }
+    }
+
     /* ==================== 强制横屏提示遮罩 ==================== */
     .portrait-warning {
       position: fixed;
@@ -531,8 +612,11 @@
       justify-content: center;
       background: rgba(10, 14, 39, 0.98);
       backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       z-index: 9999;
       padding: 40px;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
       text-align: center;
     }
 
@@ -588,19 +672,95 @@
       to { transform: rotate(360deg); }
     }
 
-    /* 移动端竖屏时显示提示 */
+    /* iPhone竖屏时显示提示 */
+    @supports (-webkit-touch-callout: none) {
+      @media (max-width: 768px) and (orientation: portrait) {
+        .portrait-warning {
+          display: flex;
+        }
+        
+        #gameCanvas,
+        .ui-panel,
+        .hint,
+        .joystick-container,
+        .split-btn,
+        .overlay,
+        .landscape-warning {
+          display: none !important;
+        }
+      }
+    }
+
+    /* 安卓移动端竖屏时显示提示 */
     @media (max-width: 768px) and (orientation: portrait) {
       .portrait-warning {
         display: flex;
       }
       
-      /* 隐藏游戏内容，只显示提示 */
       #gameCanvas,
       .ui-panel,
       .hint,
       .joystick-container,
       .split-btn,
+      .overlay,
+      .landscape-warning {
+        display: none !important;
+      }
+    }
+
+    /* 横屏时隐藏所有提示，正常显示游戏 */
+    @media (orientation: landscape) {
+      .portrait-warning,
+      .landscape-warning {
+        display: none !important;
+      }
+      
+      #gameCanvas,
+      .ui-panel,
       .overlay {
+        display: block !important;
+      }
+      
+      .joystick-container {
+        display: block !important;
+      }
+      
+      .split-btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+    }
+
+    /* 桌面端不显示任何提示 */
+    @media (min-width: 769px) and (hover: hover) {
+      .portrait-warning,
+      .landscape-warning {
+        display: none !important;
+      }
+      
+      .overlay {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        transform: none !important;
+      }
+      
+      .hint {
+        display: block !important;
+      }
+      
+      .joystick-container,
+      .split-btn {
         display: none !important;
       }
     }
@@ -645,7 +805,7 @@
 
     /* 排行榜折叠按钮 */
     .leaderboard-toggle {
-      display: none;
+      display: flex;
       align-items: center;
       gap: 4px;
       padding: 8px 12px;
@@ -656,6 +816,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
       color: #fff;
+      z-index: 101;
     }
 
     .leaderboard-toggle:hover {
@@ -785,6 +946,15 @@
       .leaderboard {
         display: block !important;
       }
+      .leaderboard.collapsed {
+        display: none !important;
+      }
+      .leaderboard-toggle {
+        display: flex;
+        margin-bottom: -1px;
+        border-radius: 8px 8px 0 0;
+        border-bottom: none;
+      }
     }
 
     /* 移动端排行榜优化 - 可折叠设计 */
@@ -806,7 +976,7 @@
       }
       
       .leaderboard {
-        display: none;
+        display: block;
         min-width: 140px;
         max-width: 45vw;
         width: auto;
@@ -822,8 +992,8 @@
         overflow-y: auto;
       }
       
-      .leaderboard.open {
-        display: block;
+      .leaderboard.collapsed {
+        display: none;
       }
       
       .leaderboard-header {
@@ -949,63 +1119,69 @@
 
   <!-- 开始界面 -->
   <div class="overlay" id="startOverlay">
-    <div class="game-title">球球大作战</div>
-    <div class="game-subtitle">吃掉食物和对手，成为最大的球！</div>
-    <div class="input-group">
-      <label>输入你的昵称</label>
-      <input type="text" class="name-input" id="playerName" placeholder="球球玩家" maxlength="10">
+    <div class="overlay-content">
+      <div class="game-title">球球大作战</div>
+      <div class="game-subtitle">吃掉食物和对手，成为最大的球！</div>
+      <div class="input-group">
+        <label>输入你的昵称</label>
+        <input type="text" class="name-input" id="playerName" placeholder="球球玩家" maxlength="10">
+      </div>
+      <button class="btn" id="startBtn">开始游戏</button>
     </div>
-    <button class="btn" id="startBtn">开始游戏</button>
   </div>
 
   <!-- 失败界面 -->
   <div class="overlay hidden" id="gameOverOverlay">
-    <div class="game-title" style="font-size: 42px; color: #ff4757; text-shadow: 0 0 20px rgba(255, 71, 87, 0.5);">💀 游戏结束</div>
-    <div class="result-stats" style="border-color: rgba(255, 71, 87, 0.3);">
-      <div class="result-item">
-        <div class="label">最终得分</div>
-        <div class="value" id="finalScore">0</div>
+    <div class="overlay-content">
+      <div class="game-title" style="font-size: 42px; color: #ff4757; text-shadow: 0 0 20px rgba(255, 71, 87, 0.5);">💀 游戏结束</div>
+      <div class="result-stats" style="border-color: rgba(255, 71, 87, 0.3);">
+        <div class="result-item">
+          <div class="label">最终得分</div>
+          <div class="value" id="finalScore">0</div>
+        </div>
+        <div class="result-item">
+          <div class="label">最大体积</div>
+          <div class="value" id="maxSize">10</div>
+        </div>
+        <div class="result-item">
+          <div class="label">存活时间</div>
+          <div class="value" id="survivalTime">0s</div>
+        </div>
       </div>
-      <div class="result-item">
-        <div class="label">最大体积</div>
-        <div class="value" id="maxSize">10</div>
+      <div style="color: #ff6b6b; font-size: 16px; margin-bottom: 20px; opacity: 0.8;">再接再厉，下次一定能称霸球场！</div>
+      <div style="display: flex; gap: 15px; justify-content: center;">
+        <button class="btn" style="background: linear-gradient(135deg, #ff4757, #ff6b6b); border: none;">再来一局</button>
+        <button class="btn btn-secondary" id="gameOverBackBtn">返回主页</button>
       </div>
-      <div class="result-item">
-        <div class="label">存活时间</div>
-        <div class="value" id="survivalTime">0s</div>
-      </div>
-    </div>
-    <div style="color: #ff6b6b; font-size: 16px; margin-bottom: 20px; opacity: 0.8;">再接再厉，下次一定能称霸球场！</div>
-    <div style="display: flex; gap: 15px; justify-content: center;">
-      <button class="btn" style="background: linear-gradient(135deg, #ff4757, #ff6b6b); border: none;">再来一局</button>
-      <button class="btn btn-secondary" id="gameOverBackBtn">返回主页</button>
     </div>
   </div>
 
   <!-- 获胜界面 -->
   <div class="overlay hidden" id="victoryOverlay">
-    <div class="game-title" style="font-size: 36px; background: linear-gradient(135deg, #ffd93d, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🎉 恭喜获胜！ 🎉</div>
-    <div class="result-stats" style="margin-top: 20px;">
-      <div class="result-item">
-        <div class="label">最终得分</div>
-        <div class="value gold" id="victoryScore">0</div>
+    <div class="overlay-content">
+      <div class="game-title" style="font-size: 36px; background: linear-gradient(135deg, #ffd93d, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🎉 恭喜获胜！ 🎉</div>
+      <div class="result-stats" style="margin-top: 20px;">
+        <div class="result-item">
+          <div class="label">最终得分</div>
+          <div class="value gold" id="victoryScore">0</div>
+        </div>
+        <div class="result-item">
+          <div class="label">最大体积</div>
+          <div class="value" id="victoryMaxSize">10</div>
+        </div>
+        <div class="result-item">
+          <div class="label">存活时间</div>
+          <div class="value" id="victorySurvivalTime">0s</div>
+        </div>
+        <div class="result-item">
+          <div class="label">吞噬AI总数</div>
+          <div class="value" id="victoryAIConsumed">0</div>
+        </div>
       </div>
-      <div class="result-item">
-        <div class="label">最大体积</div>
-        <div class="value" id="victoryMaxSize">10</div>
+      <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
+        <button class="btn" id="victoryRestartBtn" style="background: linear-gradient(135deg, #6bcb77, #4d96ff);">再来一局</button>
+        <button class="btn btn-secondary" id="victoryBackBtn">返回主页</button>
       </div>
-      <div class="result-item">
-        <div class="label">存活时间</div>
-        <div class="value" id="victorySurvivalTime">0s</div>
-      </div>
-      <div class="result-item">
-        <div class="label">吞噬AI总数</div>
-        <div class="value" id="victoryAIConsumed">0</div>
-      </div>
-    </div>
-    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
-      <button class="btn" id="victoryRestartBtn" style="background: linear-gradient(135deg, #6bcb77, #4d96ff);">再来一局</button>
-      <button class="btn btn-secondary" id="victoryBackBtn">返回主页</button>
     </div>
   </div>
 
@@ -1509,51 +1685,48 @@
     const restartBtn = document.getElementById('restartBtn');
     const portraitWarning = document.getElementById('portraitWarning');
     
-    /**
-     * 检测并处理屏幕方向（仅移动端）
-     * 统一处理横屏/竖屏逻辑
-     */
+    function isLandscape() {
+      return window.innerWidth > window.innerHeight;
+    }
+    
+    function isIOSDevice() {
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+    
     function checkOrientation() {
       if (!state.isMobile) return;
       
-      const isLandscape = window.innerWidth > window.innerHeight;
+      const inLandscape = isLandscape();
       
-      if (isLandscape) {
-        // 横屏模式
+      if (inLandscape) {
         landscapeWarning.classList.add('hidden');
         if (portraitWarning) {
           portraitWarning.classList.remove('visible');
         }
         
-        // 重新计算摇杆尺寸（因为 CSS 可能改变了容器大小）
         if (joystick && state.isRunning) {
           joystick.recalculateDimensions();
         }
         
-        // 如果之前因为竖屏而暂停，现在恢复
         if (state.wasRunningBeforePortrait) {
           state.wasRunningBeforePortrait = false;
-          // 修正暂停时长
           if (state.pauseStartTime > 0) {
             state.accumulatedPauseTime += performance.now() - state.pauseStartTime;
             state.pauseStartTime = 0;
           }
           state.isRunning = true;
           state.lastTime = performance.now();
-          // 先取消旧的动画帧，再启动新的
           if (state.animationFrameId) {
             cancelAnimationFrame(state.animationFrameId);
           }
           requestAnimationFrame(gameLoop);
         }
       } else {
-        // 竖屏模式
         landscapeWarning.classList.remove('hidden');
         if (portraitWarning) {
           portraitWarning.classList.add('visible');
         }
         
-        // 如果游戏正在运行，暂停它
         if (state.isRunning) {
           state.wasRunningBeforePortrait = true;
           state.isRunning = false;
@@ -1562,16 +1735,25 @@
       }
     }
     
-    // 监听屏幕方向变化事件
+    let orientationCheckTimer = null;
+    function debouncedOrientationCheck() {
+      if (orientationCheckTimer) {
+        clearTimeout(orientationCheckTimer);
+      }
+      orientationCheckTimer = setTimeout(checkOrientation, 100);
+    }
+    
     window.addEventListener('orientationchange', () => {
-      // 延迟执行，等待方向切换完成
-      setTimeout(checkOrientation, 300);
+      setTimeout(checkOrientation, 500);
     });
     
-    // 监听窗口大小变化（某些设备不触发 orientationchange）
-    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('resize', debouncedOrientationCheck);
+    window.addEventListener('visualViewport', debouncedOrientationCheck);
     
-    // 页面加载时检查初始方向
+    if (isIOSDevice()) {
+      window.addEventListener('scroll', debouncedOrientationCheck, { passive: true });
+    }
+    
     checkOrientation();
 
     // ==================== 全屏API模块 ====================
@@ -1583,11 +1765,40 @@
       if (!state.isMobile) return;
       
       const elem = document.documentElement;
+      const ua = navigator.userAgent.toLowerCase();
       
       // 检查是否已在全屏模式
       if (document.fullscreenElement || document.webkitFullscreenElement || 
           document.mozFullScreenElement || document.msFullscreenElement) {
         return;
+      }
+      
+      // 小米浏览器横屏API
+      if (ua.includes('miui') || ua.includes('xiaomi')) {
+        if (typeof window.MiuiFullScreen !== 'undefined') {
+          window.MiuiFullScreen.setOrientation('landscape');
+        } else if (document.body && document.body.setOrientation) {
+          document.body.setOrientation(90);
+        }
+      }
+      
+      // OPPO浏览器横屏API
+      if (ua.includes('oppo') || ua.includes('realme')) {
+        if (typeof window.OPPO !== 'undefined' && window.OPPO.screen) {
+          window.OPPO.screen.setOrientation('landscape');
+        }
+      }
+      
+      // VIVO浏览器横屏API
+      if (ua.includes('vivo')) {
+        if (typeof window.VivoFullScreen !== 'undefined') {
+          window.VivoFullScreen.requestLandscape();
+        }
+      }
+      
+      // UC/QQ浏览器 X5内核横屏API
+      if (typeof window.AndroidFullScreen !== 'undefined') {
+        window.AndroidFullScreen.setOrientation(1);
       }
       
       // 尝试请求全屏
@@ -1862,7 +2073,6 @@
         if (dist > this.baseRadius * 2) return;
         
         e.preventDefault();
-        e.stopPropagation();
         
         this.touchId = touch.identifier;
         this.isActive = true;
@@ -1879,7 +2089,6 @@
         for (let i = 0; i < e.changedTouches.length; i++) {
           if (e.changedTouches[i].identifier === this.touchId) {
             e.preventDefault();
-            e.stopPropagation();
             this.updatePosition(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
             break;
           }
@@ -5169,24 +5378,12 @@
       if (!aiCountDisplay) {
         aiCountDisplay = document.createElement('div');
         aiCountDisplay.id = 'aiCountDisplay';
-        aiCountDisplay.style.cssText = `
-          position: fixed;
-          top: 70px;
-          left: 10px;
-          background: rgba(0, 0, 0, 0.7);
-          color: #ffd93d;
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-size: 14px;
-          font-weight: bold;
-          font-family: Microsoft YaHei, sans-serif;
-          z-index: 999;
-        `;
-        document.body.appendChild(aiCountDisplay);
+        aiCountDisplay.className = 'stat-box';
+        aiCountDisplay.innerHTML = '<div class="stat-label">剩余</div><div class="stat-value" id="aiCountValue">0</div>';
+        document.getElementById('uiPanel').appendChild(aiCountDisplay);
       }
       
-      // 更新AI数量显示
-      aiCountDisplay.innerHTML = `剩余AI: <span style="color: #ff6b6b">${state.enemies.length}</span>`;
+      document.getElementById('aiCountValue').textContent = state.enemies.length;
       
       // 处理不同的获胜状态提示
       if (vs.hasTriggeredVictory) {
@@ -5786,25 +5983,33 @@
     
     // 排行榜折叠按钮
     const leaderboardToggle = document.getElementById('leaderboardToggle');
-    let isLeaderboardOpen = false;
+    let isLeaderboardOpen = true;
+    
+    const toggleLeaderboard = () => {
+      isLeaderboardOpen = !isLeaderboardOpen;
+      if (isLeaderboardOpen) {
+        leaderboard.classList.remove('collapsed');
+        leaderboardToggle.classList.add('active');
+      } else {
+        leaderboard.classList.add('collapsed');
+        leaderboardToggle.classList.remove('active');
+      }
+    };
     
     if (leaderboardToggle && leaderboard) {
-      leaderboardToggle.addEventListener('click', () => {
-        isLeaderboardOpen = !isLeaderboardOpen;
-        if (isLeaderboardOpen) {
-          leaderboard.classList.add('open');
-          leaderboardToggle.classList.add('active');
-        } else {
-          leaderboard.classList.remove('open');
-          leaderboardToggle.classList.remove('active');
-        }
+      leaderboardToggle.classList.add('active');
+      
+      leaderboardToggle.addEventListener('click', toggleLeaderboard);
+      leaderboardToggle.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        toggleLeaderboard();
       });
       
       // 点击外部关闭排行榜（移动端）
       document.addEventListener('click', (e) => {
         if (isLeaderboardOpen && !leaderboard.contains(e.target) && !leaderboardToggle.contains(e.target)) {
           isLeaderboardOpen = false;
-          leaderboard.classList.remove('open');
+          leaderboard.classList.add('collapsed');
           leaderboardToggle.classList.remove('active');
         }
       });
