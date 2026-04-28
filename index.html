@@ -34,7 +34,6 @@
       -webkit-user-select: none;
       -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
-      touch-action: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -42,6 +41,18 @@
       bottom: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Canvas区域禁用touch-action，按钮区域保持默认 */
+    canvas {
+      touch-action: none;
+    }
+    
+    /* 按钮类保持正常触摸行为 */
+    .btn, .overlay, .joystick-container, .split-btn, #leaderboardToggle {
+      touch-action: auto;
     }
 
     @supports (height: 100dvh) {
@@ -1150,7 +1161,7 @@
       </div>
       <div style="color: #ff6b6b; font-size: 16px; margin-bottom: 20px; opacity: 0.8;">再接再厉，下次一定能称霸球场！</div>
       <div style="display: flex; gap: 15px; justify-content: center;">
-        <button class="btn" style="background: linear-gradient(135deg, #ff4757, #ff6b6b); border: none;">再来一局</button>
+        <button class="btn" id="gameOverRestartBtn" style="background: linear-gradient(135deg, #ff4757, #ff6b6b); border: none;">再来一局</button>
         <button class="btn btn-secondary" id="gameOverBackBtn">返回主页</button>
       </div>
     </div>
@@ -1933,6 +1944,40 @@
     }
 
     /**
+     * 根据球体半径计算速度（统一的速度计算公式）
+     * 球体越大速度越慢，符合游戏物理规则
+     * @param {number} radius - 球体半径
+     * @returns {number} 速度值
+     */
+    function getBallSpeed(radius) {
+      const speedFactor = radius > 80 ? 0.005 : 0.004;
+      const speed = CONFIG.BASE_SPEED / (1 + (radius - CONFIG.PLAYER_INIT_RADIUS) * speedFactor);
+      return Math.max(speed, CONFIG.MIN_SPEED);
+    }
+
+    /**
+     * 根据半径计算圆形面积
+     * @param {number} radius - 半径
+     * @returns {number} 面积
+     */
+    function calcArea(radius) {
+      return Math.PI * radius * radius;
+    }
+
+    /**
+     * 根据两个球的半径计算合并后的半径
+     * @param {number} radius1 - 球1半径
+     * @param {number} radius2 - 球2半径
+     * @param {number} [efficiency=1] - 合并效率
+     * @returns {number} 合并后的半径
+     */
+    function calcMergedRadius(radius1, radius2, efficiency = 1) {
+      const area1 = calcArea(radius1);
+      const area2 = calcArea(radius2);
+      return Math.sqrt((area1 + area2 * efficiency) / Math.PI);
+    }
+
+    /**
      * 基于体积判断是否可以吞噬
      * 体积比 = (半径^3)，如果体积比大于EAT_RATIO则可以吞噬
      * @param {number} eaterRadius - 吞噬者半径
@@ -1944,6 +1989,16 @@
       // 如果体积比 > EAT_RATIO，表示体积足够大
       const volumeRatio = (eaterRadius ** 3) / (targetRadius ** 3);
       return volumeRatio > CONFIG.EAT_RATIO;
+    }
+
+    /**
+     * 检查球体是否处于无敌时间
+     * @param {Object} ball - 球体对象
+     * @param {number} now - 当前时间戳
+     * @returns {boolean} 是否无敌
+     */
+    function isInvincible(ball, now) {
+      return ball.invincibleUntil && now < ball.invincibleUntil;
     }
 
     /**
@@ -2402,9 +2457,7 @@
        * 获取当前速度（体积越大越慢）
        */
       getSpeed() {
-        const speedFactor = this.radius > 80 ? 0.005 : 0.004;
-        const speed = CONFIG.BASE_SPEED / (1 + (this.radius - CONFIG.PLAYER_INIT_RADIUS) * speedFactor);
-        return Math.max(speed, CONFIG.MIN_SPEED);
+        return getBallSpeed(this.radius);
       }
 
       /**
@@ -2581,10 +2634,7 @@
        * 增加半径（吃掉东西后）
        */
       grow(amount) {
-        // 面积叠加：新面积 = 原面积 + 增加的面积
-        const currentArea = Math.PI * this.radius * this.radius;
-        const addedArea = Math.PI * amount * amount;
-        this.radius = Math.sqrt((currentArea + addedArea) / Math.PI);
+        this.radius = calcMergedRadius(this.radius, amount, 1);
       }
     }
 
@@ -2640,10 +2690,8 @@
        * 获取当前速度（支持加速）
        */
       getSpeed() {
-        const speedFactor = this.radius > 80 ? 0.005 : 0.004;
-        const baseSpeed = CONFIG.BASE_SPEED / (1 + (this.radius - CONFIG.PLAYER_INIT_RADIUS) * speedFactor);
-        const speed = Math.max(baseSpeed, CONFIG.MIN_SPEED);
-        return speed * this.baseSpeedMultiplier;
+        const baseSpeed = getBallSpeed(this.radius);
+        return baseSpeed * this.baseSpeedMultiplier;
       }
 
       /**
@@ -2930,6 +2978,8 @@
       update(dt, player, allEnemies, foods) {
         this.changeDirTimer += dt;
         this.strategyTimer += dt;
+        
+        const now = performance.now();
 
         // 检测是否卡住
         const moved = distance(this.x, this.y, this.lastPosX, this.lastPosY);
@@ -2949,7 +2999,50 @@
         }
         this.lastPosX = this.x;
         this.lastPosY = this.y;
+        
+        // 1. 找到同名字的AI球（分身）
+        const sameNameEnemies = allEnemies.filter(e => e.name === this.name && e !== this);
+        
+        // 2. 找到同名字球中最大的一个
+        let largestSameNameBall = this;
+        let largestRadius = this.radius;
+        for (const e of sameNameEnemies) {
+          if (e.radius > largestRadius) {
+            largestRadius = e.radius;
+            largestSameNameBall = e;
+          }
+        }
+        
+        // 3. 如果是分身，且有分身信息
+        const isSplitBall = this.splitTime > 0;
+        const timeSinceSplit = isSplitBall ? now - this.splitTime : Infinity;
+        
+        // 分身速度
+        const ballSpeed = this.getSpeed();
+        
+        // 6. 同名字的AI球共享同一个移动方向（如果是分裂出来的）
+        if (sameNameEnemies.length > 0 && isSplitBall) {
+          // 如果冷却时间已过（3秒），分身向最大的主球靠拢合并
+          if (timeSinceSplit >= CONFIG.MERGE_WAIT_TIME) {
+            const dx = largestSameNameBall.x - this.x;
+            const dy = largestSameNameBall.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist > this.radius + largestSameNameBall.radius + 10) {
+              this.vx = (dx / dist) * ballSpeed;
+              this.vy = (dy / dist) * ballSpeed;
+              
+              this.x += this.vx * dt;
+              this.y += this.vy * dt;
+              
+              this.x = clamp(this.x, this.radius, CONFIG.MAP_WIDTH - this.radius);
+              this.y = clamp(this.y, this.radius, CONFIG.MAP_HEIGHT - this.radius);
+              return;
+            }
+          }
+        }
 
+        // 普通AI行为
         // 根据反应速度决定决策频率
         if (this.changeDirTimer >= this.changeDirInterval) {
           this.changeDirTimer = 0;
@@ -4302,8 +4395,58 @@
     // ==================== 分身更新模块 ====================
     
     /**
+     * 获取玩家的移动方向（从摇杆或鼠标获取）
+     */
+    function getPlayerMovementDirection() {
+      if (!state.player) return { dx: 0, dy: 0 };
+      
+      // 摇杆优先
+      if (state.isMobile && state.joystick.active) {
+        return {
+          dx: state.joystick.direction.x,
+          dy: state.joystick.direction.y
+        };
+      }
+      
+      // 鼠标控制
+      if (state.camera) {
+        const worldPos = state.camera.screenToWorld(state.mouse.x, state.mouse.y);
+        const dx = worldPos.x - state.player.x;
+        const dy = worldPos.y - state.player.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0) {
+          return {
+            dx: dx / dist,
+            dy: dy / dist
+          };
+        }
+      }
+      
+      return { dx: 0, dy: 0 };
+    }
+    
+    /**
+     * 找到所有玩家球中体积最大的一个
+     */
+    function findLargestPlayerBall() {
+      if (!state.player) return null;
+      
+      let largestBall = state.player;
+      let largestRadius = state.player.radius;
+      
+      for (const ball of state.playerBalls) {
+        if (ball.radius > largestRadius) {
+          largestBall = ball;
+          largestRadius = ball.radius;
+        }
+      }
+      
+      return largestBall;
+    }
+    
+    /**
      * 更新玩家分身的物理状态
-     * 实现：惯性衰减 + 分身间排斥力
+     * 实现：统一方向控制 + 速度与半径成反比 + 自动合并
      * @param {number} dt - 时间增量（秒）
      */
     function updatePlayerBalls(dt) {
@@ -4316,7 +4459,7 @@
       
       const now = performance.now();
       
-      // 更新合并计时器
+      // 更新合并计时器（确保3秒冷却）
       if (state.lastSplitTime > 0) {
         const timeSinceSplit = now - state.lastSplitTime;
         const timeUntilMerge = CONFIG.MERGE_WAIT_TIME - timeSinceSplit;
@@ -4329,52 +4472,64 @@
         }
       }
       
+      // 获取统一的移动方向
+      const moveDir = getPlayerMovementDirection();
+      // 找到最大的主球用于合并
+      const largestBall = findLargestPlayerBall();
+      
       // 更新所有分身
       for (let i = state.playerBalls.length - 1; i >= 0; i--) {
         const ball = state.playerBalls[i];
         const timeSinceSplit = now - ball.splitTime;
         const timeSinceLastMerge = now - state.lastMergeStartTime;
-        // 合球条件：分裂后1秒且不在合球冷却中
-        const canMerge = timeSinceSplit >= 1000 && timeSinceLastMerge >= CONFIG.MERGE_BLOCK_DURATION;
+        // 合球条件：分裂后3秒且不在合球冷却中
+        const canMerge = timeSinceSplit >= CONFIG.MERGE_WAIT_TIME && timeSinceLastMerge >= CONFIG.MERGE_BLOCK_DURATION;
         
-        // 应用惯性衰减（小球停得快，大球滑行更远）
-        // 添加边界限制，防止速度过小或过大
-        const inertiaFactor = CONFIG.INERTIA_DECAY + (ball.radius / CONFIG.PLAYER_INIT_RADIUS) * 0.002;
-        ball.vx *= inertiaFactor;
-        ball.vy *= inertiaFactor;
+        // 获取分身速度（使用统一的速度计算公式）
+        const ballSpeed = getBallSpeed(ball.radius);
         
-        // 速度下限：防止无限衰减导致抖动
-        const minSpeed = 0.01;
-        const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
-        if (speed < minSpeed) {
-          ball.vx = 0;
-          ball.vy = 0;
+        // 1. 所有分身共享同一个控制方向移动
+        // 应用移动方向（带惯性，不会立即改变方向）
+        if (moveDir.dx !== 0 || moveDir.dy !== 0) {
+          const targetVx = moveDir.dx * ballSpeed;
+          const targetVy = moveDir.dy * ballSpeed;
+          const steerStrength = 0.1;
+          ball.vx += (targetVx - ball.vx) * steerStrength;
+          ball.vy += (targetVy - ball.vy) * steerStrength;
         }
         
-        // 速度上限：防止弹射过快
-        const maxSpeed = 50;
-        if (speed > maxSpeed) {
-          ball.vx = (ball.vx / speed) * maxSpeed;
-          ball.vy = (ball.vy / speed) * maxSpeed;
+        // 2. 刚分裂的分身保留一定惯性（前300ms）
+        const splitInertia = Math.max(0, 1 - timeSinceSplit / 300);
+        if (splitInertia > 0) {
+          const inertiaFactor = 1.0 - (0.5 * splitInertia);
+          ball.vx *= inertiaFactor;
+          ball.vy *= inertiaFactor;
         }
         
-        // 计算到主球的距离
-        const playerDist = distance(ball.x, ball.y, state.player.x, state.player.y);
-        
-        // 自动合并逻辑：距离接近时向主球靠拢
-        if (canMerge && playerDist < CONFIG.MERGE_DISTANCE) {
-          // 计算指向主球的方向
-          const dx = state.player.x - ball.x;
-          const dy = state.player.y - ball.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+        // 3. 合球冷却结束后，小分身向体积最大的主分身靠拢合并
+        if (canMerge && largestBall && largestBall !== ball) {
+          const targetX = largestBall.x;
+          const targetY = largestBall.y;
+          const dist = distance(ball.x, ball.y, targetX, targetY);
           
-          if (dist > ball.radius + state.player.radius) {
-            // 向主球移动，距离越近速度越快
-            const pullSpeed = CONFIG.MERGE_SPEED * (1 + (CONFIG.MERGE_DISTANCE - dist) / CONFIG.MERGE_DISTANCE);
-            ball.vx += (dx / dist) * pullSpeed * CONFIG.MERGE_PULL_FORCE * 60 * dt;
-            ball.vy += (dy / dist) * pullSpeed * CONFIG.MERGE_PULL_FORCE * 60 * dt;
+          if (dist > ball.radius + largestBall.radius + 5) {
+            const dx = targetX - ball.x;
+            const dy = targetY - ball.y;
+            const normDist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (normDist > 0) {
+              const pullStrength = 0.3 + (CONFIG.MERGE_DISTANCE - Math.min(dist, CONFIG.MERGE_DISTANCE)) / CONFIG.MERGE_DISTANCE * 0.7;
+              const pullSpeed = ballSpeed * pullStrength;
+              
+              ball.vx += (dx / normDist) * pullSpeed * 0.5;
+              ball.vy += (dy / normDist) * pullSpeed * 0.5;
+            }
           }
         }
+        
+        // 速度衰减（防止永久滑行）
+        ball.vx *= 0.985;
+        ball.vy *= 0.985;
         
         // 更新位置
         ball.x += ball.vx * dt;
@@ -4384,7 +4539,8 @@
         ball.x = clamp(ball.x, ball.radius, CONFIG.MAP_WIDTH - ball.radius);
         ball.y = clamp(ball.y, ball.radius, CONFIG.MAP_HEIGHT - ball.radius);
         
-        // 分身间排斥力（避免重叠）
+        // 分身间排斥力（避免重叠）- 限制在较小范围防止性能问题
+        const REPULSION_RADIUS = 30;
         for (let j = 0; j < state.playerBalls.length; j++) {
           if (i === j) continue;
           const other = state.playerBalls[j];
@@ -4392,42 +4548,34 @@
           const dx = ball.x - other.x;
           const dy = ball.y - other.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const minDist = ball.radius + other.radius + CONFIG.REPULSION_DISTANCE;
+          const minDist = ball.radius + other.radius + REPULSION_RADIUS;
           
           if (dist < minDist && dist > 0) {
-            const force = (minDist - dist) * CONFIG.REPULSION_FORCE * (1 + ball.radius / 50);
-            const dirX = dx / dist;
-            const dirY = dy / dist;
-            
-            ball.vx += dirX * force * dt * 60;
-            ball.vy += dirY * force * dt * 60;
+            const force = (minDist - dist) * 0.5;
+            ball.vx += (dx / dist) * force;
+            ball.vy += (dy / dist) * force;
           }
         }
         
-        // === BUG修复3: 防止自己吃掉自己分身 ===
-        // 检测是否与主玩家合体（必须等待合并冷却时间，并且分身不在无敌时间内）
-        const isInvincible = ball.invincibleUntil && now < ball.invincibleUntil;
-        if (canMerge && !isInvincible && playerDist < ball.radius + state.player.radius) {
-          // 合体：体积相加
-          const playerArea = Math.PI * state.player.radius * state.player.radius;
-          const ballArea = Math.PI * ball.radius * ball.radius;
-          state.player.radius = Math.sqrt((playerArea + ballArea) / Math.PI);
+        // 计算到主玩家的距离
+        const playerDist = distance(ball.x, ball.y, state.player.x, state.player.y);
+        
+        // 合体检测
+        if (canMerge && playerDist < ball.radius + state.player.radius) {
+          state.player.radius = calcMergedRadius(state.player.radius, ball.radius, 1);
           
-          // 回收对象到对象池
           ballPool.release(state.playerBalls[i]);
           state.playerBalls.splice(i, 1);
           state.splitCount--;
           state.isMerging = true;
           state.lastMergeStartTime = now;
           
-          // 更新合并计时器（如果还有其他分身）
           if (state.playerBalls.length > 0) {
             state.lastSplitTime = now;
           } else {
             state.mergeTimerVisible = false;
           }
           
-          // 短暂延迟后取消合体状态
           setTimeout(() => {
             state.isMerging = false;
           }, CONFIG.MERGE_BLOCK_DURATION);
@@ -4620,7 +4768,7 @@
             const distSq = distanceSquared(ball.x, ball.y, food.x, food.y);
             
             if (distSq < ballRadiusSq) {
-              ball.radius = Math.sqrt(Math.PI * ball.radius * ball.radius + Math.PI * food.radius * food.radius * 0.72) / Math.sqrt(Math.PI);
+              ball.radius = calcMergedRadius(ball.radius, food.radius * 0.85, 0.72);
               ballFoodsToRemove.add(food);
               ballFoodsToAdd.push(new Food());
               scoreAdd += 1;
@@ -4674,7 +4822,7 @@
           
           // 分身吃敌人（基于体积判定）
           if (distSq < ballRadiusSq && canEat(ball.radius, enemy.radius)) {
-            ball.radius = Math.sqrt(Math.PI * ball.radius * ball.radius + Math.PI * enemy.radius * enemy.radius * 0.49) / Math.sqrt(Math.PI);
+            ball.radius = calcMergedRadius(ball.radius, enemy.radius * 0.7, 0.49);
             enemiesToRemove2.add(enemy);
             AINamePool.releaseName(enemy.name);
             state.score += 10;
@@ -4682,10 +4830,8 @@
             break;
           }
           
-          // === BUG修复扩展: 分身无敌时间保护 ===
-          // 敌人吃分身（分身不在无敌时间内，基于体积判定）
-          const isBallInvincible = ball.invincibleUntil && now < ball.invincibleUntil;
-          if (!isBallInvincible && distSq < enemyRadiusSq && canEat(enemy.radius, ball.radius)) {
+          // 分身无敌时间保护
+          if (!isInvincible(ball, now) && distSq < enemyRadiusSq && canEat(enemy.radius, ball.radius)) {
             ballsToRemove.add(ball);
             state.splitCount--;
             break;
@@ -4697,7 +4843,7 @@
       state.playerBalls = state.playerBalls.filter(b => !ballsToRemove.has(b));
       state.enemies = state.enemies.filter(e => !enemiesToRemove2.has(e));
 
-      // 6. 敌人之间互相吃（基于体积判定，使用距离平方优化）
+      // 6. 敌人之间互相吃或合并（基于体积判定，使用距离平方优化）
       const enemiesToRemove3 = new Set();
       const enemiesToRelease = [];
       
@@ -4716,19 +4862,54 @@
           
           const distSq = distanceSquared(a.x, a.y, b.x, b.y);
           const bRadiusSq = b.radius * b.radius;
-
-          if (distSq < aRadiusSq && canEat(a.radius, b.radius)) {
-            a.grow(b.radius * 0.7);
-            enemiesToRemove3.add(j);
-            enemiesToRelease.push(b.name);
-            updateVictoryHint();
-            break;
-          } else if (distSq < bRadiusSq && canEat(b.radius, a.radius)) {
-            b.grow(a.radius * 0.7);
-            enemiesToRemove3.add(i);
-            enemiesToRelease.push(a.name);
-            updateVictoryHint();
-            break;
+          
+          // 检查是否是同名字的AI分身
+          const isSameName = a.name === b.name;
+          
+          if (isSameName) {
+            // 检查是否都有分裂时间（都是分身）
+            const aHasSplitTime = a.splitTime > 0;
+            const bHasSplitTime = b.splitTime > 0;
+            
+            if (aHasSplitTime || bHasSplitTime) {
+              // 检查合球冷却时间是否已过（3秒）
+              const aTimeSinceSplit = aHasSplitTime ? now - a.splitTime : Infinity;
+              const bTimeSinceSplit = bHasSplitTime ? now - b.splitTime : Infinity;
+              
+              if (aTimeSinceSplit >= CONFIG.MERGE_WAIT_TIME || bTimeSinceSplit >= CONFIG.MERGE_WAIT_TIME) {
+                // 同名字的AI分身，合并（体积相加）
+                if (a.radius >= b.radius) {
+                  // a更大，合并b
+                  a.radius = calcMergedRadius(a.radius, b.radius * 0.95, 1);
+                  enemiesToRemove3.add(j);
+                  // 不释放名字，因为是分身合并
+                  updateVictoryHint();
+                  break;
+                } else {
+                  // b更大，合并a
+                  b.radius = calcMergedRadius(b.radius, a.radius * 0.95, 1);
+                  enemiesToRemove3.add(i);
+                  // 不释放名字
+                  updateVictoryHint();
+                  break;
+                }
+              }
+            }
+          } else {
+            // 普通敌人之间的吃掉逻辑
+            if (distSq < aRadiusSq && canEat(a.radius, b.radius)) {
+              a.grow(b.radius * 0.7);
+              enemiesToRemove3.add(j);
+              enemiesToRelease.push(b.name);
+              updateVictoryHint();
+              break;
+            } else if (distSq < bRadiusSq && canEat(b.radius, a.radius)) {
+              b.grow(a.radius * 0.7);
+              enemiesToRemove3.add(i);
+              enemiesToRelease.push(a.name);
+              updateVictoryHint();
+              break;
+            }
           }
         }
       }
@@ -5600,9 +5781,15 @@
     function initGame() {
       console.log('initGame函数开始执行');
       
-      // 验证昵称输入
-      const playerName = playerNameInput.value.trim();
+      // 获取玩家名称，优先使用输入框内容，如果为空则使用已保存的配置
+      let playerName = playerNameInput.value.trim();
       
+      // 如果输入框为空但已有配置，则使用配置中的名称
+      if (!playerName && CONFIG.PLAYER_NAME) {
+        playerName = CONFIG.PLAYER_NAME;
+      }
+      
+      // 如果还是没有名称，则要求输入
       if (!playerName) {
         // 输入为空，显示提示
         alert('请输入名称');
@@ -5959,24 +6146,72 @@
       
       console.log('开始按钮事件监听器已绑定');
       
-      // 使用touchend + click双重绑定确保移动端响应
-      startBtn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('touchend事件触发，调用initGame');
-        initGame();
-      });
+      // 防止重复触发标志
+      let isStarting = false;
       
-      startBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      // 统一的开始游戏函数
+      const handleStartGame = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        
         // 防止重复触发
-        if (state.isRunning) {
-          console.log('游戏已在运行中，忽略点击');
+        if (isStarting || state.isRunning) {
+          console.log('游戏已在运行中或正在启动，忽略点击');
           return;
         }
-        console.log('click事件触发，调用initGame');
+        
+        isStarting = true;
+        console.log('开始游戏触发，调用initGame');
+        
+        // 延迟重置标志，防止快速点击
+        setTimeout(() => {
+          isStarting = false;
+        }, 500);
+        
         initGame();
+      };
+      
+      // iOS兼容性：优先使用touchstart
+      startBtn.addEventListener('touchstart', handleStartGame, { passive: false });
+      
+      // touchend备用
+      startBtn.addEventListener('touchend', handleStartGame, { passive: false });
+      
+      // click备用（桌面端）
+      startBtn.addEventListener('click', handleStartGame);
+      
+      // 其他再来一局和返回按钮也使用同样的机制
+      const otherButtons = [
+        document.getElementById('gameOverRestartBtn'),
+        document.getElementById('gameOverBackBtn'),
+        document.getElementById('victoryRestartBtn'),
+        document.getElementById('victoryBackBtn')
+      ].filter(btn => btn);
+      
+      otherButtons.forEach(btn => {
+        let isProcessing = false;
+        
+        const handleButtonClick = (e) => {
+          if (isProcessing) return;
+          isProcessing = true;
+          
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          
+          // 直接触发按钮原有的click事件
+          btn.click();
+          
+          setTimeout(() => {
+            isProcessing = false;
+          }, 500);
+        };
+        
+        btn.addEventListener('touchstart', handleButtonClick, { passive: false });
+        btn.addEventListener('touchend', handleButtonClick, { passive: false });
       });
     }
     addStartButtonListener();
@@ -6027,9 +6262,18 @@
     victoryRestartBtn.addEventListener('click', () => {
       const victoryOverlay = document.getElementById('victoryOverlay');
       victoryOverlay.classList.add('hidden');
-      startOverlay.classList.remove('hidden');
+      // 直接开始新游戏，使用之前的玩家名称
+      initGame();
     });
 
+    // 失败界面再来一局按钮
+    const gameOverRestartBtn = document.getElementById('gameOverRestartBtn');
+    gameOverRestartBtn.addEventListener('click', () => {
+      gameOverOverlay.classList.add('hidden');
+      // 直接开始新游戏，使用之前的玩家名称
+      initGame();
+    });
+    
     // 失败界面返回主页按钮
     const gameOverBackBtn = document.getElementById('gameOverBackBtn');
     gameOverBackBtn.addEventListener('click', () => {
