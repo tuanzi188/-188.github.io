@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
+  <meta name="screen-orientation" content="landscape">
+  <meta name="x5-orientation" content="landscape">
+  <meta name="theme-color" content="#0a0e27">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
@@ -536,9 +539,10 @@
     }
 
     .portrait-warning-icon {
-      font-size: 80px;
-      margin-bottom: 30px;
-      animation: rotate-phone 2s ease-in-out infinite;
+      font-size: 100px;
+      margin-bottom: 25px;
+      animation: rotate-phone 2.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(79, 172, 254, 0.5));
     }
 
     @keyframes rotate-phone {
@@ -547,17 +551,39 @@
     }
 
     .portrait-warning-title {
-      font-size: 28px;
-      font-weight: 700;
+      font-size: 32px;
+      font-weight: 800;
       color: #fff;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
+    }
+
+    .portrait-warning-subtitle {
+      font-size: 16px;
+      color: rgba(79, 172, 254, 0.8);
+      margin-bottom: 20px;
+      font-weight: 500;
     }
 
     .portrait-warning-text {
-      font-size: 16px;
+      font-size: 15px;
       color: rgba(255, 255, 255, 0.7);
-      line-height: 1.6;
+      line-height: 1.7;
       max-width: 400px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .portrait-warning-arrow {
+      font-size: 48px;
+      color: rgba(79, 172, 254, 0.9);
+      animation: spin 3s linear infinite;
+      margin-top: 10px;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     /* 移动端竖屏时显示提示 */
@@ -604,18 +630,71 @@
       }
     }
 
-    /* ==================== 排行榜样式 ==================== */
-    .leaderboard {
+    /* ==================== 排行榜容器样式 ==================== */
+    .leaderboard-container {
       position: fixed;
       top: max(15px, env(safe-area-inset-top));
       right: max(15px, env(safe-area-inset-right));
-      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    /* 排行榜折叠按钮 */
+    .leaderboard-toggle {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #fff;
+    }
+
+    .leaderboard-toggle:hover {
+      background: rgba(0, 0, 0, 0.7);
+      transform: scale(1.02);
+    }
+
+    .leaderboard-toggle.active {
+      border-radius: 8px 8px 0 0;
+      border-bottom: none;
+    }
+
+    .leaderboard-toggle-icon {
+      font-size: 14px;
+    }
+
+    .leaderboard-toggle-text {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .leaderboard-toggle-arrow {
+      font-size: 10px;
+      transition: transform 0.2s ease;
+    }
+
+    .leaderboard-toggle.active .leaderboard-toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* ==================== 排行榜样式 ==================== */
+    .leaderboard {
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(15px);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 12px;
       padding: 12px;
-      z-index: 100;
       min-width: 180px;
+      max-height: 400px;
+      overflow-y: auto;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .leaderboard-header {
@@ -694,30 +773,106 @@
       color: #ffd700;
     }
 
-    /* 移动端排行榜优化 */
-    @media (max-width: 768px) {
-      .leaderboard {
-        min-width: 140px;
-        padding: 8px;
+    /* 桌面端显示完整排行榜 */
+    @media (min-width: 769px) {
+      .leaderboard-container {
+        position: fixed;
+        top: max(15px, env(safe-area-inset-top));
+        right: max(15px, env(safe-area-inset-right));
       }
+      .leaderboard {
+        display: block !important;
+      }
+    }
+
+    /* 移动端排行榜优化 - 可折叠设计 */
+    @media (max-width: 768px) {
+      .leaderboard-container {
+        position: fixed;
+        top: calc(env(safe-area-inset-top) + 10px);
+        right: 8px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        max-height: 50vh;
+      }
+      
+      .leaderboard-toggle {
+        display: flex;
+        align-self: flex-end;
+      }
+      
+      .leaderboard {
+        display: none;
+        min-width: 140px;
+        max-width: 45vw;
+        width: auto;
+        padding: 8px;
+        border-radius: 0 0 12px 12px;
+        border-top: none;
+        max-height: calc(50vh - 40px);
+        height: auto;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+      }
+      
+      .leaderboard.open {
+        display: block;
+      }
+      
       .leaderboard-header {
         font-size: 12px;
         margin-bottom: 6px;
         padding-bottom: 6px;
+        color: rgba(255, 215, 0, 0.9);
       }
+      
       .leaderboard-item {
         padding: 4px 6px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 4px;
       }
+      
+      .leaderboard-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+      
+      .leaderboard-item.current-player {
+        background: rgba(0, 242, 96, 0.15);
+        border: 1px solid rgba(0, 242, 96, 0.25);
+      }
+      
       .leaderboard-rank {
         width: 20px;
         font-size: 12px;
+        font-weight: 600;
       }
+      
       .leaderboard-name {
         font-size: 11px;
+        color: rgba(255, 255, 255, 0.9);
       }
+      
       .leaderboard-size {
         font-size: 10px;
         margin-left: 4px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+      
+      /* 触摸区域优化 - 避开主要操作区域 */
+      .leaderboard-toggle {
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      .leaderboard {
+        touch-action: none;
+        user-select: none;
       }
     }
   </style>
@@ -751,9 +906,16 @@
   </div>
 
   <!-- 排行榜面板 -->
-  <div class="leaderboard" id="leaderboard" style="display: none;">
-    <div class="leaderboard-header">🏆 排行榜</div>
-    <div class="leaderboard-list" id="leaderboardList"></div>
+  <div class="leaderboard-container" id="leaderboardContainer">
+    <div class="leaderboard-toggle" id="leaderboardToggle">
+      <span class="leaderboard-toggle-icon">🏆</span>
+      <span class="leaderboard-toggle-text">排行</span>
+      <span class="leaderboard-toggle-arrow" id="leaderboardArrow">▼</span>
+    </div>
+    <div class="leaderboard" id="leaderboard">
+      <div class="leaderboard-header">🏆 排行榜</div>
+      <div class="leaderboard-list" id="leaderboardList"></div>
+    </div>
   </div>
 
   <!-- 底部提示 -->
@@ -845,14 +1007,16 @@
     </div>
   </div>
 
-  <!-- 竖屏提示遮罩（仅移动端显示） -->
+  <!-- 竖屏提示遮罩 -->
   <div class="portrait-warning" id="portraitWarning">
     <div class="portrait-warning-icon">📱</div>
-    <div class="portrait-warning-title">请旋转手机</div>
+    <div class="portrait-warning-title">请横屏游戏</div>
+    <div class="portrait-warning-subtitle">横屏模式体验更佳</div>
     <div class="portrait-warning-text">
       为了获得最佳游戏体验，请将手机旋转为横屏模式<br>
       Rotate your phone to landscape mode for the best experience
     </div>
+    <div class="portrait-warning-arrow">↻</div>
   </div>
 
   <script>
@@ -875,7 +1039,7 @@
       PLAYER_NAME: '你',
       
       // 速度配置（超神极速模式：再×1.5倍，总计×2.25倍）
-      BASE_SPEED: 75,     // 基础速度（改为75）
+      BASE_SPEED: 80,     // 基础速度
       SPEED_FACTOR: 0.0075,  // 衰减系数（半径每增大2减慢一点）
       MIN_SPEED: 35,         // 最低速度限制（大球不会太慢）
       
@@ -942,7 +1106,7 @@
       
       // 安全区缩圈配置
       SAFE_ZONE_ENABLED: true,         // 启用安全区缩圈机制
-      SAFE_ZONE_START_DELAY: 60000,    // 缩圈开始延迟（60秒）
+      SAFE_ZONE_START_DELAY: 40000,    // 缩圈开始延迟（40秒）
       SAFE_ZONE_SHRINK_INTERVAL: 25000, // 缩圈间隔（25秒）
       SAFE_ZONE_SHRINK_AMOUNT: 300,    // 每次缩圈减少的大小
       SAFE_ZONE_MIN_SIZE: 800,         // 最小安全区大小
@@ -1081,8 +1245,14 @@
         } else if (style === 'funny') {
           pool = this.funnyNames;
         } else {
-          const styles = [this.cuteNames, this.coolNames, this.funnyNames];
-          pool = styles[Math.floor(Math.random() * styles.length)];
+          const rand = Math.random();
+          if (rand < 0.4) {
+            pool = this.cuteNames;
+          } else if (rand < 0.8) {
+            pool = this.funnyNames;
+          } else {
+            pool = this.coolNames;
+          }
         }
         
         const lengths = Object.keys(pool).map(Number).sort((a, b) => b - a);
@@ -1100,15 +1270,18 @@
       },
       
       releaseName(name) {
+        if (!name) return;
         this.usedNames.delete(name);
         const len = name.length;
         for (const style of ['cute', 'cool', 'funny']) {
-          if (this[style][len] && !this[style][len].includes(name)) {
+          if (this[style] && this[style][len] && !this[style][len].includes(name)) {
             this[style][len].push(name);
             return;
           }
         }
-        this.funnyNames[3].push(name);
+        if (this.funnyNames && this.funnyNames[3]) {
+          this.funnyNames[3].push(name);
+        }
       },
       
       cleanup() {
@@ -2514,12 +2687,13 @@
         this.targetX = random(0, CONFIG.MAP_WIDTH);
         this.targetY = random(0, CONFIG.MAP_HEIGHT);
         this.changeDirTimer = 0;
-        this.changeDirInterval = random(0.8, 2.5);
+        // 高难度AI：决策间隔缩小，反应更快
+        this.changeDirInterval = random(0.4, 0.9);
         
-        // AI 性格类型
-        this.personality = randomChoice(['aggressive', 'cautious', 'hunter', 'opportunist']);
-        // AI 反应速度（秒）
-        this.reactionSpeed = random(0.3, 1.5);
+        // AI 性格类型（高难度：更多攻击性和猎人性格）
+        this.personality = randomChoice(['aggressive', 'aggressive', 'hunter', 'hunter', 'opportunist', 'cautious']);
+        // AI 反应速度（高难度：反应更快更一致）
+        this.reactionSpeed = random(0.2, 0.5);
         
         // AI 状态
         this.lastSplitTime = 0;
@@ -2529,6 +2703,14 @@
         this.stuckCounter = 0;
         this.lastPosX = x;
         this.lastPosY = y;
+        
+        // 高级AI状态
+        this.currentStrategy = 'develop'; // develop, hunt, flee, patrol
+        this.strategyTimer = 0;
+        // 高难度：策略持续时间更短，更灵活
+        this.minStrategyDuration = random(1, 3);
+        this.targetMemory = null;
+        this.targetMemoryTime = 0;
       }
 
       /**
@@ -2536,15 +2718,19 @@
        */
       update(dt, player, allEnemies, foods) {
         this.changeDirTimer += dt;
+        this.strategyTimer += dt;
 
         // 检测是否卡住
         const moved = distance(this.x, this.y, this.lastPosX, this.lastPosY);
         if (moved < 1) {
           this.stuckCounter += dt;
-          if (this.stuckCounter > 2) {
-            // 卡住了，改变方向
-            this.targetX = random(100, CONFIG.MAP_WIDTH - 100);
-            this.targetY = random(100, CONFIG.MAP_HEIGHT - 100);
+          if (this.stuckCounter > 1.5) {
+            // 卡住了，随机改变方向
+            const angle = Math.random() * Math.PI * 2;
+            this.targetX = this.x + Math.cos(angle) * 300;
+            this.targetY = this.y + Math.sin(angle) * 300;
+            this.targetX = clamp(this.targetX, 100, CONFIG.MAP_WIDTH - 100);
+            this.targetY = clamp(this.targetY, 100, CONFIG.MAP_HEIGHT - 100);
             this.stuckCounter = 0;
           }
         } else {
@@ -2559,70 +2745,133 @@
           this.decideDirection(player, allEnemies, foods, state.spikes);
         }
 
-        this.move(this.targetX, this.targetY, dt);
+        // 平滑移动
+        this.smoothMove(dt);
       }
 
       /**
-       * 智能AI决策系统
-       * 优先级：躲避刺球 > 躲避威胁 > 合理分裂逃跑 > 追捕猎物 > 寻找食物 > 随机巡逻
-       * 增强：主动变大意识和吃球球意识
+       * 平滑移动（更接近真人操作）
+       */
+      smoothMove(dt) {
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < 5) {
+          this.vx *= 0.95;
+          this.vy *= 0.95;
+          return;
+        }
+        
+        // 加速向目标移动，带平滑过渡
+        const speed = this.getSpeed();
+        const targetVx = (dx / dist) * speed;
+        const targetVy = (dy / dist) * speed;
+        
+        // 平滑加速，避免突然转向
+        const accelFactor = 3 * dt;
+        this.vx = this.vx + (targetVx - this.vx) * accelFactor;
+        this.vy = this.vy + (targetVy - this.vy) * accelFactor;
+        
+        // 限制最大速度
+        const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        if (currentSpeed > speed * 1.2) {
+          this.vx = (this.vx / currentSpeed) * speed * 1.2;
+          this.vy = (this.vy / currentSpeed) * speed * 1.2;
+        }
+        
+        // 更新位置
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+        
+        // 边界检测
+        this.x = clamp(this.x, this.radius, CONFIG.MAP_WIDTH - this.radius);
+        this.y = clamp(this.y, this.radius, CONFIG.MAP_HEIGHT - this.radius);
+        
+        // 边界反弹
+        if (this.x <= this.radius || this.x >= CONFIG.MAP_WIDTH - this.radius) {
+          this.vx *= -0.8;
+          this.targetX = random(100, CONFIG.MAP_WIDTH - 100);
+        }
+        if (this.y <= this.radius || this.y >= CONFIG.MAP_HEIGHT - this.radius) {
+          this.vy *= -0.8;
+          this.targetY = random(100, CONFIG.MAP_HEIGHT - 100);
+        }
+      }
+
+      /**
+       * 智能AI决策系统 - 增强版
+       * 优先级：躲避刺球 > 安全区威胁 > 躲避威胁 > 追捕猎物 > 寻找食物 > 智能巡逻
        */
       decideDirection(player, allEnemies, foods, spikes) {
         const now = performance.now();
         
+        // 更新策略持续时间
+        if (this.strategyTimer >= this.minStrategyDuration) {
+          this.strategyTimer = 0;
+          this.minStrategyDuration = random(2, 6);
+        }
+        
         // 1. 躲避刺球（最高优先级）
         const nearbySpike = this.findNearbySpike(spikes);
         if (nearbySpike) {
-          this.avoidSpike(nearbySpike);
-          this.changeDirInterval = 0.15;
+          this.avoidSpikeSmart(nearbySpike, spikes);
+          this.changeDirInterval = 0.1 + Math.random() * 0.1;
+          this.currentStrategy = 'flee';
           return;
         }
         
         // 2. 检测安全区威胁
         if (this.isInDangerZone()) {
           this.fleeFromDangerZone();
-          this.changeDirInterval = 0.2;
+          this.changeDirInterval = 0.15 + Math.random() * 0.1;
+          this.currentStrategy = 'flee';
           return;
         }
 
-        // 3. 检测威胁并智能逃跑（更高优先级）
-        const threat = this.findThreat(player, allEnemies);
+        // 3. 检测威胁并智能逃跑
+        const threat = this.findThreatAdvanced(player, allEnemies);
         if (threat) {
-          this.handleThreat(threat, player, allEnemies, now);
+          this.handleThreatSmart(threat, player, allEnemies, spikes, now);
+          this.changeDirInterval = 0.15 + Math.random() * 0.15;
+          this.currentStrategy = 'flee';
           return;
         }
 
-        // 4. 主动寻找可吞噬的目标（增强吃球球意识）
+        // 4. 根据大小对比决定策略
+        const sizeComparison = this.analyzeSizeComparison(player, allEnemies);
+        
+        // 5. 主动寻找可吞噬的目标
         const bestTarget = this.findBestTarget(player, allEnemies, foods);
         if (bestTarget) {
           if (bestTarget.isFood) {
             this.targetX = bestTarget.target.x;
             this.targetY = bestTarget.target.y;
-            this.changeDirInterval = 0.4 + Math.random() * 0.2;
+            this.changeDirInterval = 0.3 + Math.random() * 0.2;
+            this.currentStrategy = 'develop';
           } else {
-            // 如果是球球目标，使用智能拦截
-            if (this.personality === 'hunter') {
-              this.interceptPrey(bestTarget.target);
-            } else {
-              this.targetX = bestTarget.target.x;
-              this.targetY = bestTarget.target.y;
-            }
-            this.changeDirInterval = 0.3;
+            // 智能追击：预测路径拦截
+            this.huntWithPrediction(bestTarget.target);
+            this.changeDirInterval = 0.25 + Math.random() * 0.15;
+            this.currentStrategy = 'hunt';
           }
+          this.targetMemory = bestTarget.target;
+          this.targetMemoryTime = now;
           return;
         }
 
-        // 5. 寻找最近的食物（智能选择）
-        const targetFood = this.findSmartFood(foods);
-        if (targetFood) {
-          this.targetX = targetFood.x;
-          this.targetY = targetFood.y;
-          this.changeDirInterval = 0.5 + Math.random() * 0.3;
+        // 6. 寻找食物密集区域（发育策略）
+        const foodCluster = this.findFoodCluster(foods);
+        if (foodCluster) {
+          this.targetX = foodCluster.x;
+          this.targetY = foodCluster.y;
+          this.changeDirInterval = 0.4 + Math.random() * 0.3;
+          this.currentStrategy = 'develop';
           return;
         }
 
-        // 7. 智能巡逻（避开边界和危险区域）
-        this.smartPatrol();
+        // 7. 智能巡逻（根据当前策略）
+        this.smartPatrolAdvanced(player, allEnemies);
       }
       
       /**
@@ -2643,6 +2892,345 @@
       }
       
       /**
+       * 分析大小对比（判断与玩家和其他敌人的大小关系）
+       */
+      analyzeSizeComparison(player, allEnemies) {
+        const comparisons = {
+          player: player.radius / this.radius,
+          canEatPlayer: canEat(this.radius, player.radius),
+          playerCanEatMe: canEat(player.radius, this.radius),
+          avgEnemySize: 0,
+          biggerThanMe: 0,
+          smallerThanMe: 0
+        };
+        
+        let totalSize = 0;
+        let count = 0;
+        for (const enemy of allEnemies) {
+          if (enemy === this) continue;
+          totalSize += enemy.radius;
+          count++;
+          if (enemy.radius > this.radius * 1.1) comparisons.biggerThanMe++;
+          else if (enemy.radius < this.radius * 0.9) comparisons.smallerThanMe++;
+        }
+        
+        if (count > 0) {
+          comparisons.avgEnemySize = totalSize / count;
+        }
+        
+        return comparisons;
+      }
+      
+      /**
+       * 高级威胁检测（考虑预测位置和威胁程度）
+       */
+      findThreatAdvanced(player, allEnemies) {
+        const dangerRadius = this.radius * 10;
+        let nearestThreat = null;
+        let highestThreatScore = 0;
+        
+        // 检测玩家
+        if (canEat(player.radius, this.radius)) {
+          const threatInfo = this.evaluateThreat(player);
+          if (threatInfo.dist < dangerRadius && threatInfo.score > highestThreatScore) {
+            nearestThreat = player;
+            highestThreatScore = threatInfo.score;
+          }
+        }
+        
+        // 检测其他敌人
+        for (const enemy of allEnemies) {
+          if (enemy === this) continue;
+          if (canEat(enemy.radius, this.radius)) {
+            const threatInfo = this.evaluateThreat(enemy);
+            if (threatInfo.dist < dangerRadius && threatInfo.score > highestThreatScore) {
+              nearestThreat = enemy;
+              highestThreatScore = threatInfo.score;
+            }
+          }
+        }
+        
+        return nearestThreat;
+      }
+      
+      /**
+       * 智能处理威胁（多种逃跑策略）
+       */
+      handleThreatSmart(threat, player, allEnemies, spikes, now) {
+        this.isFleeing = true;
+        
+        // 计算智能逃跑方向
+        const escapeDir = this.calculateSmartEscapeDirection(threat, player, allEnemies, spikes);
+        this.targetX = escapeDir.x;
+        this.targetY = escapeDir.y;
+        
+        // 考虑分裂逃跑
+        if (this.shouldSplitToEscape(threat)) {
+          this.attemptSplitEscape(now);
+        }
+      }
+      
+      /**
+       * 计算智能逃跑方向（避开威胁、刺球，寻找安全区域）
+       */
+      calculateSmartEscapeDirection(threat, player, allEnemies, spikes) {
+        let bestX = this.x + (this.x - threat.x) * 3;
+        let bestY = this.y + (this.y - threat.y) * 3;
+        let bestScore = -Infinity;
+        
+        const checkAngles = 16;
+        for (let i = 0; i < checkAngles; i++) {
+          const angle = Math.atan2(this.y - threat.y, this.x - threat.x) + 
+                       ((i - checkAngles / 2) / checkAngles) * Math.PI * 0.8;
+          const dist = 300 + Math.random() * 200;
+          const testX = this.x + Math.cos(angle) * dist;
+          const testY = this.y + Math.sin(angle) * dist;
+          
+          // 边界检查
+          if (testX < 50 || testX > CONFIG.MAP_WIDTH - 50 ||
+              testY < 50 || testY > CONFIG.MAP_HEIGHT - 50) {
+            continue;
+          }
+          
+          let score = 100;
+          
+          // 远离主要威胁
+          score += distance(testX, testY, threat.x, threat.y) * 0.15;
+          
+          // 远离其他威胁
+          for (const enemy of allEnemies) {
+            if (enemy === this) continue;
+            if (canEat(enemy.radius, this.radius)) {
+              score += distance(testX, testY, enemy.x, enemy.y) * 0.08;
+            }
+          }
+          
+          // 远离刺球
+          for (const spike of spikes) {
+            const spikeDist = distance(testX, testY, spike.x, spike.y);
+            if (spikeDist < 150) {
+              score -= (150 - spikeDist) * 0.5;
+            }
+          }
+          
+          // 靠近安全区中心
+          const sz = state.safeZone;
+          if (sz && sz.enabled) {
+            score += (1000 - distance(testX, testY, sz.centerX, sz.centerY)) * 0.05;
+          }
+          
+          // 靠近食物
+          for (let j = 0; j < 3; j++) {
+            const food = state.foods[Math.floor(Math.random() * state.foods.length)];
+            if (food) {
+              const foodDist = distance(testX, testY, food.x, food.y);
+              if (foodDist < 200) {
+                score += (200 - foodDist) * 0.03;
+              }
+            }
+          }
+          
+          if (score > bestScore) {
+            bestScore = score;
+            bestX = testX;
+            bestY = testY;
+          }
+        }
+        
+        return {
+          x: clamp(bestX, 100, CONFIG.MAP_WIDTH - 100),
+          y: clamp(bestY, 100, CONFIG.MAP_HEIGHT - 100)
+        };
+      }
+      
+      /**
+       * 智能躲避刺球（考虑周围刺球布局）
+       */
+      avoidSpikeSmart(nearbySpike, spikes) {
+        let bestX = this.x + (this.x - nearbySpike.x) * 3;
+        let bestY = this.y + (this.y - nearbySpike.y) * 3;
+        let bestScore = -Infinity;
+        
+        const checkAngles = 12;
+        for (let i = 0; i < checkAngles; i++) {
+          const angle = Math.atan2(this.y - nearbySpike.y, this.x - nearbySpike.x) +
+                       ((i - checkAngles / 2) / checkAngles) * Math.PI;
+          const dist = 250 + Math.random() * 150;
+          const testX = this.x + Math.cos(angle) * dist;
+          const testY = this.y + Math.sin(angle) * dist;
+          
+          if (testX < 50 || testX > CONFIG.MAP_WIDTH - 50 ||
+              testY < 50 || testY > CONFIG.MAP_HEIGHT - 50) {
+            continue;
+          }
+          
+          let score = 100;
+          
+          // 远离所有刺球
+          for (const spike of spikes) {
+            const spikeDist = distance(testX, testY, spike.x, spike.y);
+            if (spikeDist < 150) {
+              score -= (150 - spikeDist) * 0.6;
+            } else {
+              score += spikeDist * 0.02;
+            }
+          }
+          
+          // 靠近食物
+          for (let j = 0; j < 3; j++) {
+            const food = state.foods[Math.floor(Math.random() * state.foods.length)];
+            if (food) {
+              const foodDist = distance(testX, testY, food.x, food.y);
+              if (foodDist < 200) {
+                score += (200 - foodDist) * 0.04;
+              }
+            }
+          }
+          
+          if (score > bestScore) {
+            bestScore = score;
+            bestX = testX;
+            bestY = testY;
+          }
+        }
+        
+        this.targetX = clamp(bestX, 100, CONFIG.MAP_WIDTH - 100);
+        this.targetY = clamp(bestY, 100, CONFIG.MAP_HEIGHT - 100);
+      }
+      
+      /**
+       * 智能追击（预测路径拦截）
+       */
+      huntWithPrediction(prey) {
+        const dist = distance(this.x, this.y, prey.x, prey.y);
+        const mySpeed = this.getSpeed();
+        const preySpeed = prey.getSpeed ? prey.getSpeed() : CONFIG.BASE_SPEED;
+        
+        // 预测猎物移动
+        const timeToCatch = dist / (mySpeed - preySpeed * 0.8);
+        const predictionFactor = Math.min(timeToCatch * 0.6, 3);
+        
+        // 预测猎物位置
+        const predictedX = prey.x + prey.vx * predictionFactor * 2;
+        const predictedY = prey.y + prey.vy * predictionFactor * 2;
+        
+        // 考虑性格差异
+        if (this.personality === 'aggressive') {
+          // 直接追击
+          this.targetX = predictedX;
+          this.targetY = predictedY;
+        } else if (this.personality === 'hunter') {
+          // 预判拦截
+          const interceptX = this.x + (predictedX - this.x) * 0.7;
+          const interceptY = this.y + (predictedY - this.y) * 0.7;
+          this.targetX = interceptX;
+          this.targetY = interceptY;
+        } else {
+          // 保守追击，保持一定距离
+          const safeDist = this.radius * 1.5;
+          if (dist < safeDist) {
+            const dx = prey.x - this.x;
+            const dy = prey.y - this.y;
+            this.targetX = this.x + dx * 0.3;
+            this.targetY = this.y + dy * 0.3;
+          } else {
+            this.targetX = prey.x;
+            this.targetY = prey.y;
+          }
+        }
+      }
+      
+      /**
+       * 寻找食物密集区域
+       */
+      findFoodCluster(foods) {
+        if (foods.length < 10) return null;
+        
+        const searchRadius = this.radius * 8;
+        let bestCluster = null;
+        let bestDensity = 0;
+        
+        // 随机采样一些食物点作为候选中心
+        const sampleCount = Math.min(20, foods.length);
+        for (let i = 0; i < sampleCount; i++) {
+          const centerFood = foods[Math.floor(Math.random() * foods.length)];
+          const centerX = centerFood.x;
+          const centerY = centerFood.y;
+          
+          // 统计附近食物数量
+          let density = 0;
+          for (const food of foods) {
+            const dist = distance(centerX, centerY, food.x, food.y);
+            if (dist < 150) {
+              density++;
+            }
+          }
+          
+          // 检查是否在危险区域
+          if (this.isPositionInDanger(centerX, centerY)) {
+            density *= 0.5;
+          }
+          
+          // 检查距离
+          const distToMe = distance(this.x, this.y, centerX, centerY);
+          if (distToMe > searchRadius * 1.5) {
+            density *= (1 - (distToMe - searchRadius) / searchRadius);
+          }
+          
+          if (density > bestDensity) {
+            bestDensity = density;
+            bestCluster = { x: centerX, y: centerY };
+          }
+        }
+        
+        return bestCluster;
+      }
+      
+      /**
+       * 智能巡逻（根据当前策略调整）
+       */
+      smartPatrolAdvanced(player, allEnemies) {
+        // 根据当前策略调整巡逻行为
+        if (this.currentStrategy === 'develop') {
+          // 发育模式：寻找食物密集区域或安全区域中心
+          if (state.foods.length > 0 && Math.random() < 0.8) {
+            const randomFood = state.foods[Math.floor(Math.random() * state.foods.length)];
+            this.targetX = randomFood.x + (Math.random() - 0.5) * 150;
+            this.targetY = randomFood.y + (Math.random() - 0.5) * 150;
+          } else {
+            // 前往安全区中心
+            const sz = state.safeZone;
+            if (sz && sz.enabled) {
+              this.targetX = sz.centerX + (Math.random() - 0.5) * 200;
+              this.targetY = sz.centerY + (Math.random() - 0.5) * 200;
+            } else {
+              this.targetX = random(150, CONFIG.MAP_WIDTH - 150);
+              this.targetY = random(150, CONFIG.MAP_HEIGHT - 150);
+            }
+          }
+        } else if (this.currentStrategy === 'hunt') {
+          // 狩猎模式：在可能有猎物的区域巡逻
+          const playerAreaX = player.x + (Math.random() - 0.5) * 400;
+          const playerAreaY = player.y + (Math.random() - 0.5) * 400;
+          this.targetX = clamp(playerAreaX, 100, CONFIG.MAP_WIDTH - 100);
+          this.targetY = clamp(playerAreaY, 100, CONFIG.MAP_HEIGHT - 100);
+        } else {
+          // 普通巡逻
+          this.targetX = random(150, CONFIG.MAP_WIDTH - 150);
+          this.targetY = random(150, CONFIG.MAP_HEIGHT - 150);
+        }
+        
+        // 根据性格调整巡逻频率
+        if (this.personality === 'aggressive') {
+          this.changeDirInterval = random(1.5, 3);
+        } else if (this.personality === 'cautious') {
+          this.changeDirInterval = random(3, 5);
+        } else {
+          this.changeDirInterval = random(2, 4);
+        }
+      }
+      
+      /**
        * 寻找最佳目标（综合评估食物和球球）
        * 增强AI主动变大和吃球球的意识
        */
@@ -2650,13 +3238,15 @@
         let bestTarget = null;
         let bestScore = -Infinity;
         
-        const searchRadius = this.radius * 12;
+        // 扩大搜索范围，增强主动寻敌能力
+        const searchRadius = this.radius * 15;
         
-        // 评估玩家
+        // 评估玩家（提高优先级）
         if (canEat(this.radius, player.radius)) {
           const dist = distance(this.x, this.y, player.x, player.y);
           if (dist < searchRadius) {
-            const score = this.calculateTargetScore(player, dist, false);
+            // 玩家目标给予额外分数加成
+            const score = this.calculateTargetScore(player, dist, false) + 100;
             if (score > bestScore) {
               bestScore = score;
               bestTarget = { target: player, isFood: false };
@@ -2664,13 +3254,13 @@
           }
         }
         
-        // 评估其他敌人
+        // 评估其他敌人（扩大搜索范围）
         for (const enemy of allEnemies) {
           if (enemy === this) continue;
           if (!canEat(this.radius, enemy.radius)) continue;
           
           const dist = distance(this.x, this.y, enemy.x, enemy.y);
-          if (dist < searchRadius) {
+          if (dist < searchRadius * 1.2) {
             const score = this.calculateTargetScore(enemy, dist, false);
             if (score > bestScore) {
               bestScore = score;
@@ -2680,10 +3270,10 @@
         }
         
         // 评估食物（只有在没有更好的球球目标时才考虑）
-        if (bestScore < 50) { // 如果没有好的球球目标
+        if (bestScore < 30) { // 降低阈值，更容易切换到吃食物
           for (const food of foods) {
             const dist = distance(this.x, this.y, food.x, food.y);
-            if (dist < searchRadius * 0.6) {
+            if (dist < searchRadius * 0.8) {
               const score = this.calculateTargetScore(food, dist, true);
               if (score > bestScore) {
                 bestScore = score;
@@ -2701,6 +3291,7 @@
        */
       calculateTargetScore(target, dist, isFood) {
         let score = 0;
+        const searchRadius = this.radius * 12;
         
         if (isFood) {
           // 食物评分：距离越近越好，越大越好
@@ -3395,6 +3986,8 @@
      * @param {number} dt - 时间增量（秒）
      */
     function updatePlayerBalls(dt) {
+      if (!state.player) return;
+      
       if (state.playerBalls.length === 0) {
         state.mergeTimerVisible = false;
         return;
@@ -3562,56 +4155,130 @@
     // ==================== 碰撞检测模块 ====================
     
     /**
+     * 计算距离平方（避免开方运算，用于碰撞检测优化）
+     */
+    function distanceSquared(x1, y1, x2, y2) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      return dx * dx + dy * dy;
+    }
+
+    /**
+     * 空间分区管理器（优化碰撞检测）
+     */
+    class SpatialHash {
+      constructor(cellSize = 100) {
+        this.cellSize = cellSize;
+        this.cells = {};
+      }
+      
+      _getCellKey(x, y) {
+        const cellX = Math.floor(x / this.cellSize);
+        const cellY = Math.floor(y / this.cellSize);
+        return `${cellX},${cellY}`;
+      }
+      
+      insert(item) {
+        const key = this._getCellKey(item.x, item.y);
+        if (!this.cells[key]) {
+          this.cells[key] = [];
+        }
+        this.cells[key].push(item);
+      }
+      
+      query(x, y, radius) {
+        const results = [];
+        const halfCells = Math.ceil(radius / this.cellSize);
+        const centerCellX = Math.floor(x / this.cellSize);
+        const centerCellY = Math.floor(y / this.cellSize);
+        
+        for (let dx = -halfCells; dx <= halfCells; dx++) {
+          for (let dy = -halfCells; dy <= halfCells; dy++) {
+            const key = `${centerCellX + dx},${centerCellY + dy}`;
+            if (this.cells[key]) {
+              results.push(...this.cells[key]);
+            }
+          }
+        }
+        
+        return results;
+      }
+      
+      clear() {
+        this.cells = {};
+      }
+      
+      build(items) {
+        this.clear();
+        for (const item of items) {
+          if (item && typeof item.x === 'number' && typeof item.y === 'number') {
+            this.insert(item);
+          }
+        }
+      }
+    }
+
+    /**
      * 检测并处理所有碰撞
      */
     function handleCollisions() {
       const player = state.player;
+      const playerRadiusSq = player.radius * player.radius;
+      const now = performance.now();
 
-      // 1. 玩家吃食物（提高增大速度：从0.7提升到0.85）
-      for (let i = state.foods.length - 1; i >= 0; i--) {
-        const food = state.foods[i];
-        const dist = distance(player.x, player.y, food.x, food.y);
+      // 构建食物空间分区
+      const foodHash = new SpatialHash(80);
+      foodHash.build(state.foods);
+
+      // 1. 玩家吃食物（提高增大速度）
+      const nearbyFoods = foodHash.query(player.x, player.y, player.radius + 20);
+      let foodsToRemove = new Set();
+      let foodsToAdd = [];
+      let scoreAdd = 0;
+      
+      for (const food of nearbyFoods) {
+        const distSq = distanceSquared(player.x, player.y, food.x, food.y);
         
-        if (dist < player.radius) {
-          // 吃掉食物
+        if (distSq < playerRadiusSq) {
           player.grow(food.radius * 0.95);
-          state.foods.splice(i, 1);
-          state.score += 1;
-          
-          // 补充新食物
-          state.foods.push(new Food());
+          foodsToRemove.add(food);
+          foodsToAdd.push(new Food());
+          scoreAdd += 1;
         }
       }
+      
+      state.foods = state.foods.filter(f => !foodsToRemove.has(f));
+      state.foods.push(...foodsToAdd);
+      state.score += scoreAdd;
 
-      // 2. 玩家与敌人碰撞
-      for (let i = state.enemies.length - 1; i >= 0; i--) {
-        const enemy = state.enemies[i];
-        const dist = distance(player.x, player.y, enemy.x, enemy.y);
+      // 2. 玩家与敌人碰撞（使用距离平方优化）
+      const enemiesToRemove = new Set();
+      
+      for (const enemy of state.enemies) {
+        const distSq = distanceSquared(player.x, player.y, enemy.x, enemy.y);
+        const enemyRadiusSq = enemy.radius * enemy.radius;
 
-        // 玩家吃敌人（基于体积判定，提高增大速度）
-        if (dist < player.radius && canEat(player.radius, enemy.radius)) {
-          const enemyName = enemy.name;
+        // 玩家吃敌人（基于体积判定）
+        if (distSq < playerRadiusSq && canEat(player.radius, enemy.radius)) {
           player.grow(enemy.radius);
-          state.enemies.splice(i, 1);
-          AINamePool.releaseName(enemyName);
+          enemiesToRemove.add(enemy);
+          AINamePool.releaseName(enemy.name);
           state.score += 10;
           state.victoryState.totalAIConsumed++;
           updateVictoryHint();
-          continue;
         }
-
         // 敌人吃玩家（基于体积判定）
-        if (dist < enemy.radius && canEat(enemy.radius, player.radius)) {
-          // 防御性检查：确保玩家确实存在
+        else if (distSq < enemyRadiusSq && canEat(enemy.radius, player.radius)) {
           if (state.player) {
             gameOver();
           }
           return;
         }
       }
+      
+      state.enemies = state.enemies.filter(e => !enemiesToRemove.has(e));
 
       // 3. 分身吃食物（合球冷却时间内禁止）
-      const now = performance.now();
       const isInMergeCooldown = state.isMerging || (now - state.lastMergeStartTime < CONFIG.MERGE_BLOCK_DURATION);
       
       if (!isInMergeCooldown) {
@@ -3619,69 +4286,76 @@
         const ballFoodsToAdd = [];
         let scoreAdd = 0;
         
+        // 重新构建食物空间分区（因为玩家可能已经吃了一些）
+        foodHash.build(state.foods);
+        
         for (const ball of state.playerBalls) {
-          for (let i = state.foods.length - 1; i >= 0; i--) {
-            if (ballFoodsToRemove.has(i)) continue;
+          const ballRadiusSq = ball.radius * ball.radius;
+          const nearbyBallFoods = foodHash.query(ball.x, ball.y, ball.radius + 20);
+          
+          for (const food of nearbyBallFoods) {
+            if (ballFoodsToRemove.has(food)) continue;
             
-            const food = state.foods[i];
-            const dist = distance(ball.x, ball.y, food.x, food.y);
+            const distSq = distanceSquared(ball.x, ball.y, food.x, food.y);
             
-            if (dist < ball.radius) {
+            if (distSq < ballRadiusSq) {
               ball.radius = Math.sqrt(Math.PI * ball.radius * ball.radius + Math.PI * food.radius * food.radius * 0.72) / Math.sqrt(Math.PI);
-              ballFoodsToRemove.add(i);
+              ballFoodsToRemove.add(food);
               ballFoodsToAdd.push(new Food());
               scoreAdd += 1;
             }
           }
         }
         
-        const ballFoodIndices = Array.from(ballFoodsToRemove).sort((a, b) => b - a);
-        for (const idx of ballFoodIndices) {
-          state.foods.splice(idx, 1);
-        }
+        state.foods = state.foods.filter(f => !ballFoodsToRemove.has(f));
         state.foods.push(...ballFoodsToAdd);
         state.score += scoreAdd;
       }
 
-      // 4. 敌人吃食物（提高增大速度）
-      const foodsToRemove = new Set();
-      const foodsToAdd = [];
+      // 4. 敌人吃食物（提高增大速度，使用空间分区优化）
+      foodsToRemove = new Set();
+      foodsToAdd = [];
       
-      state.enemies.forEach(enemy => {
-        for (let i = state.foods.length - 1; i >= 0; i--) {
-          if (foodsToRemove.has(i)) continue;
+      foodHash.build(state.foods);
+      
+      for (const enemy of state.enemies) {
+        const enemyRadiusSq = enemy.radius * enemy.radius;
+        const nearbyEnemyFoods = foodHash.query(enemy.x, enemy.y, enemy.radius + 20);
+        
+        for (const food of nearbyEnemyFoods) {
+          if (foodsToRemove.has(food)) continue;
           
-          const food = state.foods[i];
-          const dist = distance(enemy.x, enemy.y, food.x, food.y);
+          const distSq = distanceSquared(enemy.x, enemy.y, food.x, food.y);
           
-          if (dist < enemy.radius) {
+          if (distSq < enemyRadiusSq) {
             enemy.grow(food.radius * 0.95);
-            foodsToRemove.add(i);
+            foodsToRemove.add(food);
             foodsToAdd.push(new Food());
           }
         }
-      });
-      
-      const foodIndices = Array.from(foodsToRemove).sort((a, b) => b - a);
-      for (const idx of foodIndices) {
-        state.foods.splice(idx, 1);
       }
+      
+      state.foods = state.foods.filter(f => !foodsToRemove.has(f));
       state.foods.push(...foodsToAdd);
 
-      // 5. 敌人与分身碰撞
-      for (let i = state.playerBalls.length - 1; i >= 0; i--) {
-        const ball = state.playerBalls[i];
+      // 5. 敌人与分身碰撞（使用距离平方优化）
+      const ballsToRemove = new Set();
+      const enemiesToRemove2 = new Set();
+      
+      for (const ball of state.playerBalls) {
+        const ballRadiusSq = ball.radius * ball.radius;
         
-        for (let j = state.enemies.length - 1; j >= 0; j--) {
-          const enemy = state.enemies[j];
-          const dist = distance(ball.x, ball.y, enemy.x, enemy.y);
+        for (const enemy of state.enemies) {
+          if (enemiesToRemove2.has(enemy)) continue;
+          
+          const distSq = distanceSquared(ball.x, ball.y, enemy.x, enemy.y);
+          const enemyRadiusSq = enemy.radius * enemy.radius;
           
           // 分身吃敌人（基于体积判定）
-          if (dist < ball.radius && canEat(ball.radius, enemy.radius)) {
-            const enemyName = enemy.name;
+          if (distSq < ballRadiusSq && canEat(ball.radius, enemy.radius)) {
             ball.radius = Math.sqrt(Math.PI * ball.radius * ball.radius + Math.PI * enemy.radius * enemy.radius * 0.49) / Math.sqrt(Math.PI);
-            state.enemies.splice(j, 1);
-            AINamePool.releaseName(enemyName);
+            enemiesToRemove2.add(enemy);
+            AINamePool.releaseName(enemy.name);
             state.score += 10;
             updateVictoryHint();
             break;
@@ -3689,44 +4363,48 @@
           
           // === BUG修复扩展: 分身无敌时间保护 ===
           // 敌人吃分身（分身不在无敌时间内，基于体积判定）
-          const now = performance.now();
           const isBallInvincible = ball.invincibleUntil && now < ball.invincibleUntil;
-          if (!isBallInvincible && dist < enemy.radius && canEat(enemy.radius, ball.radius)) {
-            ballPool.release(state.playerBalls[i]);
-            state.playerBalls.splice(i, 1);
+          if (!isBallInvincible && distSq < enemyRadiusSq && canEat(enemy.radius, ball.radius)) {
+            ballsToRemove.add(ball);
             state.splitCount--;
             break;
           }
         }
       }
+      
+      // 应用删除操作
+      state.playerBalls = state.playerBalls.filter(b => !ballsToRemove.has(b));
+      state.enemies = state.enemies.filter(e => !enemiesToRemove2.has(e));
 
-      // 6. 敌人之间互相吃（基于体积判定，提高增大速度）
-      const enemiesToRemove = new Set();
+      // 6. 敌人之间互相吃（基于体积判定，使用距离平方优化）
+      const enemiesToRemove3 = new Set();
       const enemiesToRelease = [];
       
       for (let i = state.enemies.length - 1; i >= 0; i--) {
-        if (enemiesToRemove.has(i)) continue;
+        if (enemiesToRemove3.has(i)) continue;
         
         const a = state.enemies[i];
         if (!a) continue;
+        const aRadiusSq = a.radius * a.radius;
         
         for (let j = i - 1; j >= 0; j--) {
-          if (enemiesToRemove.has(j)) continue;
+          if (enemiesToRemove3.has(j)) continue;
           
           const b = state.enemies[j];
           if (!b) continue;
           
-          const dist = distance(a.x, a.y, b.x, b.y);
+          const distSq = distanceSquared(a.x, a.y, b.x, b.y);
+          const bRadiusSq = b.radius * b.radius;
 
-          if (dist < a.radius && canEat(a.radius, b.radius)) {
+          if (distSq < aRadiusSq && canEat(a.radius, b.radius)) {
             a.grow(b.radius * 0.7);
-            enemiesToRemove.add(j);
+            enemiesToRemove3.add(j);
             enemiesToRelease.push(b.name);
             updateVictoryHint();
             break;
-          } else if (dist < b.radius && canEat(b.radius, a.radius)) {
+          } else if (distSq < bRadiusSq && canEat(b.radius, a.radius)) {
             b.grow(a.radius * 0.7);
-            enemiesToRemove.add(i);
+            enemiesToRemove3.add(i);
             enemiesToRelease.push(a.name);
             updateVictoryHint();
             break;
@@ -3734,7 +4412,7 @@
         }
       }
       
-      const indices = Array.from(enemiesToRemove).sort((a, b) => b - a);
+      const indices = Array.from(enemiesToRemove3).sort((a, b) => b - a);
       for (const idx of indices) {
         const enemy = state.enemies[idx];
         if (enemy && !enemiesToRelease.includes(enemy.name)) {
@@ -4033,6 +4711,8 @@
      * 创建/更新安全区提示UI
      */
     function updateSafeZoneHint() {
+      if (!state.player) return;
+      
       const sz = state.safeZone;
       if (!sz.enabled || sz.currentSize >= CONFIG.MAP_WIDTH) {
         const hint = document.getElementById('safeZoneHint');
@@ -4304,6 +4984,8 @@
      * 更新排行榜
      */
     function updateLeaderboard() {
+      if (!state.player) return;
+      
       // 获取所有实体（玩家+敌人）
       const allEntities = [];
       
@@ -4315,8 +4997,9 @@
         isPlayer: true
       });
       
-      // 添加敌人
+      // 添加敌人（过滤无效或已死亡的敌人）
       for (const enemy of state.enemies) {
+        if (!enemy || enemy.radius <= 0 || enemy.radius < CONFIG.ENEMY_MIN_RADIUS) continue;
         allEntities.push({
           name: enemy.name,
           radius: enemy.radius,
@@ -4342,7 +5025,7 @@
       
       // 生成排行榜HTML
       let html = '';
-      const topCount = Math.min(10, allEntities.length);
+      const topCount = Math.min(8, allEntities.length);
       
       for (let i = 0; i < topCount; i++) {
         const entity = allEntities[i];
@@ -4444,13 +5127,65 @@
     }
 
     /**
+     * 检查对象是否在相机可视范围内（视锥剔除）
+     */
+    function isVisible(camera, x, y, radius = 0) {
+      const margin = radius + 50; // 额外边距
+      const width = canvas.displayWidth || window.innerWidth;
+      const height = canvas.displayHeight || window.innerHeight;
+      const left = camera.x - width / camera.zoom - margin;
+      const right = camera.x + width / camera.zoom + margin;
+      const top = camera.y - height / camera.zoom - margin;
+      const bottom = camera.y + height / camera.zoom + margin;
+      return x >= left && x <= right && y >= top && y <= bottom;
+    }
+
+    /**
+     * 性能监控
+     */
+    const performanceMonitor = {
+      frameCount: 0,
+      lastFpsUpdate: 0,
+      currentFps: 60,
+      frameTime: 0,
+      maxFrameTime: 0,
+      minFrameTime: Infinity,
+      
+      update(timestamp) {
+        this.frameCount++;
+        if (timestamp - this.lastFpsUpdate >= 1000) {
+          this.currentFps = Math.round(this.frameCount * 1000 / (timestamp - this.lastFpsUpdate));
+          this.frameCount = 0;
+          this.lastFpsUpdate = timestamp;
+        }
+        const now = performance.now();
+        if (this.lastFrameTime) {
+          this.frameTime = now - this.lastFrameTime;
+          this.maxFrameTime = Math.max(this.maxFrameTime, this.frameTime);
+          this.minFrameTime = Math.min(this.minFrameTime, this.frameTime);
+        }
+        this.lastFrameTime = now;
+      },
+      
+      getStats() {
+        return {
+          fps: this.currentFps,
+          frameTime: this.frameTime.toFixed(2),
+          maxFrameTime: this.maxFrameTime.toFixed(2),
+          minFrameTime: this.minFrameTime.toFixed(2)
+        };
+      }
+    };
+
+    /**
      * 游戏主循环
      */
     function gameLoop(timestamp) {
       if (!state.isRunning) return;
 
+      performanceMonitor.update(timestamp);
+
       try {
-        // 检查玩家是否有效（存在且有必要的属性）
         const playerValid = state.player && 
                            typeof state.player === 'object' && 
                            typeof state.player.radius === 'number' && 
@@ -4460,13 +5195,12 @@
         
         if (!playerValid) {
           console.error('玩家对象无效:', state.player);
-          return; // 不触发gameOver，只是跳过这次循环
+          return;
         }
 
-        const rawDt = (timestamp - state.lastTime) / 1000;
         const adjustedTimestamp = timestamp - state.accumulatedPauseTime;
         const dt = Math.min((adjustedTimestamp - state.lastTime) / 1000, 0.1);
-        state.lastTime = timestamp;
+        state.lastTime = adjustedTimestamp;
 
         const camera = state.camera;
 
@@ -4476,11 +5210,14 @@
         updatePlayerBalls(dt);
 
         if (state.enemies && Array.isArray(state.enemies)) {
-          state.enemies.forEach(enemy => {
+          for (let i = state.enemies.length - 1; i >= 0; i--) {
+            const enemy = state.enemies[i];
             if (enemy && typeof enemy.update === 'function') {
               enemy.update(dt, state.player, state.enemies, state.foods);
+            } else {
+              state.enemies.splice(i, 1);
             }
-          });
+          }
         }
 
         updateDifficulty(dt);
@@ -4498,26 +5235,37 @@
         drawGrid(camera);
         drawSafeZone(ctx, camera);
 
-        if (state.foods && Array.isArray(state.foods)) {
-          state.foods.forEach(food => {
-            if (food && typeof food.draw === 'function') {
-              food.draw(ctx, camera);
-            }
-          });
+        // 视锥剔除渲染优化
+        const visibleFoods = state.foods && Array.isArray(state.foods) 
+          ? state.foods.filter(food => food && isVisible(camera, food.x, food.y, food.radius))
+          : [];
+        
+        const visibleSpikes = state.spikes && Array.isArray(state.spikes)
+          ? state.spikes.filter(spike => spike && isVisible(camera, spike.x, spike.y, spike.radius))
+          : [];
+        
+        const visibleEnemies = state.enemies && Array.isArray(state.enemies)
+          ? state.enemies.filter(enemy => enemy && isVisible(camera, enemy.x, enemy.y, enemy.radius))
+          : [];
+
+        // 批量绘制食物
+        for (const food of visibleFoods) {
+          if (typeof food.draw === 'function') {
+            food.draw(ctx, camera);
+          }
         }
 
-        if (state.spikes && Array.isArray(state.spikes)) {
-          state.spikes.forEach(spike => {
-            if (spike && typeof spike.draw === 'function') {
-              spike.draw(ctx, camera);
-            }
-          });
+        // 批量绘制刺球
+        for (const spike of visibleSpikes) {
+          if (typeof spike.draw === 'function') {
+            spike.draw(ctx, camera);
+          }
         }
 
-        if (state.enemies && Array.isArray(state.enemies)) {
-          state.enemies = state.enemies.filter(enemy => enemy && typeof enemy.draw === 'function');
-          state.enemies.sort((a, b) => a.radius - b.radius);
-          state.enemies.forEach(enemy => enemy.draw(ctx, camera));
+        // 按大小排序后绘制敌人（小的先画）
+        visibleEnemies.sort((a, b) => a.radius - b.radius);
+        for (const enemy of visibleEnemies) {
+          enemy.draw(ctx, camera);
         }
 
         if (state.player && typeof state.player.draw === 'function') {
@@ -4530,6 +5278,7 @@
         state.animationFrameId = requestAnimationFrame(gameLoop);
       } catch (e) {
         console.error('游戏循环错误:', e);
+        console.error('错误堆栈:', e.stack);
         state.animationFrameId = requestAnimationFrame(gameLoop);
       }
     }
@@ -4571,6 +5320,10 @@
       state.splitCount = 1;
       state.isMerging = false;
       state.lastMergeStartTime = 0;
+      state.playerBalls = [];
+      state.mergeTimerVisible = false;
+      state.mergeTimeRemaining = 0;
+      state.lastSplitTime = 0;
       
       // 重置暂停状态
       state.wasRunningBeforePortrait = false;
@@ -4622,8 +5375,44 @@
 
       // 生成敌人
       state.enemies = [];
+      const minDistanceToPlayer = 200;
+      const minDistanceBetweenEnemies = 150;
+      
       for (let i = 0; i < CONFIG.ENEMY_COUNT; i++) {
-        state.enemies.push(new Enemy());
+        const enemy = new Enemy();
+        let validPosition = false;
+        let attempts = 0;
+        const maxAttempts = 100;
+        
+        while (!validPosition && attempts < maxAttempts) {
+          attempts++;
+          validPosition = true;
+          
+          // 检查与玩家的距离
+          const distToPlayer = distance(enemy.x, enemy.y, state.player.x, state.player.y);
+          if (distToPlayer < minDistanceToPlayer) {
+            validPosition = false;
+          }
+          
+          // 检查与其他敌人的距离
+          if (validPosition) {
+            for (const existingEnemy of state.enemies) {
+              const distToEnemy = distance(enemy.x, enemy.y, existingEnemy.x, existingEnemy.y);
+              if (distToEnemy < minDistanceBetweenEnemies) {
+                validPosition = false;
+                break;
+              }
+            }
+          }
+          
+          // 如果位置无效，重新生成
+          if (!validPosition) {
+            enemy.x = random(100, CONFIG.MAP_WIDTH - 100);
+            enemy.y = random(100, CONFIG.MAP_HEIGHT - 100);
+          }
+        }
+        
+        state.enemies.push(enemy);
       }
 
       // 生成刺球
@@ -4883,10 +5672,38 @@
     }
     addStartButtonListener();
     
-    restartBtn.addEventListener('click', () => {
-      gameOverOverlay.classList.add('hidden');
-      startOverlay.classList.remove('hidden');
-    });
+    // 排行榜折叠按钮
+    const leaderboardToggle = document.getElementById('leaderboardToggle');
+    let isLeaderboardOpen = false;
+    
+    if (leaderboardToggle && leaderboard) {
+      leaderboardToggle.addEventListener('click', () => {
+        isLeaderboardOpen = !isLeaderboardOpen;
+        if (isLeaderboardOpen) {
+          leaderboard.classList.add('open');
+          leaderboardToggle.classList.add('active');
+        } else {
+          leaderboard.classList.remove('open');
+          leaderboardToggle.classList.remove('active');
+        }
+      });
+      
+      // 点击外部关闭排行榜（移动端）
+      document.addEventListener('click', (e) => {
+        if (isLeaderboardOpen && !leaderboard.contains(e.target) && !leaderboardToggle.contains(e.target)) {
+          isLeaderboardOpen = false;
+          leaderboard.classList.remove('open');
+          leaderboardToggle.classList.remove('active');
+        }
+      });
+    }
+    
+    if (restartBtn) {
+      restartBtn.addEventListener('click', () => {
+        gameOverOverlay.classList.add('hidden');
+        startOverlay.classList.remove('hidden');
+      });
+    }
 
     // 获胜界面重启按钮
     const victoryRestartBtn = document.getElementById('victoryRestartBtn');
