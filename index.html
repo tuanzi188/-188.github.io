@@ -2868,16 +2868,6 @@
           return;
         }
 
-        // 6. 寻找食物密集区域（发育策略）
-        const foodCluster = this.findFoodCluster(foods);
-        if (foodCluster) {
-          this.targetX = foodCluster.x;
-          this.targetY = foodCluster.y;
-          this.changeDirInterval = 0.4 + Math.random() * 0.3;
-          this.currentStrategy = 'develop';
-          return;
-        }
-
         // 7. 智能巡逻（根据当前策略）
         this.smartPatrolAdvanced(player, allEnemies);
       }
