@@ -114,37 +114,187 @@
     /* ==================== UI 面板 ==================== */
     .ui-panel {
       position: fixed;
-      top: max(15px, env(safe-area-inset-top));
-      left: max(15px, env(safe-area-inset-left));
+      top: max(10px, env(safe-area-inset-top));
+      left: max(10px, env(safe-area-inset-left));
       z-index: 100;
       display: flex;
-      gap: 12px;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-width: calc(100vw - 20px);
     }
 
     .stat-box {
       background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      padding: 10px 18px;
-      min-width: 100px;
+      border-radius: 10px;
+      padding: 6px 12px;
+      min-width: 70px;
+      text-align: center;
     }
 
     .stat-label {
-      font-size: 11px;
+      font-size: 10px;
       color: rgba(255, 255, 255, 0.5);
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
     }
 
     .stat-value {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 700;
       color: #00f260;
     }
 
     .stat-value.size { color: #0575e6; }
-    .stat-value.zoom { color: #a29bfe; font-size: 18px; }
+    .stat-value.zoom { color: #a29bfe; font-size: 16px; }
+    .stat-value.rank { color: #ffd700; }
+
+    /* ==================== 安全区提示（左侧中间） ==================== */
+    .safe-zone-hint {
+      position: fixed;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      color: #ff8800;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      font-family: Microsoft YaHei, sans-serif;
+      z-index: 99;
+      border: 1px solid rgba(255, 136, 0, 0.3);
+      white-space: nowrap;
+      transition: all 0.3s ease;
+    }
+
+    .danger-warning {
+      position: fixed;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 0, 0, 0.85);
+      color: #fff;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 22px;
+      font-weight: bold;
+      font-family: Microsoft YaHei, sans-serif;
+      z-index: 9999;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+      display: none;
+      pointer-events: none;
+      animation: pulse 0.5s ease-in-out infinite alternate;
+    }
+
+    .welcome-toast {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: linear-gradient(135deg, rgba(0, 242, 96, 0.95), rgba(5, 117, 230, 0.95));
+      color: #fff;
+      padding: 24px 48px;
+      border-radius: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      font-family: Microsoft YaHei, sans-serif;
+      z-index: 10000;
+      text-align: center;
+      box-shadow: 
+        0 10px 40px rgba(0, 242, 96, 0.4),
+        0 0 80px rgba(5, 117, 230, 0.3);
+      opacity: 0;
+      pointer-events: none;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .welcome-toast.show {
+      animation: welcomeSlideIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    }
+
+    .welcome-toast.hide {
+      animation: welcomeSlideOut 0.6s ease-in forwards;
+    }
+
+    .welcome-toast .emoji {
+      font-size: 36px;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .welcome-toast .text {
+      display: block;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: translateX(-50%) scale(1);
+        box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+      }
+      100% {
+        transform: translateX(-50%) scale(1.05);
+        box-shadow: 0 0 50px rgba(255, 0, 0, 0.7);
+      }
+    }
+
+    @keyframes welcomeSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-40px) scale(0.8);
+      }
+      50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1);
+      }
+    }
+
+    @keyframes welcomeSlideOut {
+      0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-20px) scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: translateX(-50%) translateY(-30px) scale(0.9);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px) scale(0.7);
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 500px) {
+      .safe-zone-hint {
+        top: max(10px, env(safe-area-inset-top));
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: auto;
+        font-size: 11px;
+        padding: 5px 10px;
+      }
+      .danger-warning {
+        font-size: 18px;
+        padding: 10px 24px;
+      }
+      .welcome-toast {
+        top: 25%;
+        font-size: 20px;
+        padding: 18px 36px;
+      }
+      .welcome-toast .emoji {
+        font-size: 28px;
+      }
+    }
 
     /* ==================== 底部提示 ==================== */
     .hint {
@@ -1244,7 +1394,7 @@
       isLowEnd: false,
       fpsTarget: 60,
       renderQuality: 'high',
-      maxFoodCount: 450,
+      maxFoodCount: 700,
       maxEnemyCount: 15,
       enableAdvancedEffects: true,
       
@@ -1265,13 +1415,13 @@
         if (this.isLowEnd) {
           this.renderQuality = 'low';
           this.fpsTarget = 30;
-          this.maxFoodCount = 250;
+          this.maxFoodCount = 400;
           this.maxEnemyCount = 8;
           this.enableAdvancedEffects = false;
         } else if (this.isMobile) {
           this.renderQuality = 'medium';
           this.fpsTarget = 45;
-          this.maxFoodCount = 350;
+          this.maxFoodCount = 550;
           this.maxEnemyCount = 12;
           this.enableAdvancedEffects = true;
         }
@@ -1290,27 +1440,39 @@
 
     // ==================== 兼容性工具函数 ====================
     const CompatUtils = {
-      requestAnimationFrame: window.requestAnimationFrame ||
-                            window.webkitRequestAnimationFrame ||
-                            window.mozRequestAnimationFrame ||
-                            function(callback) { return setTimeout(callback, 16); },
+      requestAnimationFrame: (function() {
+        const raf = window.requestAnimationFrame ||
+                   window.webkitRequestAnimationFrame ||
+                   window.mozRequestAnimationFrame;
+        if (raf) {
+          return raf.bind(window);
+        }
+        return function(callback) { return setTimeout(callback, 16); };
+      })(),
                             
-      cancelAnimationFrame: window.cancelAnimationFrame ||
-                           window.webkitCancelAnimationFrame ||
-                           window.mozCancelAnimationFrame ||
-                           clearTimeout,
+      cancelAnimationFrame: (function() {
+        const caf = window.cancelAnimationFrame ||
+                    window.webkitCancelAnimationFrame ||
+                    window.mozCancelAnimationFrame;
+        if (caf) {
+          return caf.bind(window);
+        }
+        return clearTimeout;
+      })(),
                            
-      performanceNow: window.performance && window.performance.now ? 
-                     () => window.performance.now() : 
-                     () => Date.now(),
+      performanceNow: (function() {
+        if (window.performance && window.performance.now) {
+          return window.performance.now.bind(window.performance);
+        }
+        return () => Date.now();
+      })(),
                      
       devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
       
       safeAddEventListener(element, event, handler, options = {}) {
         if (!element) return;
-        const safeOptions = options.passive !== undefined ? options : { passive: true };
         try {
-          element.addEventListener(event, handler, safeOptions);
+          element.addEventListener(event, handler, options);
         } catch (e) {
           try {
             element.addEventListener(event, handler, false);
@@ -1376,7 +1538,7 @@
             state.isRunning = true;
             state.wasRunningBeforePortrait = false;
             if (typeof gameLoop === 'function') {
-              state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
+              requestAnimationFrame(gameLoop);
             }
           }
         }
@@ -1405,7 +1567,7 @@
       PLAYER_NAME: '你',
       
       // 速度配置（超神极速模式：再×1.5倍，总计×2.25倍）
-      BASE_SPEED: 80,     // 基础速度
+      BASE_SPEED: 90,     // 基础速度
       SPEED_FACTOR: 0.0075,  // 衰减系数（半径每增大2减慢一点）
       MIN_SPEED: 35,         // 最低速度限制（大球不会太慢）
       
@@ -2545,18 +2707,15 @@
       update(player, dt) {
         if (!player) return;
 
-        // 更新目标位置
-        this.setTarget(player);
+        this.targetX = player.x;
+        this.targetY = player.y;
         
-        // 固定缩放为1.2，不随球体大小变化
         this.zoom = 1.2;
         this.targetZoom = 1.2;
 
-        // 动态调整跟随速度
         const sizeRatio = player.radius / CONFIG.PLAYER_INIT_RADIUS;
-        const dynamicFollowSpeed = this.followSpeed / (1 + (sizeRatio - 1) * 0.3);
+        const dynamicFollowSpeed = 0.25 / (1 + (sizeRatio - 1) * 0.15);
         
-        // 平滑插值跟随（Lerp）
         this.x += (this.targetX - this.x) * dynamicFollowSpeed;
         this.y += (this.targetY - this.y) * dynamicFollowSpeed;
       }
@@ -3832,6 +3991,108 @@
         }
       }
       
+      findNearbySpike(spikes) {
+        if (!spikes || !Array.isArray(spikes)) return null;
+        const dangerRadius = CONFIG.SPIKE_DANGER_RADIUS + this.radius;
+        for (let i = 0, len = spikes.length; i < len; i++) {
+          const spike = spikes[i];
+          const dist = distance(this.x, this.y, spike.x, spike.y);
+          if (dist < dangerRadius) {
+            return spike;
+          }
+        }
+        return null;
+      }
+      
+      evaluateThreat(entity) {
+        const dist = distance(this.x, this.y, entity.x, entity.y);
+        const canEatMe = canEat(entity.radius, this.radius);
+        const predictionTime = 2;
+        const futureX = entity.x + (entity.vx || 0) * predictionTime;
+        const futureY = entity.y + (entity.vy || 0) * predictionTime;
+        const futureDist = distance(this.x, this.y, futureX, futureY);
+        const sizeRatio = entity.radius / this.radius;
+        const distanceScore = Math.max(0, 1000 - dist) / 1000;
+        const futureDistanceScore = Math.max(0, 1000 - futureDist) / 1000;
+        const sizeScore = Math.min(sizeRatio, 3);
+        let threatScore = 0;
+        if (canEatMe) {
+          threatScore = (distanceScore * 0.6 + futureDistanceScore * 0.4) * sizeScore * 100;
+        }
+        return { score: threatScore, dist: dist, futureDist: futureDist, canEatMe: canEatMe };
+      }
+      
+      fleeFromDangerZone() {
+        const sz = state.safeZone;
+        const halfSize = sz.currentSize / 2;
+        let fleeX = sz.centerX - this.x;
+        let fleeY = sz.centerY - this.y;
+        const dist = Math.sqrt(fleeX * fleeX + fleeY * fleeY);
+        if (dist > 0) {
+          fleeX /= dist;
+          fleeY /= dist;
+        }
+        const targetX = this.x + fleeX * 500;
+        const targetY = this.y + fleeY * 500;
+        this.targetX = clamp(targetX, sz.centerX - halfSize + this.radius + 20, sz.centerX + halfSize - this.radius - 20);
+        this.targetY = clamp(targetY, sz.centerY - halfSize + this.radius + 20, sz.centerY + halfSize - this.radius - 20);
+      }
+      
+      isPositionInDanger(x, y) {
+        const sz = state.safeZone;
+        if (!sz || !sz.enabled || sz.currentSize >= CONFIG.MAP_WIDTH) return false;
+        const halfSize = sz.currentSize / 2;
+        const margin = this.radius + 30;
+        return (
+          x < sz.centerX - halfSize + margin ||
+          x > sz.centerX + halfSize - margin ||
+          y < sz.centerY - halfSize + margin ||
+          y > sz.centerY + halfSize - margin
+        );
+      }
+      
+      shouldSplitToEscape(threat) {
+        const dist = distance(this.x, this.y, threat.x, threat.y);
+        const threatSizeRatio = threat.radius / this.radius;
+        return this.radius >= CONFIG.MIN_SPLIT_RADIUS * 1.5 &&
+               canEat(threat.radius, this.radius) &&
+               threatSizeRatio > 1.3 &&
+               dist < this.radius * 2 &&
+               this.personality === 'aggressive' &&
+               state.splitCount < CONFIG.MAX_SPLITS;
+      }
+      
+      attemptSplitEscape(now) {
+        if (now - this.lastSplitTime < CONFIG.SPLIT_COOLDOWN) return;
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0) {
+          const dirX = dx / dist;
+          const dirY = dy / dist;
+          const newRadius = this.radius / Math.sqrt(2);
+          const sizeFactor = CONFIG.PLAYER_INIT_RADIUS / this.radius;
+          const splitSpeed = CONFIG.SPLIT_VELOCITY_BASE * (1 + sizeFactor * CONFIG.SPLIT_VELOCITY_MULTIPLIER) * 0.8;
+          const splitBall = new Enemy();
+          splitBall.x = this.x + dirX * this.radius;
+          splitBall.y = this.y + dirY * this.radius;
+          splitBall.radius = newRadius;
+          splitBall.vx = dirX * splitSpeed + this.vx * 0.5;
+          splitBall.vy = dirY * splitSpeed + this.vy * 0.5;
+          splitBall.color = this.color;
+          splitBall.name = this.name;
+          splitBall.splitTime = now;
+          splitBall.invincibleUntil = now + 1000;
+          splitBall.personality = this.personality;
+          splitBall.reactionSpeed = this.reactionSpeed;
+          this.radius = newRadius;
+          this.lastSplitTime = now;
+          this.vx = dirX * splitSpeed * 0.6 + this.vx * 0.3;
+          this.vy = dirY * splitSpeed * 0.6 + this.vy * 0.3;
+          state.enemies.push(splitBall);
+        }
+      }
+
 
     }
 
@@ -4550,7 +4811,7 @@
         const dist = distance(player.x, player.y, spike.x, spike.y);
         
         // 玩家比刺球大足够多，可以吃掉刺球
-        if (dist < player.radius && player.radius > spike.radius * 2.5) {
+        if (dist < player.radius && player.radius > spike.radius * 2) {
           player.grow(spike.radius * 0.6);
           state.spikes.splice(i, 1);
           state.spikes.push(new Spike());
@@ -4558,7 +4819,7 @@
           continue;
         }
         // 玩家大小适中，碰到刺球会分裂
-        else if (dist < player.radius + spike.radius * 0.8 && player.radius > spike.radius * 1.2 && player.radius < spike.radius * 2.5) {
+        else if (dist < player.radius + spike.radius * 0.8 && player.radius > spike.radius * 1.2 && player.radius < spike.radius * 2) {
           // 计算分裂数量（根据玩家大小）
           const splitCount = Math.min(4, Math.floor(player.radius / spike.radius));
           const newRadius = player.radius / Math.sqrt(splitCount);
@@ -4610,7 +4871,7 @@
           const dist = distance(ball.x, ball.y, spike.x, spike.y);
           
           // 分身比刺球大足够多，可以吃掉刺球
-          if (dist < ball.radius && ball.radius > spike.radius * 1.3) {
+          if (dist < ball.radius && ball.radius > spike.radius * 2) {
             ball.radius = Math.sqrt(Math.PI * ball.radius * ball.radius + Math.PI * spike.radius * spike.radius * 0.36) / Math.sqrt(Math.PI);
             state.spikes.splice(j, 1);
             state.spikes.push(new Spike());
@@ -4644,7 +4905,7 @@
           const dist = distance(enemy.x, enemy.y, spike.x, spike.y);
           
           // 敌人比刺球大足够多，可以吃掉刺球
-          if (dist < enemy.radius && enemy.radius > spike.radius * 1.3) {
+          if (dist < enemy.radius && enemy.radius > spike.radius * 2) {
             enemy.grow(spike.radius * 0.5);
             // 刺球被吃掉后生成新的
             spike.x = random(100, CONFIG.MAP_WIDTH - 100);
@@ -4820,77 +5081,40 @@
       const sz = state.safeZone;
       if (!sz.enabled || sz.currentSize >= CONFIG.MAP_WIDTH) {
         const hint = document.getElementById('safeZoneHint');
-        if (hint) {
-          hint.style.display = 'none';
-        }
+        if (hint) hint.style.display = 'none';
         const dangerWarning = document.getElementById('dangerWarning');
-        if (dangerWarning) {
-          dangerWarning.style.display = 'none';
-        }
+        if (dangerWarning) dangerWarning.style.display = 'none';
         return;
       }
       
-      // 检测玩家是否在安全区外
       const playerInDanger = !isInSafeZone(state.player.x, state.player.y);
       
-      // 创建危险警告提示
       let dangerWarning = document.getElementById('dangerWarning');
       if (!dangerWarning) {
         dangerWarning = document.createElement('div');
         dangerWarning.id = 'dangerWarning';
-        dangerWarning.style.cssText = `
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background: rgba(255, 0, 0, 0.85);
-          color: #fff;
-          padding: 20px 40px;
-          border-radius: 15px;
-          font-size: 28px;
-          font-weight: bold;
-          font-family: Microsoft YaHei, sans-serif;
-          z-index: 9999;
-          text-align: center;
-          box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
-          display: none;
-        `;
+        dangerWarning.className = 'danger-warning';
         document.body.appendChild(dangerWarning);
       }
       
       if (playerInDanger) {
         dangerWarning.innerHTML = '⚠️ 危险！请尽快进入安全区！';
         dangerWarning.style.display = 'block';
-        dangerWarning.style.animation = 'pulse 0.5s ease-in-out infinite alternate';
       } else {
         dangerWarning.style.display = 'none';
       }
       
-      // 创建安全区状态提示
       let hint = document.getElementById('safeZoneHint');
       if (!hint) {
         hint = document.createElement('div');
         hint.id = 'safeZoneHint';
-        hint.style.cssText = `
-          position: fixed;
-          top: 110px;
-          left: 10px;
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(5px);
-          color: #ff8800;
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-size: 14px;
-          font-weight: bold;
-          font-family: Microsoft YaHei, sans-serif;
-          z-index: 999;
-        `;
+        hint.className = 'safe-zone-hint';
         document.body.appendChild(hint);
       }
       
       const remainingSize = Math.round(sz.currentSize);
-      const isShrinkingText = sz.isShrinking ? '⚠️ 缩圈中！' : '';
-      hint.innerHTML = `安全区: <span style="color: #ff6b6b">${remainingSize}x${remainingSize}</span> ${isShrinkingText}`;
+      const isShrinkingText = sz.isShrinking ? ' ⚠️缩圈中' : '';
+      hint.innerHTML = `安全区: <span style="color: #ff6b6b">${remainingSize}x${remainingSize}</span>${isShrinkingText}`;
       hint.style.display = 'block';
     }
 
@@ -5240,7 +5464,7 @@
 
       // 帧率控制（跳过部分帧以保持目标帧率）
       if (timestamp - lastFrameTime < TARGET_FRAME_TIME && PerformanceConfig.isMobile) {
-        state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
+        requestAnimationFrame(gameLoop);
         return;
       }
       lastFrameTime = timestamp;
@@ -5258,7 +5482,7 @@
         
         if (!playerValid) {
           console.error('玩家对象无效:', state.player);
-          state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
+          requestAnimationFrame(gameLoop);
           return;
         }
 
@@ -5271,13 +5495,21 @@
         state.player.update(camera, dt);
         state.player.shrink(dt);
         
-        updatePlayerBalls(dt);
+        // 减少分身更新频率
+        if (PerformanceMonitor.frameCount % 2 === 0) {
+          updatePlayerBalls(dt);
+        }
 
+        // 只更新可见范围内的敌人
         if (state.enemies && Array.isArray(state.enemies)) {
           for (let i = state.enemies.length - 1; i >= 0; i--) {
             const enemy = state.enemies[i];
             if (enemy && typeof enemy.update === 'function') {
-              enemy.update(dt, state.player, state.enemies, state.foods);
+              const isNearPlayer = Math.abs(enemy.x - state.player.x) < 1000 && 
+                                   Math.abs(enemy.y - state.player.y) < 1000;
+              if (isNearPlayer || PerformanceMonitor.frameCount % 3 === 0) {
+                enemy.update(dt, state.player, state.enemies, state.foods);
+              }
             } else {
               state.enemies.splice(i, 1);
             }
@@ -5286,96 +5518,122 @@
 
         camera.update(state.player, dt);
         checkVictoryCondition(dt);
-        handleCollisions();
+        
+        // 减少碰撞检测频率
+        if (PerformanceMonitor.frameCount % (PerformanceConfig.isMobile ? 2 : 1) === 0) {
+          handleCollisions();
+        }
+        
         updateSafeZone(dt);
         
         // 减少UI更新频率（移动端）
-        if (PerformanceMonitor.frameCount % (PerformanceConfig.isMobile ? 3 : 1) === 0) {
+        const uiUpdateInterval = PerformanceConfig.isLowEnd ? 4 : (PerformanceConfig.isMobile ? 3 : 1);
+        if (PerformanceMonitor.frameCount % uiUpdateInterval === 0) {
           updateUI();
         }
 
         // 清空画布
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.fillStyle = '#0a0e27';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // 应用相机
-        camera.apply(ctx);
-        
-        // 选择性绘制（根据性能配置）
-        if (PerformanceConfig.renderQuality !== 'low') {
-          drawGrid(camera);
-          drawSafeZone(ctx, camera);
-        }
+        try {
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.fillStyle = '#0a0e27';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // 应用相机
+          camera.apply(ctx);
+          
+          // 选择性绘制（根据性能配置）
+          if (PerformanceConfig.renderQuality === 'high') {
+            drawGrid(camera);
+            drawSafeZone(ctx, camera);
+          } else if (PerformanceConfig.renderQuality === 'medium') {
+            drawSafeZone(ctx, camera);
+          }
 
-        // 视锥剔除渲染优化（提前过滤可见对象）
-        let visibleFoods = [];
-        let visibleSpikes = [];
-        let visibleEnemies = [];
-        
-        if (state.foods && Array.isArray(state.foods)) {
-          for (let i = 0, len = state.foods.length; i < len; i++) {
-            const food = state.foods[i];
-            if (food && camera.isVisible(food.x, food.y, food.radius)) {
-              visibleFoods.push(food);
+          // 视锥剔除渲染优化（提前过滤可见对象）
+          const visibleFoods = [];
+          const visibleSpikes = [];
+          const visibleEnemies = [];
+          
+          // 优化：预计算一些值
+          const foods = state.foods;
+          const spikes = state.spikes;
+          const enemies = state.enemies;
+          
+          if (foods && Array.isArray(foods)) {
+            const foodCount = foods.length;
+            // 根据性能减少绘制的食物数量
+            const visibleLimit = PerformanceConfig.renderQuality === 'low' ? Math.min(foodCount, 150) : 
+                                 PerformanceConfig.renderQuality === 'medium' ? Math.min(foodCount, 250) : foodCount;
+            for (let i = 0; i < visibleLimit; i++) {
+              const food = foods[i];
+              if (food && camera.isVisible(food.x, food.y, food.radius)) {
+                visibleFoods.push(food);
+              }
             }
           }
-        }
-        
-        if (state.spikes && Array.isArray(state.spikes)) {
-          for (let i = 0, len = state.spikes.length; i < len; i++) {
-            const spike = state.spikes[i];
-            if (spike && camera.isVisible(spike.x, spike.y, spike.radius * 2)) {
-              visibleSpikes.push(spike);
+          
+          if (spikes && Array.isArray(spikes)) {
+            for (let i = 0, len = spikes.length; i < len; i++) {
+              const spike = spikes[i];
+              if (spike && camera.isVisible(spike.x, spike.y, spike.radius * 2)) {
+                visibleSpikes.push(spike);
+              }
             }
           }
-        }
-        
-        if (state.enemies && Array.isArray(state.enemies)) {
-          for (let i = 0, len = state.enemies.length; i < len; i++) {
-            const enemy = state.enemies[i];
-            if (enemy && camera.isVisible(enemy.x, enemy.y, enemy.radius)) {
-              visibleEnemies.push(enemy);
+          
+          if (enemies && Array.isArray(enemies)) {
+            for (let i = 0, len = enemies.length; i < len; i++) {
+              const enemy = enemies[i];
+              if (enemy && camera.isVisible(enemy.x, enemy.y, enemy.radius)) {
+                visibleEnemies.push(enemy);
+              }
             }
           }
-        }
 
-        // 批量绘制食物（简化绘制）
-        for (let i = 0, len = visibleFoods.length; i < len; i++) {
-          const food = visibleFoods[i];
-          // 简化食物绘制
-          ctx.beginPath();
-          ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
-          ctx.fillStyle = food.color;
-          ctx.fill();
-        }
-
-        // 批量绘制刺球
-        for (let i = 0, len = visibleSpikes.length; i < len; i++) {
-          const spike = visibleSpikes[i];
-          if (typeof spike.draw === 'function') {
-            spike.draw(ctx, camera);
+          // 批量绘制食物（简化绘制）
+          if (visibleFoods.length > 0) {
+            for (let i = 0, len = visibleFoods.length; i < len; i++) {
+              const food = visibleFoods[i];
+              ctx.beginPath();
+              ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
+              ctx.fillStyle = food.color;
+              ctx.fill();
+            }
           }
+
+          // 批量绘制刺球
+          if (visibleSpikes.length > 0) {
+            for (let i = 0, len = visibleSpikes.length; i < len; i++) {
+              const spike = visibleSpikes[i];
+              if (spike && typeof spike.draw === 'function') {
+                spike.draw(ctx, camera);
+              }
+            }
+          }
+
+          // 按大小排序后绘制敌人（小的先画）
+          if (visibleEnemies.length > 0) {
+            visibleEnemies.sort((a, b) => a.radius - b.radius);
+            for (let i = 0, len = visibleEnemies.length; i < len; i++) {
+              visibleEnemies[i].draw(ctx, camera);
+            }
+          }
+
+          if (state.player && typeof state.player.draw === 'function') {
+            state.player.draw(ctx, camera);
+          }
+
+          drawPlayerBalls(ctx, camera);
+          camera.restore(ctx);
+        } catch (renderError) {
+          console.warn('渲染错误:', renderError);
         }
 
-        // 按大小排序后绘制敌人（小的先画）
-        visibleEnemies.sort((a, b) => a.radius - b.radius);
-        for (let i = 0, len = visibleEnemies.length; i < len; i++) {
-          visibleEnemies[i].draw(ctx, camera);
-        }
-
-        if (state.player && typeof state.player.draw === 'function') {
-          state.player.draw(ctx, camera);
-        }
-
-        drawPlayerBalls(ctx, camera);
-        camera.restore(ctx);
-
-        state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
+        requestAnimationFrame(gameLoop);
       } catch (e) {
         console.error('游戏循环错误:', e);
         console.error('错误堆栈:', e.stack);
-        state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
+        requestAnimationFrame(gameLoop);
       }
     }
 
@@ -5550,6 +5808,40 @@
       state.isRunning = true;
       state.lastTime = performance.now();
       requestAnimationFrame(gameLoop);
+      
+      // 显示欢迎提示
+      showWelcomeToast();
+    }
+
+    // 显示欢迎提示
+    function showWelcomeToast() {
+      // 创建提示元素
+      let toast = document.getElementById('welcomeToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'welcomeToast';
+        toast.className = 'welcome-toast';
+        toast.innerHTML = `
+          <span class="emoji">🎮</span>
+          <span class="text">吃掉所有的球球即可获得胜利</span>
+        `;
+        document.body.appendChild(toast);
+      }
+      
+      // 显示动画
+      toast.classList.remove('hide');
+      toast.classList.add('show');
+      
+      // 1秒后隐藏
+      setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 600);
+      }, 1000);
     }
 
     /**
@@ -5744,7 +6036,7 @@
     }
 
     // 按钮事件
-    // 开始按钮 - 使用pointer events确保Safari兼容性
+    // 开始按钮 - 简化事件监听器
     function addStartButtonListener() {
       // 确保startBtn存在
       if (!startBtn) {
@@ -5759,11 +6051,6 @@
       
       // 统一的开始游戏函数
       const handleStartGame = (e) => {
-        if (e) {
-          if (e.cancelable) e.preventDefault();
-          e.stopPropagation();
-        }
-        
         // 防止重复触发
         if (isStarting || state.isRunning) {
           console.log('游戏已在运行中或正在启动，忽略点击');
@@ -5781,46 +6068,46 @@
         initGame();
       };
       
-      // iOS兼容性：优先使用touchstart
-      CompatUtils.safeAddEventListener(startBtn, 'touchstart', handleStartGame, { passive: false });
+      // 只使用click事件，兼容性最好
+      startBtn.addEventListener('click', handleStartGame);
       
-      // touchend备用
-      CompatUtils.safeAddEventListener(startBtn, 'touchend', handleStartGame, { passive: false });
+      // 游戏结束界面按钮
+      const gameOverRestartBtn = document.getElementById('gameOverRestartBtn');
+      if (gameOverRestartBtn) {
+        CompatUtils.safeAddEventListener(gameOverRestartBtn, 'click', () => {
+          gameOverOverlay.classList.add('hidden');
+          // 直接开始新游戏
+          initGame();
+        });
+      }
       
-      // click备用（桌面端）
-      CompatUtils.safeAddEventListener(startBtn, 'click', handleStartGame);
+      const gameOverBackBtn = document.getElementById('gameOverBackBtn');
+      if (gameOverBackBtn) {
+        CompatUtils.safeAddEventListener(gameOverBackBtn, 'click', () => {
+          gameOverOverlay.classList.add('hidden');
+          startOverlay.classList.remove('hidden');
+        });
+      }
+
+      // 获胜界面按钮
+      const victoryRestartBtn = document.getElementById('victoryRestartBtn');
+      if (victoryRestartBtn) {
+        CompatUtils.safeAddEventListener(victoryRestartBtn, 'click', () => {
+          const victoryOverlay = document.getElementById('victoryOverlay');
+          victoryOverlay.classList.add('hidden');
+          // 直接开始新游戏
+          initGame();
+        });
+      }
       
-      // 其他再来一局和返回按钮也使用同样的机制
-      const otherButtons = [
-        document.getElementById('gameOverRestartBtn'),
-        document.getElementById('gameOverBackBtn'),
-        document.getElementById('victoryRestartBtn'),
-        document.getElementById('victoryBackBtn')
-      ].filter(btn => btn);
-      
-      otherButtons.forEach(btn => {
-        let isProcessing = false;
-        
-        const handleButtonClick = (e) => {
-          if (isProcessing) return;
-          isProcessing = true;
-          
-          if (e) {
-            if (e.cancelable) e.preventDefault();
-            e.stopPropagation();
-          }
-          
-          // 直接触发按钮原有的click事件
-          btn.click();
-          
-          setTimeout(() => {
-            isProcessing = false;
-          }, 500);
-        };
-        
-        CompatUtils.safeAddEventListener(btn, 'touchstart', handleButtonClick, { passive: false });
-        CompatUtils.safeAddEventListener(btn, 'touchend', handleButtonClick, { passive: false });
-      });
+      const victoryBackBtn = document.getElementById('victoryBackBtn');
+      if (victoryBackBtn) {
+        CompatUtils.safeAddEventListener(victoryBackBtn, 'click', () => {
+          const victoryOverlay = document.getElementById('victoryOverlay');
+          victoryOverlay.classList.add('hidden');
+          startOverlay.classList.remove('hidden');
+        });
+      }
     }
     addStartButtonListener();
     
@@ -5858,24 +6145,6 @@
       });
     }
     
-    if (restartBtn) {
-      CompatUtils.safeAddEventListener(restartBtn, 'click', () => {
-        gameOverOverlay.classList.add('hidden');
-        startOverlay.classList.remove('hidden');
-      });
-    }
-
-    // 获胜界面重启按钮
-    const victoryRestartBtn = document.getElementById('victoryRestartBtn');
-    if (victoryRestartBtn) {
-      CompatUtils.safeAddEventListener(victoryRestartBtn, 'click', () => {
-        const victoryOverlay = document.getElementById('victoryOverlay');
-        victoryOverlay.classList.add('hidden');
-        // 直接开始新游戏，使用之前的玩家名称
-        initGame();
-      });
-    }
-
     // 回车键开始游戏
     CompatUtils.safeAddEventListener(playerNameInput, 'keypress', (e) => {
       if (e.key === 'Enter') initGame();
