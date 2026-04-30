@@ -7,10 +7,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0a0e27">
   <meta name="msapplication-tap-highlight" content="no">
   <meta name="format-detection" content="telephone=no">
   <meta name="format-detection" content="email=no">
+  <meta name="x5-orientation" content="landscape">
+  <meta name="x5-fullscreen" content="true">
+  <meta name="x5-page-mode" content="app">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>球球大作战</title>
@@ -24,6 +26,8 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
+      touch-action: none;
+      -webkit-touch-action: none;
     }
 
     body {
@@ -43,16 +47,39 @@
       box-sizing: border-box;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      will-change: transform;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* 性能优化：GPU加速关键元素 */
+    canvas, .joystick-container, .split-btn, .ui-panel, .overlay {
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      will-change: transform;
     }
     
     /* Canvas区域禁用touch-action，按钮区域保持默认 */
     canvas {
       touch-action: none;
+      -webkit-touch-action: none;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
     }
     
     /* 按钮类保持正常触摸行为 */
     .btn, .overlay, .joystick-container, .split-btn, #leaderboardToggle {
-      touch-action: auto;
+      touch-action: manipulation;
+      -webkit-touch-action: manipulation;
+    }
+    
+    /* 性能优化：移动端减少模糊效果 */
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+      .stat-box, .hint, .leaderboard {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+      }
     }
 
     @supports (height: 100dvh) {
@@ -1209,8 +1236,158 @@
   </div>
 
   <script>
+    // ==================== 性能检测与自适应配置模块 ====================
+    const PerformanceConfig = {
+      isMobile: false,
+      isWeChat: false,
+      isSafari: false,
+      isLowEnd: false,
+      fpsTarget: 60,
+      renderQuality: 'high',
+      maxFoodCount: 450,
+      maxEnemyCount: 15,
+      enableAdvancedEffects: true,
+      
+      init() {
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                        window.innerWidth <= 768 ||
+                        'ontouchstart' in window;
+        
+        this.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+        this.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
+        
+        // 检测低端设备
+        const memory = navigator.deviceMemory || 4;
+        const cores = navigator.hardwareConcurrency || 2;
+        this.isLowEnd = memory <= 2 || cores <= 2 || this.isMobile;
+        
+        // 自适应配置
+        if (this.isLowEnd) {
+          this.renderQuality = 'low';
+          this.fpsTarget = 30;
+          this.maxFoodCount = 250;
+          this.maxEnemyCount = 8;
+          this.enableAdvancedEffects = false;
+        } else if (this.isMobile) {
+          this.renderQuality = 'medium';
+          this.fpsTarget = 45;
+          this.maxFoodCount = 350;
+          this.maxEnemyCount = 12;
+          this.enableAdvancedEffects = true;
+        }
+        
+        console.log('性能配置:', {
+          isMobile: this.isMobile,
+          isWeChat: this.isWeChat,
+          isSafari: this.isSafari,
+          isLowEnd: this.isLowEnd,
+          renderQuality: this.renderQuality
+        });
+      }
+    };
+    
+    PerformanceConfig.init();
+
+    // ==================== 兼容性工具函数 ====================
+    const CompatUtils = {
+      requestAnimationFrame: window.requestAnimationFrame ||
+                            window.webkitRequestAnimationFrame ||
+                            window.mozRequestAnimationFrame ||
+                            function(callback) { return setTimeout(callback, 16); },
+                            
+      cancelAnimationFrame: window.cancelAnimationFrame ||
+                           window.webkitCancelAnimationFrame ||
+                           window.mozCancelAnimationFrame ||
+                           clearTimeout,
+                           
+      performanceNow: window.performance && window.performance.now ? 
+                     () => window.performance.now() : 
+                     () => Date.now(),
+                     
+      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+      
+      safeAddEventListener(element, event, handler, options = {}) {
+        if (!element) return;
+        const safeOptions = options.passive !== undefined ? options : { passive: true };
+        try {
+          element.addEventListener(event, handler, safeOptions);
+        } catch (e) {
+          try {
+            element.addEventListener(event, handler, false);
+          } catch (e2) {
+            console.warn('事件监听失败:', e2);
+          }
+        }
+      }
+    };
+
     // 等待DOM完全加载后再执行
     document.addEventListener('DOMContentLoaded', () => {
+      
+      // ==================== 微信浏览器特殊优化 ====================
+      if (PerformanceConfig.isWeChat) {
+        console.log('检测到微信浏览器，应用特殊优化');
+        
+        // 微信浏览器禁止双击缩放
+        const meta = document.querySelector('meta[name="viewport"]');
+        if (meta) {
+          meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
+        }
+        
+        // 微信浏览器触摸优化
+        document.body.addEventListener('touchstart', (e) => {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+        
+        let lastTouchEnd = 0;
+        document.body.addEventListener('touchend', (e) => {
+          const now = Date.now();
+          if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+          }
+          lastTouchEnd = now;
+        }, { passive: false });
+      }
+      
+      // ==================== 屏幕方向检测与处理 ====================
+      const handleOrientationChange = () => {
+        const isPortrait = window.innerHeight > window.innerWidth;
+        const portraitWarning = document.getElementById('portraitWarning');
+        
+        if (PerformanceConfig.isMobile && isPortrait) {
+          if (portraitWarning) {
+            portraitWarning.classList.add('visible');
+          }
+          
+          // 竖屏时如果游戏在运行，暂停游戏
+          if (state && state.isRunning && !state.wasRunningBeforePortrait) {
+            state.wasRunningBeforePortrait = true;
+            state.isRunning = false;
+          }
+        } else {
+          if (portraitWarning) {
+            portraitWarning.classList.remove('visible');
+          }
+          
+          // 横屏时恢复游戏
+          if (state && state.wasRunningBeforePortrait) {
+            state.isRunning = true;
+            state.wasRunningBeforePortrait = false;
+            if (typeof gameLoop === 'function') {
+              state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
+            }
+          }
+        }
+      };
+      
+      // 监听屏幕方向变化
+      CompatUtils.safeAddEventListener(window, 'orientationchange', handleOrientationChange);
+      CompatUtils.safeAddEventListener(window, 'resize', handleOrientationChange);
+      
+      // 初始化时检查一次方向
+      setTimeout(handleOrientationChange, 100);
       
       // ==================== 游戏配置模块 ====================
       const CONFIG = {
@@ -1232,14 +1409,14 @@
       SPEED_FACTOR: 0.0075,  // 衰减系数（半径每增大2减慢一点）
       MIN_SPEED: 35,         // 最低速度限制（大球不会太慢）
       
-      // 食物配置
-      FOOD_COUNT: 450,           // 食物总数（350→450，更多彩豆）
+      // 食物配置（自适应性能）
+      FOOD_COUNT: PerformanceConfig.maxFoodCount,
       FOOD_MIN_RADIUS: 5,
       FOOD_MAX_RADIUS: 10,
       FOOD_COLORS: ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6eb4'],
       
-      // AI 配置
-      ENEMY_COUNT: 15,
+      // AI 配置（自适应性能）
+      ENEMY_COUNT: PerformanceConfig.maxEnemyCount,
       ENEMY_MIN_RADIUS: 12,
       ENEMY_MAX_RADIUS: 45,
       ENEMY_NAMES: ['小红', '大黄', '蓝蓝', '绿绿', '紫紫', '橙橙', '粉粉', '灰灰', '白白', '黑黑', '球球', '豆豆', '泡泡', '团团', '圆圆'],
@@ -1620,51 +1797,79 @@
     };
 
     // 检测设备类型
-    function detectDevice() {
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const isSmallScreen = window.innerWidth <= 768;
-      state.isMobile = isTouchDevice || isSmallScreen;
-      
-      // Safari浏览器检测
-      const ua = navigator.userAgent;
-      state.isSafari = /Safari/i.test(ua) && !/Chrome/i.test(ua) && /iPhone|iPad|iPod/i.test(ua);
-      
-      // Safari iOS特定修复（仅在移动端生效）
-      if (state.isSafari && state.isMobile) {
-        // Safari iOS需要额外处理防止页面滚动
-        document.body.addEventListener('touchmove', (e) => {
-          if (e.target === document.body || e.target === canvas) {
-            e.preventDefault();
-          }
-        }, { passive: false });
+      function detectDevice() {
+        state.isMobile = PerformanceConfig.isMobile;
+        state.isSafari = PerformanceConfig.isSafari;
         
-        // 禁用双击缩放
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (e) => {
-          const now = Date.now();
-          if (now - lastTouchEnd <= 300) {
-            e.preventDefault();
+        // 移动端特定修复
+        if (state.isMobile) {
+          // 防止页面滚动
+          const preventScroll = (e) => {
+            if (e.target === document.body || e.target === canvas) {
+              e.preventDefault();
+            }
+          };
+          
+          CompatUtils.safeAddEventListener(document.body, 'touchmove', preventScroll, { passive: false });
+          
+          // 禁用双击缩放
+          let lastTouchEnd = 0;
+          const preventDoubleTap = (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+              e.preventDefault();
+            }
+            lastTouchEnd = now;
+          };
+          
+          CompatUtils.safeAddEventListener(document, 'touchend', preventDoubleTap, { passive: false });
+          
+          // 修复canvas触摸问题
+          canvas.style.webkitTouchCallout = 'none';
+          canvas.style.webkitUserSelect = 'none';
+          
+          // 微信浏览器优化
+          if (PerformanceConfig.isWeChat) {
+            console.log('检测到微信浏览器，应用特殊优化');
+            // 禁用微信下拉回弹
+            document.body.addEventListener('touchmove', function(e) {
+              e.preventDefault();
+            }, { passive: false });
           }
-          lastTouchEnd = now;
-        }, { passive: false });
-        
-        // 修复Safari上canvas触摸问题
-        canvas.style.webkitTouchCallout = 'none';
-        canvas.style.webkitUserSelect = 'none';
+        }
       }
-    }
-    detectDevice();
+      detectDevice();
 
     // ==================== DOM 引用 ====================
     const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d', { alpha: false });
     
-    // 优化Canvas渲染质量
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.webkitImageSmoothingEnabled = true;
-    ctx.mozImageSmoothingEnabled = true;
-    ctx.msImageSmoothingEnabled = true;
+    // 自适应Canvas上下文配置
+    const ctxOptions = { 
+      alpha: false, 
+      desynchronized: true  // 尝试使用独立的画布合成线程
+    };
+    let ctx;
+    try {
+      ctx = canvas.getContext('2d', ctxOptions);
+    } catch (e) {
+      try {
+        ctx = canvas.getContext('2d', { alpha: false });
+      } catch (e2) {
+        ctx = canvas.getContext('2d');
+      }
+    }
+    
+    // 根据性能配置设置渲染质量
+    if (PerformanceConfig.renderQuality === 'high') {
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      try { ctx.webkitImageSmoothingEnabled = true; } catch(e){}
+      try { ctx.mozImageSmoothingEnabled = true; } catch(e){}
+    } else {
+      ctx.imageSmoothingEnabled = false;
+      try { ctx.webkitImageSmoothingEnabled = false; } catch(e){}
+      try { ctx.mozImageSmoothingEnabled = false; } catch(e){}
+    }
     
     const startOverlay = document.getElementById('startOverlay');
     const gameOverOverlay = document.getElementById('gameOverOverlay');
@@ -2487,6 +2692,12 @@
           return;
         }
 
+        // 简单渲染模式（中低端设备）
+        if (PerformanceConfig.renderQuality !== 'high') {
+          this.drawSimple(ctx, camera);
+          return;
+        }
+
         // 计算视觉强度系数（球越大越明显）
         const sizeRatio = this.radius / CONFIG.PLAYER_INIT_RADIUS;
         const visualIntensity = Math.min(sizeRatio, 5);  // 最大5倍效果
@@ -2598,6 +2809,33 @@
         // 文字描边增强可读性（球越大描边越粗）
         ctx.strokeStyle = `rgba(0, 0, 0, ${Math.min(0.7, 0.5 + visualIntensity * 0.05)})`;
         ctx.lineWidth = Math.max(3, 3 + visualIntensity) / camera.zoom;
+        ctx.strokeText(this.name, this.x, this.y);
+        ctx.fillText(this.name, this.x, this.y);
+      }
+      
+      /**
+       * 简单绘制模式（用于低端设备）
+       */
+      drawSimple(ctx, camera) {
+        // 直接绘制纯色圆形
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        
+        // 简单边框
+        ctx.lineWidth = Math.max(1, 2 / camera.zoom);
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.stroke();
+        
+        // 绘制名字（简化）
+        const fontSize = Math.max(10, this.radius * 0.35);
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${fontSize}px Microsoft YaHei`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.lineWidth = Math.max(2, 2 / camera.zoom);
         ctx.strokeText(this.name, this.x, this.y);
         ctx.fillText(this.name, this.x, this.y);
       }
@@ -4943,6 +5181,55 @@
 
     // ==================== 游戏主循环模块 ====================
     
+    // 性能监控模块
+    const PerformanceMonitor = {
+      frameCount: 0,
+      lastFpsUpdate: 0,
+      currentFps: 60,
+      frameTimeHistory: [],
+      lastFrameTime: 0,
+      
+      update(timestamp) {
+        this.frameCount++;
+        const now = timestamp;
+        
+        // 每1秒更新一次FPS显示
+        if (now - this.lastFpsUpdate >= 1000) {
+          this.currentFps = Math.round((this.frameCount * 1000) / (now - this.lastFpsUpdate));
+          this.frameCount = 0;
+          this.lastFpsUpdate = now;
+          
+          // 动态调整性能配置
+          this.adaptivePerformance();
+        }
+        
+        // 记录帧时间
+        if (this.lastFrameTime > 0) {
+          const frameTime = now - this.lastFrameTime;
+          this.frameTimeHistory.push(frameTime);
+          if (this.frameTimeHistory.length > 60) {
+            this.frameTimeHistory.shift();
+          }
+        }
+        this.lastFrameTime = now;
+      },
+      
+      adaptivePerformance() {
+        // 如果FPS持续低于目标阈值，降低渲染质量
+        if (this.currentFps < PerformanceConfig.fpsTarget - 10 && PerformanceConfig.renderQuality === 'high') {
+          PerformanceConfig.renderQuality = 'medium';
+          console.log('性能自适应：降低渲染质量到 medium');
+        } else if (this.currentFps < 25 && PerformanceConfig.renderQuality !== 'low') {
+          PerformanceConfig.renderQuality = 'low';
+          console.log('性能自适应：降低渲染质量到 low');
+        }
+      }
+    };
+
+    // 帧率控制变量
+    let lastFrameTime = 0;
+    const TARGET_FRAME_TIME = PerformanceConfig.fpsTarget === 30 ? 33 : 22; // 约 30fps 或 45-60fps
+    
 
 
     /**
@@ -4950,6 +5237,16 @@
      */
     function gameLoop(timestamp) {
       if (!state.isRunning) return;
+
+      // 帧率控制（跳过部分帧以保持目标帧率）
+      if (timestamp - lastFrameTime < TARGET_FRAME_TIME && PerformanceConfig.isMobile) {
+        state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
+        return;
+      }
+      lastFrameTime = timestamp;
+
+      // 更新性能监控
+      PerformanceMonitor.update(timestamp);
 
       try {
         const playerValid = state.player && 
@@ -4961,6 +5258,7 @@
         
         if (!playerValid) {
           console.error('玩家对象无效:', state.player);
+          state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
           return;
         }
 
@@ -4990,37 +5288,71 @@
         checkVictoryCondition(dt);
         handleCollisions();
         updateSafeZone(dt);
-        updateUI();
+        
+        // 减少UI更新频率（移动端）
+        if (PerformanceMonitor.frameCount % (PerformanceConfig.isMobile ? 3 : 1) === 0) {
+          updateUI();
+        }
 
+        // 清空画布
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.fillStyle = '#0a0e27';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 应用相机
         camera.apply(ctx);
-        drawGrid(camera);
-        drawSafeZone(ctx, camera);
-
-        // 视锥剔除渲染优化
-        const visibleFoods = state.foods && Array.isArray(state.foods) 
-          ? state.foods.filter(food => food && camera.isVisible(food.x, food.y, food.radius))
-          : [];
         
-        const visibleSpikes = state.spikes && Array.isArray(state.spikes)
-          ? state.spikes.filter(spike => spike && camera.isVisible(spike.x, spike.y, spike.radius * 2))
-          : [];
-        
-        const visibleEnemies = state.enemies && Array.isArray(state.enemies)
-          ? state.enemies.filter(enemy => enemy && camera.isVisible(enemy.x, enemy.y, enemy.radius))
-          : [];
+        // 选择性绘制（根据性能配置）
+        if (PerformanceConfig.renderQuality !== 'low') {
+          drawGrid(camera);
+          drawSafeZone(ctx, camera);
+        }
 
-        // 批量绘制食物
-        for (const food of visibleFoods) {
-          if (typeof food.draw === 'function') {
-            food.draw(ctx, camera);
+        // 视锥剔除渲染优化（提前过滤可见对象）
+        let visibleFoods = [];
+        let visibleSpikes = [];
+        let visibleEnemies = [];
+        
+        if (state.foods && Array.isArray(state.foods)) {
+          for (let i = 0, len = state.foods.length; i < len; i++) {
+            const food = state.foods[i];
+            if (food && camera.isVisible(food.x, food.y, food.radius)) {
+              visibleFoods.push(food);
+            }
+          }
+        }
+        
+        if (state.spikes && Array.isArray(state.spikes)) {
+          for (let i = 0, len = state.spikes.length; i < len; i++) {
+            const spike = state.spikes[i];
+            if (spike && camera.isVisible(spike.x, spike.y, spike.radius * 2)) {
+              visibleSpikes.push(spike);
+            }
+          }
+        }
+        
+        if (state.enemies && Array.isArray(state.enemies)) {
+          for (let i = 0, len = state.enemies.length; i < len; i++) {
+            const enemy = state.enemies[i];
+            if (enemy && camera.isVisible(enemy.x, enemy.y, enemy.radius)) {
+              visibleEnemies.push(enemy);
+            }
           }
         }
 
+        // 批量绘制食物（简化绘制）
+        for (let i = 0, len = visibleFoods.length; i < len; i++) {
+          const food = visibleFoods[i];
+          // 简化食物绘制
+          ctx.beginPath();
+          ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
+          ctx.fillStyle = food.color;
+          ctx.fill();
+        }
+
         // 批量绘制刺球
-        for (const spike of visibleSpikes) {
+        for (let i = 0, len = visibleSpikes.length; i < len; i++) {
+          const spike = visibleSpikes[i];
           if (typeof spike.draw === 'function') {
             spike.draw(ctx, camera);
           }
@@ -5028,8 +5360,8 @@
 
         // 按大小排序后绘制敌人（小的先画）
         visibleEnemies.sort((a, b) => a.radius - b.radius);
-        for (const enemy of visibleEnemies) {
-          enemy.draw(ctx, camera);
+        for (let i = 0, len = visibleEnemies.length; i < len; i++) {
+          visibleEnemies[i].draw(ctx, camera);
         }
 
         if (state.player && typeof state.player.draw === 'function') {
@@ -5039,11 +5371,11 @@
         drawPlayerBalls(ctx, camera);
         camera.restore(ctx);
 
-        state.animationFrameId = requestAnimationFrame(gameLoop);
+        state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
       } catch (e) {
         console.error('游戏循环错误:', e);
         console.error('错误堆栈:', e.stack);
-        state.animationFrameId = requestAnimationFrame(gameLoop);
+        state.animationFrameId = CompatUtils.requestAnimationFrame(gameLoop);
       }
     }
 
@@ -5333,7 +5665,7 @@
     }
 
     // 窗口大小变化
-    window.addEventListener('resize', () => {
+    CompatUtils.safeAddEventListener(window, 'resize', () => {
       resizeCanvas();
       // Safari设备旋转后重新初始化摇杆
       if (state.isMobile && joystick) {
@@ -5343,7 +5675,7 @@
     resizeCanvas();
 
     // 鼠标移动（绑定到document，确保全局跟踪鼠标位置）
-    document.addEventListener('mousemove', (e) => {
+    CompatUtils.safeAddEventListener(document, 'mousemove', (e) => {
       // 只在游戏运行时处理鼠标移动
       if (!state.isRunning) return;
       state.mouse.x = e.clientX;
@@ -5351,42 +5683,42 @@
     });
 
     // 触摸移动（移动端，仅非摇杆区域）
-    canvas.addEventListener('touchmove', (e) => {
+    CompatUtils.safeAddEventListener(canvas, 'touchmove', (e) => {
       // 只在游戏运行时处理触摸移动
       if (!state.isRunning) return;
       // 如果摇杆激活，忽略画布触摸
       if (state.joystick.active) return;
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
       state.mouse.x = e.touches[0].clientX;
       state.mouse.y = e.touches[0].clientY;
     }, { passive: false });
 
-    canvas.addEventListener('touchstart', (e) => {
+    CompatUtils.safeAddEventListener(canvas, 'touchstart', (e) => {
       // 只在游戏运行时处理触摸开始
       if (!state.isRunning) return;
       // 如果摇杆激活，忽略画布触摸
       if (state.joystick.active) return;
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
       state.mouse.x = e.touches[0].clientX;
       state.mouse.y = e.touches[0].clientY;
     }, { passive: false });
 
     // 键盘控制
-    document.addEventListener('keydown', (e) => {
+    CompatUtils.safeAddEventListener(document, 'keydown', (e) => {
       state.keys[e.key] = true;
 
       // 空格键分裂（单次触发：按住只触发一次）
       if (e.key === ' ' && state.isRunning && !state.spacePressed) {
         e.preventDefault();
         state.spacePressed = true;
-        const splitResult = state.player.trySplit(performance.now());
+        const splitResult = state.player.trySplit(CompatUtils.performanceNow());
         if (splitResult) {
           state.score += 5; // 分裂奖励
         }
       }
     });
 
-    document.addEventListener('keyup', (e) => {
+    CompatUtils.safeAddEventListener(document, 'keyup', (e) => {
       state.keys[e.key] = false;
       // 释放空格时重置标志
       if (e.key === ' ') {
@@ -5397,11 +5729,13 @@
     // 移动端分裂按钮
     const splitBtn = document.getElementById('splitBtn');
     if (splitBtn) {
-      splitBtn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      CompatUtils.safeAddEventListener(splitBtn, 'touchstart', (e) => {
+        if (e.cancelable) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         if (state.isRunning && state.player) {
-          const splitResult = state.player.trySplit(performance.now());
+          const splitResult = state.player.trySplit(CompatUtils.performanceNow());
           if (splitResult) {
             state.score += 5;
           }
@@ -5426,7 +5760,7 @@
       // 统一的开始游戏函数
       const handleStartGame = (e) => {
         if (e) {
-          e.preventDefault();
+          if (e.cancelable) e.preventDefault();
           e.stopPropagation();
         }
         
@@ -5448,13 +5782,13 @@
       };
       
       // iOS兼容性：优先使用touchstart
-      startBtn.addEventListener('touchstart', handleStartGame, { passive: false });
+      CompatUtils.safeAddEventListener(startBtn, 'touchstart', handleStartGame, { passive: false });
       
       // touchend备用
-      startBtn.addEventListener('touchend', handleStartGame, { passive: false });
+      CompatUtils.safeAddEventListener(startBtn, 'touchend', handleStartGame, { passive: false });
       
       // click备用（桌面端）
-      startBtn.addEventListener('click', handleStartGame);
+      CompatUtils.safeAddEventListener(startBtn, 'click', handleStartGame);
       
       // 其他再来一局和返回按钮也使用同样的机制
       const otherButtons = [
@@ -5472,7 +5806,7 @@
           isProcessing = true;
           
           if (e) {
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault();
             e.stopPropagation();
           }
           
@@ -5484,8 +5818,8 @@
           }, 500);
         };
         
-        btn.addEventListener('touchstart', handleButtonClick, { passive: false });
-        btn.addEventListener('touchend', handleButtonClick, { passive: false });
+        CompatUtils.safeAddEventListener(btn, 'touchstart', handleButtonClick, { passive: false });
+        CompatUtils.safeAddEventListener(btn, 'touchend', handleButtonClick, { passive: false });
       });
     }
     addStartButtonListener();
@@ -5508,14 +5842,14 @@
     if (leaderboardToggle && leaderboard) {
       leaderboardToggle.classList.add('active');
       
-      leaderboardToggle.addEventListener('click', toggleLeaderboard);
-      leaderboardToggle.addEventListener('touchstart', (e) => {
-        e.preventDefault();
+      CompatUtils.safeAddEventListener(leaderboardToggle, 'click', toggleLeaderboard);
+      CompatUtils.safeAddEventListener(leaderboardToggle, 'touchstart', (e) => {
+        if (e.cancelable) e.preventDefault();
         toggleLeaderboard();
       });
       
       // 点击外部关闭排行榜（移动端）
-      document.addEventListener('click', (e) => {
+      CompatUtils.safeAddEventListener(document, 'click', (e) => {
         if (isLeaderboardOpen && !leaderboard.contains(e.target) && !leaderboardToggle.contains(e.target)) {
           isLeaderboardOpen = false;
           leaderboard.classList.add('collapsed');
@@ -5525,7 +5859,7 @@
     }
     
     if (restartBtn) {
-      restartBtn.addEventListener('click', () => {
+      CompatUtils.safeAddEventListener(restartBtn, 'click', () => {
         gameOverOverlay.classList.add('hidden');
         startOverlay.classList.remove('hidden');
       });
@@ -5533,38 +5867,17 @@
 
     // 获胜界面重启按钮
     const victoryRestartBtn = document.getElementById('victoryRestartBtn');
-    victoryRestartBtn.addEventListener('click', () => {
-      const victoryOverlay = document.getElementById('victoryOverlay');
-      victoryOverlay.classList.add('hidden');
-      // 直接开始新游戏，使用之前的玩家名称
-      initGame();
-    });
-
-    // 失败界面再来一局按钮
-    const gameOverRestartBtn = document.getElementById('gameOverRestartBtn');
-    gameOverRestartBtn.addEventListener('click', () => {
-      gameOverOverlay.classList.add('hidden');
-      // 直接开始新游戏，使用之前的玩家名称
-      initGame();
-    });
-    
-    // 失败界面返回主页按钮
-    const gameOverBackBtn = document.getElementById('gameOverBackBtn');
-    gameOverBackBtn.addEventListener('click', () => {
-      gameOverOverlay.classList.add('hidden');
-      startOverlay.classList.remove('hidden');
-    });
-
-    // 获胜界面返回主页按钮
-    const victoryBackBtn = document.getElementById('victoryBackBtn');
-    victoryBackBtn.addEventListener('click', () => {
-      const victoryOverlay = document.getElementById('victoryOverlay');
-      victoryOverlay.classList.add('hidden');
-      startOverlay.classList.remove('hidden');
-    });
+    if (victoryRestartBtn) {
+      CompatUtils.safeAddEventListener(victoryRestartBtn, 'click', () => {
+        const victoryOverlay = document.getElementById('victoryOverlay');
+        victoryOverlay.classList.add('hidden');
+        // 直接开始新游戏，使用之前的玩家名称
+        initGame();
+      });
+    }
 
     // 回车键开始游戏
-    playerNameInput.addEventListener('keypress', (e) => {
+    CompatUtils.safeAddEventListener(playerNameInput, 'keypress', (e) => {
       if (e.key === 'Enter') initGame();
     });
 
