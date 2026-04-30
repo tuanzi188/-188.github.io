@@ -1274,10 +1274,7 @@
       // 对应半径比 = cuberoot(1.10) ≈ 1.032，即半径只需大3.2%即可
       EAT_RATIO: 1.10,
       
-      // 加速道具配置
-      BOOST_SPEED_MULTIPLIER: 2.0,  // 加速倍数
-      BOOST_DURATION: 3,            // 加速持续时间（秒）
-      BOOST_COST: 0.15,             // 加速消耗的体积比例
+
       
       // 难度递增配置
       DIFFICULTY_SCALE_TIME: 30,    // 每30秒增加一次难度
@@ -1304,11 +1301,8 @@
       
       // 获胜机制配置
       VICTORY_ENABLED: true,           // 启用获胜机制
-      VICTORY_MIN_RADIUS: 80,          // 获胜最低半径阈值
       VICTORY_CHECK_INTERVAL: 300,     // 获胜检测间隔(ms)
-      VICTORY_COUNTDOWN: 5000,         // AI清空后倒计时(ms)
-      VICTORY_BUFFER_TIME: 3000,       // 体积不达标时缓冲时间(ms)
-      VICTORY_FOOD_BOOST: 50,         // 缓冲期每个食物增加的估计体积
+      VICTORY_COUNTDOWN: 5000
     };
 
     // ==================== 对象池模块 ====================
@@ -2645,11 +2639,6 @@
       constructor(name) {
         super(CONFIG.MAP_WIDTH / 2, CONFIG.MAP_HEIGHT / 2, CONFIG.PLAYER_INIT_RADIUS, CONFIG.PLAYER_COLOR, name);
         this.lastSplitTime = 0;
-        
-        // 加速系统
-        this.isBoosting = false;
-        this.boostTimer = 0;
-        this.baseSpeedMultiplier = 1.0;
       }
 
       /**
@@ -2658,19 +2647,10 @@
        * @param {number} dt - 时间增量
        */
       update(camera, dt) {
-        // 更新加速状态
-        if (this.isBoosting) {
-          this.boostTimer -= dt;
-          if (this.boostTimer <= 0) {
-            this.isBoosting = false;
-            this.baseSpeedMultiplier = 1.0;
-          }
-        }
-        
         // 移动端：使用摇杆控制
         if (state.isMobile && state.joystick.active) {
           const dir = state.joystick.direction;
-          const speed = this.getSpeed();
+          const speed = getBallSpeed(this.radius);
           this.vx = dir.x * speed;
           this.vy = dir.y * speed;
           this.x += this.vx * dt;
@@ -2684,30 +2664,6 @@
         // 边界限制
         this.x = clamp(this.x, this.radius, CONFIG.MAP_WIDTH - this.radius);
         this.y = clamp(this.y, this.radius, CONFIG.MAP_HEIGHT - this.radius);
-      }
-
-      /**
-       * 获取当前速度（支持加速）
-       */
-      getSpeed() {
-        const baseSpeed = getBallSpeed(this.radius);
-        return baseSpeed * this.baseSpeedMultiplier;
-      }
-
-      /**
-       * 激活加速
-       */
-      activateBoost() {
-        if (this.radius < CONFIG.MIN_SPLIT_RADIUS) return false;
-        
-        // 消耗体积换取速度
-        const costRatio = CONFIG.BOOST_COST;
-        this.radius *= (1 - costRatio);
-        
-        this.isBoosting = true;
-        this.boostTimer = CONFIG.BOOST_DURATION;
-        this.baseSpeedMultiplier = CONFIG.BOOST_SPEED_MULTIPLIER;
-        return true;
       }
 
       /**
@@ -3638,584 +3594,7 @@
         }
       }
       
-      /**
-       * 寻找最佳目标（综合评估食物和球球）
-       * 增强AI主动变大和吃球球的意识
-       */
-      findBestTarget(player, allEnemies, foods) {
-        let bestTarget = null;
-        let bestScore = -Infinity;
-        
-        // 扩大搜索范围，增强主动寻敌能力
-        const searchRadius = this.radius * 15;
-        
-        // 评估玩家（提高优先级）
-        if (canEat(this.radius, player.radius)) {
-          const dist = distance(this.x, this.y, player.x, player.y);
-          if (dist < searchRadius) {
-            // 玩家目标给予额外分数加成
-            const score = this.calculateTargetScore(player, dist, false) + 100;
-            if (score > bestScore) {
-              bestScore = score;
-              bestTarget = { target: player, isFood: false };
-            }
-          }
-        }
-        
-        // 评估其他敌人（扩大搜索范围）
-        for (const enemy of allEnemies) {
-          if (enemy === this) continue;
-          if (!canEat(this.radius, enemy.radius)) continue;
-          
-          const dist = distance(this.x, this.y, enemy.x, enemy.y);
-          if (dist < searchRadius * 1.2) {
-            const score = this.calculateTargetScore(enemy, dist, false);
-            if (score > bestScore) {
-              bestScore = score;
-              bestTarget = { target: enemy, isFood: false };
-            }
-          }
-        }
-        
-        // 评估食物（只有在没有更好的球球目标时才考虑）
-        if (bestScore < 30) { // 降低阈值，更容易切换到吃食物
-          for (const food of foods) {
-            const dist = distance(this.x, this.y, food.x, food.y);
-            if (dist < searchRadius * 0.8) {
-              const score = this.calculateTargetScore(food, dist, true);
-              if (score > bestScore) {
-                bestScore = score;
-                bestTarget = { target: food, isFood: true };
-              }
-            }
-          }
-        }
-        
-        return bestTarget;
-      }
-      
-      /**
-       * 计算目标评分
-       */
-      calculateTargetScore(target, dist, isFood) {
-        let score = 0;
-        const searchRadius = this.radius * 12;
-        
-        if (isFood) {
-          // 食物评分：距离越近越好，越大越好
-          score = (searchRadius - dist) * 0.5 + target.radius * 10;
-        } else {
-          // 球球评分：距离、体积增益、移动趋势
-          const volumeGain = (target.radius ** 3) / (this.radius ** 3);
-          const distanceScore = (searchRadius - dist) * 0.3;
-          const sizeScore = volumeGain * 200;
-          
-          // 考虑移动方向（如果目标正在靠近，更优先）
-          const dx = target.x - this.x;
-          const dy = target.y - this.y;
-          const approachScore = (dx * target.vx + dy * target.vy) * 0.1;
-          
-          score = distanceScore + sizeScore + approachScore;
-        }
-        
-        return score;
-      }
-      
-      /**
-       * 高级威胁评估（考虑速度和距离）
-       */
-      evaluateThreat(entity) {
-        const dist = distance(this.x, this.y, entity.x, entity.y);
-        const canEatMe = canEat(entity.radius, this.radius);
-        
-        // 预测未来位置（基于当前速度）
-        const predictionTime = 2; // 预测2秒后的位置
-        const futureX = entity.x + entity.vx * predictionTime;
-        const futureY = entity.y + entity.vy * predictionTime;
-        const futureDist = distance(this.x, this.y, futureX, futureY);
-        
-        // 威胁分数：距离越近、体积差距越大、接近速度越快，威胁越高
-        const sizeRatio = entity.radius / this.radius;
-        const distanceScore = Math.max(0, 1000 - dist) / 1000;
-        const futureDistanceScore = Math.max(0, 1000 - futureDist) / 1000;
-        const sizeScore = Math.min(sizeRatio, 3);
-        
-        let threatScore = 0;
-        if (canEatMe) {
-          threatScore = (distanceScore * 0.6 + futureDistanceScore * 0.4) * sizeScore * 100;
-        }
-        
-        return {
-          score: threatScore,
-          dist: dist,
-          futureDist: futureDist,
-          canEatMe: canEatMe
-        };
-      }
-      
-      /**
-       * 预测猎物位置
-       */
-      predictPreyPosition(prey, time = 1) {
-        return {
-          x: prey.x + prey.vx * time,
-          y: prey.y + prey.vy * time
-        };
-      }
-      
-      /**
-       * 智能拦截（预测猎物路径）
-       */
-      interceptPrey(prey) {
-        const dist = distance(this.x, this.y, prey.x, prey.y);
-        const timeToCatch = dist / this.getSpeed();
-        
-        const predictedPos = this.predictPreyPosition(prey, timeToCatch * 0.8);
-        this.targetX = predictedPos.x;
-        this.targetY = predictedPos.y;
-      }
-      
-      /**
-       * 从危险区域逃跑
-       */
-      fleeFromDangerZone() {
-        const sz = state.safeZone;
-        const halfSize = sz.currentSize / 2;
-        
-        // 计算到安全区中心的逃离方向
-        let fleeX = sz.centerX - this.x;
-        let fleeY = sz.centerY - this.y;
-        
-        // 归一化
-        const dist = Math.sqrt(fleeX * fleeX + fleeY * fleeY);
-        if (dist > 0) {
-          fleeX /= dist;
-          fleeY /= dist;
-        }
-        
-        // 找到安全区边界上的目标点
-        const targetX = this.x + fleeX * 500;
-        const targetY = this.y + fleeY * 500;
-        
-        // 限制在安全区内
-        this.targetX = clamp(targetX, sz.centerX - halfSize + this.radius + 20, sz.centerX + halfSize - this.radius - 20);
-        this.targetY = clamp(targetY, sz.centerY - halfSize + this.radius + 20, sz.centerY + halfSize - this.radius - 20);
-      }
 
-      /**
-       * 查找附近的刺球
-       */
-      findNearbySpike(spikes) {
-        const dangerRadius = CONFIG.SPIKE_DANGER_RADIUS + this.radius;
-        for (const spike of spikes) {
-          const dist = distance(this.x, this.y, spike.x, spike.y);
-          if (dist < dangerRadius) {
-            return spike;
-          }
-        }
-        return null;
-      }
-
-      /**
-       * 躲避刺球
-       */
-      avoidSpike(spike) {
-        const dx = this.x - spike.x;
-        const dy = this.y - spike.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        // 向远离刺球的方向移动，并有一定随机性
-        const escapeAngle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.5;
-        const escapeDist = dist + CONFIG.SPIKE_DANGER_RADIUS;
-        
-        this.targetX = this.x + Math.cos(escapeAngle) * escapeDist;
-        this.targetY = this.y + Math.sin(escapeAngle) * escapeDist;
-        
-        // 确保目标在地图内
-        this.targetX = clamp(this.targetX, 100, CONFIG.MAP_WIDTH - 100);
-        this.targetY = clamp(this.targetY, 100, CONFIG.MAP_HEIGHT - 100);
-      }
-
-      /**
-       * 智能处理威胁
-       */
-      handleThreat(threat, player, allEnemies, now) {
-        this.isFleeing = true;
-        
-        // 计算逃跑方向（智能逃跑，不是简单反向）
-        this.calculateSmartEscape(threat, player, allEnemies);
-        
-        // 考虑分裂逃跑
-        if (this.shouldSplitToEscape(threat, now)) {
-          this.attemptSplitEscape(now);
-        }
-        
-        this.changeDirInterval = 0.3;
-      }
-
-      /**
-       * 计算智能逃跑方向
-       */
-      calculateSmartEscape(threat, player, allEnemies) {
-        // 基础逃跑方向（远离威胁）
-        let escapeX = this.x + (this.x - threat.x) * 2;
-        let escapeY = this.y + (this.y - threat.y) * 2;
-        
-        // 考虑其他威胁的位置，找一个安全的空隙
-        let bestScore = -9999;
-        const angleStep = Math.PI / 8;
-        
-        for (let angle = 0; angle < Math.PI * 2; angle += angleStep) {
-          const testX = this.x + Math.cos(angle) * 300;
-          const testY = this.y + Math.sin(angle) * 300;
-          
-          if (testX < 50 || testX > CONFIG.MAP_WIDTH - 50 ||
-              testY < 50 || testY > CONFIG.MAP_HEIGHT - 50) {
-            continue;
-          }
-          
-          let score = 100;  // 基础分
-          
-          // 远离主要威胁
-          const threatDist = distance(testX, testY, threat.x, threat.y);
-          score += threatDist * 0.1;
-          
-          // 远离其他威胁（基于体积判定）
-          for (const enemy of allEnemies) {
-            if (enemy === this) continue;
-            if (canEat(enemy.radius, this.radius)) {
-              const dist = distance(testX, testY, enemy.x, enemy.y);
-              score += dist * 0.05;
-            }
-          }
-          
-          // 靠近食物
-          for (let i = 0; i < 5; i++) {
-            const food = state.foods[Math.floor(Math.random() * state.foods.length)];
-            const foodDist = distance(testX, testY, food.x, food.y);
-            if (foodDist < 200) {
-              score += (200 - foodDist) * 0.02;
-            }
-          }
-          
-          if (score > bestScore) {
-            bestScore = score;
-            escapeX = testX;
-            escapeY = testY;
-          }
-        }
-        
-        this.targetX = clamp(escapeX, 100, CONFIG.MAP_WIDTH - 100);
-        this.targetY = clamp(escapeY, 100, CONFIG.MAP_HEIGHT - 100);
-      }
-
-      /**
-       * 判断是否应该分裂逃跑
-       */
-      shouldSplitToEscape(threat) {
-        const dist = distance(this.x, this.y, threat.x, threat.y);
-        const threatApproaching = canEat(threat.radius, this.radius);
-        
-        // 只有在非常严格的条件下才分裂：
-        // 1. 足够大可以分裂（至少是最小分裂半径的1.5倍）
-        // 2. 威胁确实比自己大（canEat判断）
-        // 3. 威胁体积明显更大（超过1.3倍）
-        // 4. 威胁非常近（小于自身半径的2倍）
-        // 5. 性格必须是激进型才会分裂
-        // 6. 当前分身数量未达上限
-        const threatSizeRatio = threat.radius / this.radius;
-        
-        return this.radius >= CONFIG.MIN_SPLIT_RADIUS * 1.5 &&
-               threatApproaching &&
-               threatSizeRatio > 1.3 &&
-               dist < this.radius * 2 &&
-               this.personality === 'aggressive' &&
-               state.splitCount < CONFIG.MAX_SPLITS;
-      }
-
-      /**
-       * 尝试分裂逃跑
-       */
-      attemptSplitEscape(now) {
-        if (now - this.lastSplitTime < CONFIG.SPLIT_COOLDOWN) return;
-        
-        // 分裂方向与逃跑方向一致
-        const dx = this.targetX - this.x;
-        const dy = this.targetY - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist > 0) {
-          const dirX = dx / dist;
-          const dirY = dy / dist;
-          
-          const newRadius = this.radius / Math.sqrt(2);
-          
-          // 计算弹射速度（与玩家分裂类似）
-          const sizeFactor = CONFIG.PLAYER_INIT_RADIUS / this.radius;
-          const splitSpeed = CONFIG.SPLIT_VELOCITY_BASE * (1 + sizeFactor * CONFIG.SPLIT_VELOCITY_MULTIPLIER) * 0.8;
-          
-          // 创建分身向逃跑方向弹射
-          const splitBall = new Enemy();
-          splitBall.x = this.x + dirX * this.radius;
-          splitBall.y = this.y + dirY * this.radius;
-          splitBall.radius = newRadius;
-          splitBall.vx = dirX * splitSpeed + this.vx * 0.5;
-          splitBall.vy = dirY * splitSpeed + this.vy * 0.5;
-          splitBall.color = this.color;
-          splitBall.name = this.name; // 共用原名字
-          splitBall.splitTime = now;
-          splitBall.invincibleUntil = now + 1000; // 1秒无敌时间
-          splitBall.personality = this.personality;
-          splitBall.reactionSpeed = this.reactionSpeed;
-          
-          this.radius = newRadius;
-          this.lastSplitTime = now;
-          
-          // 原球也获得加速弹射
-          this.vx = dirX * splitSpeed * 0.6 + this.vx * 0.3;
-          this.vy = dirY * splitSpeed * 0.6 + this.vy * 0.3;
-          
-          state.enemies.push(splitBall);
-        }
-      }
-
-      /**
-       * 智能追捕猎物
-       */
-      huntPrey(prey) {
-        // 根据性格决定追踪策略
-        if (this.personality === 'aggressive') {
-          // 直接追击
-          this.targetX = prey.x;
-          this.targetY = prey.y;
-          this.changeDirInterval = 0.3;
-        } else if (this.personality === 'hunter') {
-          // 智能预判拦截
-          this.interceptPrey(prey);
-          this.changeDirInterval = 0.5;
-        } else {
-          // 保守追踪，保持距离
-          const dx = prey.x - this.x;
-          const dy = prey.y - this.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const safeDist = this.radius * 2;
-          
-          if (dist < safeDist) {
-            // 太近了，稍微后退
-            this.targetX = this.x - dx * 0.5;
-            this.targetY = this.y - dy * 0.5;
-          } else {
-            this.targetX = prey.x;
-            this.targetY = prey.y;
-          }
-          this.changeDirInterval = 0.8;
-        }
-      }
-
-      /**
-       * 智能选择食物（优先选择密集区域和高价值食物）
-       */
-      findSmartFood(foods) {
-        const searchRadius = this.radius * 8;
-        let bestFood = null;
-        let bestScore = -Infinity;
-        
-        for (const food of foods) {
-          const dist = distance(this.x, this.y, food.x, food.y);
-          if (dist > searchRadius) continue;
-          
-          // 避开危险区域的食物
-          let dangerPenalty = 0;
-          if (this.isPositionInDanger(food.x, food.y)) {
-            dangerPenalty = 200;
-          }
-          
-          // 计算食物密度分数
-          let densityScore = 0;
-          for (const otherFood of foods) {
-            if (otherFood === food) continue;
-            const otherDist = distance(food.x, food.y, otherFood.x, otherFood.y);
-            if (otherDist < 150) {
-              densityScore += (150 - otherDist) * 0.2;
-            }
-          }
-          
-          // 食物价值分数（越大越好）
-          const valueScore = food.radius * 2;
-          
-          // 距离分数（越近越好）
-          const distScore = (searchRadius - dist) * 0.3;
-          
-          // 总分数
-          const totalScore = densityScore + distScore + valueScore - dangerPenalty;
-          
-          if (totalScore > bestScore) {
-            bestScore = totalScore;
-            bestFood = food;
-          }
-        }
-        
-        return bestFood;
-      }
-      
-      /**
-       * 检测位置是否在危险区域
-       */
-      isPositionInDanger(x, y) {
-        const sz = state.safeZone;
-        if (!sz || !sz.enabled || sz.currentSize >= CONFIG.MAP_WIDTH) return false;
-        
-        const halfSize = sz.currentSize / 2;
-        const margin = this.radius + 30;
-        return (
-          x < sz.centerX - halfSize + margin ||
-          x > sz.centerX + halfSize - margin ||
-          y < sz.centerY - halfSize + margin ||
-          y > sz.centerY + halfSize - margin
-        );
-      }
-
-      /**
-       * 智能巡逻（避开边界和危险区域）
-       */
-      smartPatrol() {
-        // 优先选择食物密集区域
-        if (state.foods.length > 0 && Math.random() < 0.7) {
-          const randomFood = state.foods[Math.floor(Math.random() * state.foods.length)];
-          this.targetX = randomFood.x + (Math.random() - 0.5) * 100;
-          this.targetY = randomFood.y + (Math.random() - 0.5) * 100;
-        } else {
-          // 随机巡逻，但远离边界
-          this.targetX = random(150, CONFIG.MAP_WIDTH - 150);
-          this.targetY = random(150, CONFIG.MAP_HEIGHT - 150);
-        }
-        
-        this.changeDirInterval = random(2, 4);
-      }
-
-      /**
-       * 查找附近的威胁（比自己大的球）
-       */
-      findThreat(player, allEnemies) {
-        const dangerRadius = this.radius * 8;
-        let nearestThreat = null;
-        let minDist = dangerRadius;
-
-        // 检测玩家（基于体积判定）
-        if (canEat(player.radius, this.radius)) {
-          const dist = distance(this.x, this.y, player.x, player.y);
-          if (dist < dangerRadius && dist < minDist) {
-            nearestThreat = player;
-            minDist = dist;
-          }
-        }
-
-        // 检测其他敌人（基于体积判定）
-        for (const enemy of allEnemies) {
-          if (enemy === this) continue;
-          if (canEat(enemy.radius, this.radius)) {
-            const dist = distance(this.x, this.y, enemy.x, enemy.y);
-            if (dist < dangerRadius && dist < minDist) {
-              nearestThreat = enemy;
-              minDist = dist;
-            }
-          }
-        }
-
-        return nearestThreat;
-      }
-
-      /**
-       * 查找可吞噬的小目标（优先捕食比自己小很多的目标）
-       */
-      findSmallTarget(player, allEnemies) {
-        const searchRadius = this.radius * 10;
-        let bestTarget = null;
-        let bestScore = -Infinity;
-
-        // 检测玩家
-        if (canEat(this.radius, player.radius)) {
-          const dist = distance(this.x, this.y, player.x, player.y);
-          if (dist < searchRadius) {
-            // 体积比越大分数越高
-            const volumeRatio = (this.radius ** 3) / (player.radius ** 3);
-            const score = volumeRatio * 100 - dist * 0.1;
-            if (score > bestScore) {
-              bestScore = score;
-              bestTarget = player;
-            }
-          }
-        }
-
-        // 检测其他敌人
-        for (const enemy of allEnemies) {
-          if (enemy === this) continue;
-          if (canEat(this.radius, enemy.radius)) {
-            const dist = distance(this.x, this.y, enemy.x, enemy.y);
-            if (dist < searchRadius) {
-              const volumeRatio = (this.radius ** 3) / (enemy.radius ** 3);
-              const score = volumeRatio * 100 - dist * 0.1;
-              if (score > bestScore) {
-                bestScore = score;
-                bestTarget = enemy;
-              }
-            }
-          }
-        }
-
-        return bestTarget;
-      }
-
-      /**
-       * 查找可捕食的猎物（比自己小的球）
-       */
-      findPrey(player, allEnemies) {
-        const huntRadius = this.radius * 7;
-        let nearestPrey = null;
-        let minDist = huntRadius;
-
-        // 检测玩家（基于体积判定）
-        if (canEat(this.radius, player.radius)) {
-          const dist = distance(this.x, this.y, player.x, player.y);
-          if (dist < huntRadius && dist < minDist) {
-            nearestPrey = player;
-            minDist = dist;
-          }
-        }
-
-        // 检测其他敌人（基于体积判定）
-        for (const enemy of allEnemies) {
-          if (enemy === this) continue;
-          if (canEat(this.radius, enemy.radius)) {
-            const dist = distance(this.x, this.y, enemy.x, enemy.y);
-            if (dist < huntRadius && dist < minDist) {
-              nearestPrey = enemy;
-              minDist = dist;
-            }
-          }
-        }
-
-        return nearestPrey;
-      }
-
-      /**
-       * 查找最近的食物
-       */
-      findNearestFood(foods) {
-        const searchRadius = this.radius * 5;
-        let nearest = null;
-        let minDist = searchRadius;
-
-        for (const food of foods) {
-          const dist = distance(this.x, this.y, food.x, food.y);
-          if (dist < searchRadius && dist < minDist) {
-            nearest = food;
-            minDist = dist;
-          }
-        }
-
-        return nearest;
-      }
     }
 
     /**
@@ -5049,22 +4428,7 @@
       }
     }
 
-    // ==================== 难度和重生系统 ====================
-    
-    /**
-     * 难度递增系统（占位函数）
-     */
-    function updateDifficulty(dt) {
-      // 暂时不实现难度递增
-    }
-    
-    /**
-     * 敌人重生系统 - 只在游戏开始时生成初始敌人，之后不再生成新敌人
-     */
-    function spawnEnemies(dt) {
-      // 不再生成新敌人，保持当前敌人数量
-      // 敌人被吃掉后数量会自然减少，不会补充
-    }
+
     
     // ==================== 安全区缩圈机制 ====================
     
@@ -5579,101 +4943,13 @@
 
     // ==================== 游戏主循环模块 ====================
     
-    /**
-     * 检查玩家状态是否有效
-     * @returns {boolean} 玩家状态是否有效
-     */
-    function checkPlayerState() {
-      const player = state.player;
-      
-      // 检查玩家是否存在
-      if (!player) {
-        console.error('玩家对象不存在');
-        return false;
-      }
-      
-      // 检查玩家位置是否有效
-      if (isNaN(player.x) || isNaN(player.y)) {
-        console.error('玩家位置无效:', player.x, player.y);
-        return false;
-      }
-      
-      // 检查玩家半径是否有效
-      if (isNaN(player.radius) || player.radius <= 0) {
-        console.error('玩家半径无效:', player.radius);
-        return false;
-      }
-      
-      // 检查玩家位置是否在地图范围内
-      if (player.x < 0 || player.x > CONFIG.MAP_WIDTH ||
-          player.y < 0 || player.y > CONFIG.MAP_HEIGHT) {
-        console.warn('玩家位置超出地图范围:', player.x, player.y);
-        // 重置到地图中心
-        player.x = CONFIG.MAP_WIDTH / 2;
-        player.y = CONFIG.MAP_HEIGHT / 2;
-      }
-      
-      return true;
-    }
 
-    /**
-     * 检查对象是否在相机可视范围内（视锥剔除）
-     */
-    function isVisible(camera, x, y, radius = 0) {
-      const margin = radius + 50; // 额外边距
-      const width = canvas.displayWidth || window.innerWidth;
-      const height = canvas.displayHeight || window.innerHeight;
-      const left = camera.x - width / camera.zoom - margin;
-      const right = camera.x + width / camera.zoom + margin;
-      const top = camera.y - height / camera.zoom - margin;
-      const bottom = camera.y + height / camera.zoom + margin;
-      return x >= left && x <= right && y >= top && y <= bottom;
-    }
-
-    /**
-     * 性能监控
-     */
-    const performanceMonitor = {
-      frameCount: 0,
-      lastFpsUpdate: 0,
-      currentFps: 60,
-      frameTime: 0,
-      maxFrameTime: 0,
-      minFrameTime: Infinity,
-      
-      update(timestamp) {
-        this.frameCount++;
-        if (timestamp - this.lastFpsUpdate >= 1000) {
-          this.currentFps = Math.round(this.frameCount * 1000 / (timestamp - this.lastFpsUpdate));
-          this.frameCount = 0;
-          this.lastFpsUpdate = timestamp;
-        }
-        const now = performance.now();
-        if (this.lastFrameTime) {
-          this.frameTime = now - this.lastFrameTime;
-          this.maxFrameTime = Math.max(this.maxFrameTime, this.frameTime);
-          this.minFrameTime = Math.min(this.minFrameTime, this.frameTime);
-        }
-        this.lastFrameTime = now;
-      },
-      
-      getStats() {
-        return {
-          fps: this.currentFps,
-          frameTime: this.frameTime.toFixed(2),
-          maxFrameTime: this.maxFrameTime.toFixed(2),
-          minFrameTime: this.minFrameTime.toFixed(2)
-        };
-      }
-    };
 
     /**
      * 游戏主循环
      */
     function gameLoop(timestamp) {
       if (!state.isRunning) return;
-
-      performanceMonitor.update(timestamp);
 
       try {
         const playerValid = state.player && 
@@ -5710,8 +4986,6 @@
           }
         }
 
-        updateDifficulty(dt);
-        spawnEnemies(dt);
         camera.update(state.player, dt);
         checkVictoryCondition(dt);
         handleCollisions();
@@ -5727,15 +5001,15 @@
 
         // 视锥剔除渲染优化
         const visibleFoods = state.foods && Array.isArray(state.foods) 
-          ? state.foods.filter(food => food && isVisible(camera, food.x, food.y, food.radius))
+          ? state.foods.filter(food => food && camera.isVisible(food.x, food.y, food.radius))
           : [];
         
         const visibleSpikes = state.spikes && Array.isArray(state.spikes)
-          ? state.spikes.filter(spike => spike && isVisible(camera, spike.x, spike.y, spike.radius))
+          ? state.spikes.filter(spike => spike && camera.isVisible(spike.x, spike.y, spike.radius * 2))
           : [];
         
         const visibleEnemies = state.enemies && Array.isArray(state.enemies)
-          ? state.enemies.filter(enemy => enemy && isVisible(camera, enemy.x, enemy.y, enemy.radius))
+          ? state.enemies.filter(enemy => enemy && camera.isVisible(enemy.x, enemy.y, enemy.radius))
           : [];
 
         // 批量绘制食物
