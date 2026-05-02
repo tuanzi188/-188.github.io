@@ -3169,11 +3169,10 @@
        * @param {number} dt - 时间增量（秒）
        */
       updateSmooth(dt) {
-        // 平滑过渡到目标缩放
+        const smoothFactor = 1 - Math.pow(0.85, dt * 60);
         const zoomDiff = this.targetZoom - this.zoom;
-        this.zoom += zoomDiff * 0.15;  // 平滑系数0.15
-        if (Math.abs(zoomDiff) < 0.01) this.zoom = this.targetZoom;
-        // 确保在合法范围内
+        this.zoom += zoomDiff * smoothFactor;
+        if (Math.abs(zoomDiff) < 0.005) this.zoom = this.targetZoom;
         this.zoom = clamp(this.zoom, this.minZoom, this.maxZoom);
       }
 
@@ -3253,11 +3252,11 @@
         const isMobileDevice = PerformanceConfig.isMobile;
         
         if (isMobileDevice) {
-          const mobileBaseSpeed = 0.85;
-          const mobileFollowSpeed = mobileBaseSpeed / (1 + (sizeRatio - 1) * 0.08);
+          const mobileBaseSpeed = 0.55;
+          const mobileFollowSpeed = mobileBaseSpeed / (1 + (sizeRatio - 1) * 0.1);
           const lerpFactor = 1 - Math.pow(1 - mobileFollowSpeed, dt * 60);
-          this.x += (this.targetX - this.x) * Math.min(lerpFactor, 0.92);
-          this.y += (this.targetY - this.y) * Math.min(lerpFactor, 0.92);
+          this.x += (this.targetX - this.x) * Math.min(lerpFactor, 0.75);
+          this.y += (this.targetY - this.y) * Math.min(lerpFactor, 0.75);
         } else {
           const baseSpeed = 0.65;
           const dynamicFollowSpeed = baseSpeed / (1 + (sizeRatio - 1) * 0.12);
@@ -7056,11 +7055,9 @@
       for (const enemy of nearbyEnemies) {
         const distSq = distanceSquared(player.x, player.y, enemy.x, enemy.y);
         if (distSq < playerRadiusSq && canEat(player.radius, enemy.radius)) {
-          // 问题2：半径超过80时只获得敌人半径40%
           if (player.radius > 80) {
-            const gain = enemy.radius * 0.4;
+            const gain = enemy.radius * 0.5;
             player.radius = calcMergedRadius(player.radius, gain, 1);
-            // 检查体积上限
             if (player.radius > 300) {
               player.radius = 300;
               if (!state.volumeLimitShown) {
@@ -8074,10 +8071,6 @@
     function gameLoop(timestamp) {
       if (!state.isRunning) return;
 
-      if (timestamp - lastFrameTime < TARGET_FRAME_TIME && PerformanceConfig.isMobile) {
-        requestAnimationFrame(gameLoop);
-        return;
-      }
       lastFrameTime = timestamp;
 
       PerformanceMonitor.update(timestamp);
