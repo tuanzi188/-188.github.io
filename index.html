@@ -1466,7 +1466,7 @@
     <div class="stat-value" id="energyValue" style="color: #fff;">0/3</div>
   </div>
   
-  <div class="split-btn" id="energyBlastBtn" style="display: none; position: fixed; bottom: max(145px, calc(env(safe-area-inset-bottom) + 105px)); right: max(50px, env(safe-area-inset-right)); width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #9b59b6, #8e44ad); border: 3px solid rgba(255, 255, 255, 0.5); color: #fff; font-size: 13px; font-weight: 700; z-index: 151; box-shadow: 0 4px 20px rgba(155, 89, 182, 0.5); cursor: pointer; user-select: none; -webkit-user-select: none; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; transition: all 0.3s ease;" onclick="triggerEnergyBlast()">
+  <div class="split-btn" id="energyBlastBtn" style="display: none; position: fixed; bottom: max(145px, calc(env(safe-area-inset-bottom) + 105px)); right: max(50px, env(safe-area-inset-right)); width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #9b59b6, #8e44ad); border: 3px solid rgba(255, 255, 255, 0.5); color: #fff; font-size: 13px; font-weight: 700; z-index: 151; box-shadow: 0 4px 20px rgba(155, 89, 182, 0.5); cursor: pointer; user-select: none; -webkit-user-select: none; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; transition: all 0.3s ease;">
     <span style="font-size: 22px; margin-bottom: 2px;">⚡</span>
     <span>爆能</span>
   </div>
@@ -6087,10 +6087,10 @@
         }
       }
       
-      // Boss吞噬机制（狂暴模式下）
-      if (boss.health <= 2 && !boss.invulnerable && now - state.bossLastDevourTime > 15000) {
+      // Boss吞噬机制（全程生效，不仅狂暴模式）
+      if (!boss.invulnerable && now - state.bossLastDevourTime > 15000) {
         const dist = distance(player.x, player.y, boss.x, boss.y);
-        if (dist < boss.radius + player.radius && player.radius < boss.radius * 0.6) {
+        if (dist < boss.radius + player.radius && player.radius < boss.radius * 0.8) {
           // 启动吞噬预警
           if (!state.bossDevourWarning) {
             state.bossDevourWarning = true;
@@ -6101,7 +6101,7 @@
             setTimeout(() => {
               if (state.boss && state.boss.alive && !state.boss.invulnerable) {
                 const newDist = distance(player.x, player.y, boss.x, boss.y);
-                if (newDist < boss.radius + player.radius && player.radius < boss.radius * 0.6) {
+                if (newDist < boss.radius + player.radius && player.radius < boss.radius * 0.8) {
                   // 吞噬成功
                   gameOver();
                   showToast('💀 你被深渊主宰吞噬了！ 💀');
@@ -9147,6 +9147,23 @@
             state.score += 5;
           }
         }
+      }, { passive: false });
+    }
+
+    // 移动端爆能按钮（解决 onclick 内联无法访问闭包函数的问题）
+    const energyBlastBtn = _getUI('energyBlastBtn');
+    if (energyBlastBtn) {
+      energyBlastBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (e.cancelable) e.preventDefault();
+        triggerEnergyBlast();
+      });
+      energyBlastBtn.addEventListener('touchstart', (e) => {
+        if (state.isRunning && e.cancelable) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        triggerEnergyBlast();
       }, { passive: false });
     }
 
