@@ -426,6 +426,11 @@
     .btn:active {
       transform: translateY(0);
     }
+    .btn {
+      pointer-events: auto !important;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
 
     .btn-secondary {
       background: rgba(255, 255, 255, 0.15);
@@ -1745,7 +1750,7 @@
         this.isLowEnd = memory <= 2 || cores <= 2 || this.isMobile;
         
         // 统一配置（不根据设备调整）
-        this.maxFoodCount = 500;
+        this.maxFoodCount = 700;
         this.maxEnemyCount = 15;
         
         // 自适应配置
@@ -4379,7 +4384,7 @@
         let bestDist = Infinity;
         for (const spike of nearby) {
           if (spike.lastEatenBy === this && performance.now() < spike.immuneUntil) continue;
-          if (this.radius > spike.radius * 2) {
+          if (this.radius > spike.radius * 1.5) {
             const dist = distance(this.x, this.y, spike.x, spike.y);
             if (dist < bestDist) {
               bestDist = dist;
@@ -7214,7 +7219,7 @@
         const d2 = distanceSquared(player.x, player.y, spike.x, spike.y);
         const dist = Math.sqrt(d2);
 
-        if (player.radius > spike.radius * 2 && dist < player.radius + spike.radius) {
+        if (player.radius > spike.radius * 1.5 && dist < player.radius + spike.radius) {
           player.grow(spike.radius * 1);
           const idx = state.spikes.indexOf(spike);
           if (idx >= 0) { spikePool.release(spike); state.spikes.splice(idx, 1); state.spikes.push(spikePool.acquire()); }
@@ -7266,7 +7271,7 @@
           const d2 = distanceSquared(ball.x, ball.y, spike.x, spike.y);
           const dist = Math.sqrt(d2);
 
-          if (ball.radius > spike.radius * 2 && dist < ball.radius + spike.radius) {
+          if (ball.radius > spike.radius * 1.5 && dist < ball.radius + spike.radius) {
             ball.radius = Math.sqrt(Math.PI * ball.radius * ball.radius + Math.PI * spike.radius * spike.radius * 1.2) / Math.sqrt(Math.PI);
             const sidx = state.spikes.indexOf(spike);
             if (sidx >= 0) { spikePool.release(spike); state.spikes.splice(sidx, 1); state.spikes.push(spikePool.acquire()); }
@@ -7314,7 +7319,7 @@
           const d2 = distanceSquared(enemy.x, enemy.y, spike.x, spike.y);
           const dist = Math.sqrt(d2);
 
-          if (enemy.radius > spike.radius * 2 && dist < enemy.radius + spike.radius) {
+          if (enemy.radius > spike.radius * 1.5 && dist < enemy.radius + spike.radius) {
             enemy.grow(spike.radius * 1);
             
             spike.lastEatenBy = enemy;
@@ -9166,63 +9171,39 @@
       
       startBtn.addEventListener('click', handleStartGame);
       
-      // 游戏结束界面按钮
-      const gameOverRestartBtn = _getUI('gameOverRestartBtn');
-      if (gameOverRestartBtn) {
-        const handleGameOverRestart = (e) => {
-          console.log('[Game] 重新开始按钮触发，事件类型:', e.type);
+      // 统一按钮事件处理（pointerdown 兼容鼠标+触摸，解决移动端点击失效）
+      function bindButton(btn, handler) {
+        if (!btn) return;
+        let lastTrigger = 0;
+        const wrapped = (e) => {
           e.stopPropagation();
           if (e.cancelable) e.preventDefault();
-          Game.restart();
+          const now = performance.now();
+          if (now - lastTrigger < 500) return;  // 防抖500ms
+          lastTrigger = now;
+          handler(e);
         };
-        gameOverRestartBtn.addEventListener('click', handleGameOverRestart);
-        gameOverRestartBtn.addEventListener('touchstart', handleGameOverRestart, { passive: false });
+        btn.addEventListener('pointerdown', wrapped);
+        btn.addEventListener('click', wrapped);
       }
       
-      const gameOverBackBtn = _getUI('gameOverBackBtn');
-      if (gameOverBackBtn) {
-        const handleGameOverBack = (e) => {
-          console.log('[Game] 返回主页按钮触发，事件类型:', e.type);
-          e.stopPropagation();
-          if (e.cancelable) e.preventDefault();
-          gameOverOverlay.classList.add('hidden');
-          startOverlay.classList.remove('hidden');
-          const leaderboardContainer = document.getElementById('leaderboardContainer');
-          if (leaderboardContainer) leaderboardContainer.style.display = 'none';
-        };
-        gameOverBackBtn.addEventListener('click', handleGameOverBack);
-        gameOverBackBtn.addEventListener('touchstart', handleGameOverBack, { passive: false });
-      }
+      // 游戏结束界面按钮
+      bindButton(_getUI('gameOverRestartBtn'), () => Game.restart());
+      bindButton(_getUI('gameOverBackBtn'), () => {
+        gameOverOverlay.classList.add('hidden');
+        startOverlay.classList.remove('hidden');
+        const leaderboardContainer = document.getElementById('leaderboardContainer');
+        if (leaderboardContainer) leaderboardContainer.style.display = 'none';
+      });
 
       // 获胜界面按钮
-      const victoryRestartBtn = _getUI('victoryRestartBtn');
-      if (victoryRestartBtn) {
-        const victoryOverlay = _getUI('victoryOverlay');
-        const handleVictoryRestart = (e) => {
-          console.log('[Game] 获胜重新开始按钮触发，事件类型:', e.type);
-          e.stopPropagation();
-          if (e.cancelable) e.preventDefault();
-          Game.restart();
-        };
-        victoryRestartBtn.addEventListener('click', handleVictoryRestart);
-        victoryRestartBtn.addEventListener('touchstart', handleVictoryRestart, { passive: false });
-      }
-      
-      const victoryBackBtn = _getUI('victoryBackBtn');
-      if (victoryBackBtn) {
-        const victoryOverlay = _getUI('victoryOverlay');
-        const handleVictoryBack = (e) => {
-          console.log('[Game] 获胜返回主页按钮触发，事件类型:', e.type);
-          e.stopPropagation();
-          if (e.cancelable) e.preventDefault();
-          victoryOverlay.classList.add('hidden');
-          startOverlay.classList.remove('hidden');
-          const leaderboardContainer = document.getElementById('leaderboardContainer');
-          if (leaderboardContainer) leaderboardContainer.style.display = 'none';
-        };
-        victoryBackBtn.addEventListener('click', handleVictoryBack);
-        victoryBackBtn.addEventListener('touchstart', handleVictoryBack, { passive: false });
-      }
+      bindButton(_getUI('victoryRestartBtn'), () => Game.restart());
+      bindButton(_getUI('victoryBackBtn'), () => {
+        victoryOverlay.classList.add('hidden');
+        startOverlay.classList.remove('hidden');
+        const leaderboardContainer = document.getElementById('leaderboardContainer');
+        if (leaderboardContainer) leaderboardContainer.style.display = 'none';
+      });
     }
     addStartButtonListener();
     
@@ -9329,8 +9310,8 @@
         <h3>🔴 刺球</h3>
         <ul>
           <li>触碰刺球会导致球球 <span class="warn">分裂成碎片</span></li>
-          <li>当体积足够大时，可以 <span class="highlight">吞噬刺球</span>（系数 1:1）</li>
-          <li>AI敌人同样可以吃刺球（体积需 > 刺球2倍）</li>
+          <li>当体积足够大时，可以 <span class="highlight">吞噬刺球</span>（系数 1:1，需 > 刺球1.5倍）</li>
+          <li>AI敌人同样可以吃刺球（体积需 > 刺球1.5倍）</li>
         </ul>
 
         <h3>🛡️ 安全区机制</h3>
@@ -9350,7 +9331,7 @@
             <ul>
               <li>释放 <span class="warn">冲击波</span>（范围250px，命中减15%体积）</li>
               <li>释放 <span class="warn">追踪孢子</span>（命中缩小15%）</li>
-              <li>发动 <span class="warn">吞噬技能</span>（15秒冷却，2秒预警）</li>
+              <li>发动 <span class="warn">吞噬技能</span>（15秒冷却，2秒预警，全程生效）</li>
             </ul>
           </li>
           <li><span class="highlight">胜利条件</span>：体积大于BOSS时靠近即可吞噬！</li>
