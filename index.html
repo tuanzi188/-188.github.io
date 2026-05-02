@@ -820,6 +820,14 @@
       }
     }
 
+    @keyframes shieldPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+      50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(255, 215, 0, 1); }
+    }
+    #shieldBrokenBar.shield-anim {
+      animation: shieldPulse 1.2s ease-in-out infinite;
+    }
+
     @media (max-width: 768px), (hover: none) and (pointer: coarse) {
       .split-btn {
         display: flex !important;
@@ -1477,15 +1485,9 @@
     🐌 减速 <span id="slowTimer" style="color: #ffcc00;">0.0</span>s
   </div>
 
-  <!-- 缩放控制UI（双指捏合提示 + 重置按钮） -->
-  <div id="zoomControlPanel" style="position: fixed; top: 50%; left: 10px; transform: translateY(-50%); z-index: 150; display: flex; align-items: center; gap: 8px; background: rgba(0, 0, 0, 0.6); padding: 8px 12px; border-radius: 12px; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.15);">
-    <span style="color: #aaa; font-size: 13px; white-space: nowrap;">🔍 <span id="zoomValue">1.20x</span></span>
-    <button id="resetZoomBtn" style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4); transition: all 0.2s;" title="重置视野缩放">↺</button>
-  </div>
-
   <!-- 首次游戏提示：双指捏合 -->
   <div id="pinchHint" style="position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); z-index: 250; background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)); color: white; padding: 10px 20px; border-radius: 25px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5); animation: pinchHintPulse 2s ease-in-out infinite; pointer-events: none; user-select: none; display: none;">
-    ✌️ 双指捏合可自由调整视野
+    🔍 双指捏合防止页面缩放
   </div>
 
   <!-- 横屏警告 -->
@@ -1573,6 +1575,13 @@
   <!-- BOSS提示条 -->
   <div id="bossHintBar" style="display: none; position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 100; background: linear-gradient(135deg, rgba(138, 43, 226, 0.9), rgba(75, 0, 130, 0.9)); color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; font-family: 'Microsoft YaHei', sans-serif; box-shadow: 0 0 20px rgba(138, 43, 226, 0.6); white-space: nowrap; pointer-events: none; user-select: none; border: 1px solid rgba(200, 150, 255, 0.4);">
     🍽️ 想吃BOSS？先让刺球教训它，或用爆能炸它！ 🍽️
+  </div>
+
+  <!-- BOSS护盾破碎提示 -->
+  <div style="position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 100; pointer-events: none;">
+    <div id="shieldBrokenBar" style="display: none; background: linear-gradient(135deg, rgba(255, 215, 0, 0.95), rgba(255, 165, 0, 0.95)); color: #1a1a2e; padding: 8px 24px; border-radius: 20px; font-size: 15px; font-weight: 800; font-family: 'Microsoft YaHei', sans-serif; box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3); user-select: none; border: 2px solid rgba(255, 255, 255, 0.6); letter-spacing: 1px; white-space: nowrap;">
+      ⚔️ BOSS护盾已破碎！靠近吞噬！ ⚔️
+    </div>
   </div>
 
   <!-- 竖屏提示遮罩 -->
@@ -1684,6 +1693,8 @@
           // 隐藏其他可能的UI元素
           const bossHintBar = document.getElementById('bossHintBar');
           if (bossHintBar) bossHintBar.style.display = 'none';
+          const shieldBrokenBar = document.getElementById('shieldBrokenBar');
+          if (shieldBrokenBar) shieldBrokenBar.style.display = 'none';
           const timerEl = document.getElementById('survivalTimer');
           if (timerEl) timerEl.style.display = 'none';
           const dangerWarning = _getUI('dangerWarning');
@@ -3125,8 +3136,10 @@
        * @param {number} playerMaxRadius - 参数保留但不再使用
        */
       updateAutoZoom(playerMaxRadius) {
-        // 固定不变！视野完全由玩家手动控制
-        this.autoZoom = this.baseZoom;
+        // 自动缩放：玩家越大，视野越远，上限0.6
+        const sizeRatio = playerMaxRadius / CONFIG.PLAYER_INIT_RADIUS;
+        const zoomFactor = 1 / Math.sqrt(sizeRatio);
+        this.autoZoom = clamp(zoomFactor * this.baseZoom, this.minZoom, this.maxZoom);
       }
 
       /**
@@ -3205,9 +3218,9 @@
 
       /**
        * 更新相机状态（每帧调用）
-       * 实现平滑跟随和纯手动缩放控制
+       * 实现平滑跟随和自动缩放控制
        *
-       * 核心设计：视野大小完全由玩家双指捏合控制，不随球体变化
+       * 自动缩放：玩家越大视野越远，最大拉远上限0.6
        *
        * @param {Ball} player - 玩家球体对象
        * @param {number} dt - 时间增量（秒）
@@ -3227,11 +3240,11 @@
           this.targetY = player.y;
         }
 
-        // 基准缩放保持固定值（不受球体大小影响）
+        // 自动缩放（基于玩家体积）
         this.updateAutoZoom(player.radius);
 
-        // 最终目标缩放 = 固定基准 + 手动偏移（玩家完全控制）
-        this.targetZoom = clamp(this.baseZoom + this.manualZoomOffset, this.minZoom, this.maxZoom);
+        // 最终目标缩放 = 自动缩放
+        this.targetZoom = this.autoZoom;
 
         // 平滑更新当前缩放值
         this.updateSmooth(dt);
@@ -6188,6 +6201,11 @@
         boss.health = 0;
         boss.invulnerable = false;
         boss.color = '#8a2be2';
+        // 隐藏普通提示条，显示护盾破碎提示
+        const hintBar = document.getElementById('bossHintBar');
+        if (hintBar) hintBar.style.display = 'none';
+        const shieldBar = document.getElementById('shieldBrokenBar');
+        if (shieldBar) { shieldBar.style.display = ''; shieldBar.classList.add('shield-anim'); }
         showToast('⚔️ BOSS护盾已破碎！现在可以吞噬它了！ ⚔️');
         state.screenFlash = { 
           alpha: 0.6, 
@@ -6550,6 +6568,8 @@
       // 隐藏BOSS提示条
       const hintBar = document.getElementById('bossHintBar');
       if (hintBar) hintBar.style.display = 'none';
+      const shieldBar = document.getElementById('shieldBrokenBar');
+      if (shieldBar) shieldBar.style.display = 'none';
       
       // 生成食物
       const foodCount = state.isMobile ? 20 : 25;
@@ -7379,11 +7399,11 @@
         if (distanceSquared(player.x, player.y, orb.x, orb.y) < (player.radius + orb.radius) ** 2) {
           if (state.energyCharge < state.maxEnergy) {
             state.energyCharge++;
-            player.grow(5);
-            showFloatingText(player.x, player.y, '⚡能量球+1 体积+5⚡', '#ffdd88');
-            state.screenShake = { intensity: 4, duration: 0.1, startTime: performance.now() };
             updateEnergyUI();
           }
+          player.grow(5);
+          showFloatingText(player.x, player.y, '⚡能量球+1 体积+5⚡', '#ffdd88');
+          state.screenShake = { intensity: 4, duration: 0.1, startTime: performance.now() };
           state.energyOrbs.splice(i, 1);
           break;
         }
@@ -8853,6 +8873,8 @@
         // 隐藏BOSS提示条
         const hintBar = document.getElementById('bossHintBar');
         if (hintBar) hintBar.style.display = 'none';
+        const shieldBrokenBar = document.getElementById('shieldBrokenBar');
+        if (shieldBrokenBar) shieldBrokenBar.style.display = 'none';
         
         // 隐藏倒计时UI
         const timerEl = document.getElementById('survivalTimer');
@@ -9054,7 +9076,7 @@
 
     _uiCache.canvas.addEventListener('touchstart', (e) => {
       if (e.touches.length === 2) {
-        e.preventDefault();  // 阻止页面滚动和缩放
+        e.preventDefault();
         isPinching = true;
         initialPinchDistance = getTouchDistance(e.touches);
         initialPinchZoom = state.camera.zoom;
@@ -9064,19 +9086,6 @@
     _uiCache.canvas.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2 && isPinching) {
         e.preventDefault();
-        const newDistance = getTouchDistance(e.touches);
-        if (initialPinchDistance > 0) {
-          const ratio = newDistance / initialPinchDistance;
-          // 缩放系数：每100%距离变化对应0.6倍缩放
-          const deltaZoom = (ratio - 1) * 0.6;
-          state.camera.addManualOffset(deltaZoom);
-          // 更新基准值（增量累加，避免跳跃）
-          initialPinchDistance = newDistance;
-          initialPinchZoom = state.camera.zoom;
-
-          // 更新UI显示
-          updateZoomDisplay();
-        }
       }
     }, { passive: false });
 
