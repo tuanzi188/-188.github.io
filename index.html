@@ -3658,10 +3658,24 @@
           this.vy = dir.y * speed;
           this.x += this.vx * dt;
           this.y += this.vy * dt;
+        } else if (state.isMobile) {
+          // 移动端摇杆未激活时完全静止
+          this.vx = 0;
+          this.vy = 0;
         } else {
-          // 桌面端：使用鼠标控制
-          const worldPos = camera.screenToWorld(state.mouse.x, state.mouse.y);
-          this.moveWithSpeedMultiplier(worldPos.x, worldPos.y, dt, speedMultiplier);
+          // 桌面端：使用鼠标控制（添加死区，鼠标靠近球球时停止移动）
+          const playerScreenX = (this.x - camera.x) * camera.zoom + window.innerWidth / 2;
+          const playerScreenY = (this.y - camera.y) * camera.zoom + window.innerHeight / 2;
+          const screenDist = Math.sqrt(
+            (state.mouse.x - playerScreenX) ** 2 + (state.mouse.y - playerScreenY) ** 2
+          );
+          if (screenDist > 8) {
+            const worldPos = camera.screenToWorld(state.mouse.x, state.mouse.y);
+            this.moveWithSpeedMultiplier(worldPos.x, worldPos.y, dt, speedMultiplier);
+          } else {
+            this.vx = 0;
+            this.vy = 0;
+          }
         }
 
         // 边界限制
@@ -5422,8 +5436,18 @@
         };
       }
       
+      // 移动端摇杆未激活时完全静止
+      if (state.isMobile) return { dx: 0, dy: 0 };
+      
       // 鼠标控制
       if (state.camera) {
+        const playerScreenX = (state.player.x - state.camera.x) * state.camera.zoom + window.innerWidth / 2;
+        const playerScreenY = (state.player.y - state.camera.y) * state.camera.zoom + window.innerHeight / 2;
+        const screenDist = Math.sqrt(
+          (state.mouse.x - playerScreenX) ** 2 + (state.mouse.y - playerScreenY) ** 2
+        );
+        if (screenDist <= 15) return { dx: 0, dy: 0 };
+        
         const worldPos = state.camera.screenToWorld(state.mouse.x, state.mouse.y);
         const dx = worldPos.x - state.player.x;
         const dy = worldPos.y - state.player.y;
@@ -8129,10 +8153,8 @@
         // 更新减速状态指示器
         updateSlowIndicator();
 
-        // 更新能量球
-        if (state.boss && state.boss.alive) {
-          updateEnergyOrbs(dt);
-        }
+        // 更新能量球（全程生效）
+        updateEnergyOrbs(dt);
 
         // BOSS触发条件检测
         const shouldSpawnBoss = !state.bossSpawned && 
