@@ -1664,13 +1664,12 @@
 
       restart: function() {
         console.log('[Game.restart] 触发');
-        // 先停止游戏运行，防止旧的 gameLoop 继续运行
-        state.isRunning = false;
+        const s = window.__state || state;
+        s.isRunning = false;
         
-        // 重置游戏结束和获胜标记
-        state.isGameOver = false;
-        state.victoryState.hasTriggeredVictory = false;
-        state.survivalMode = false;
+        s.isGameOver = false;
+        s.victoryState.hasTriggeredVictory = false;
+        s.survivalMode = false;
         
         // 强制隐藏所有可能的 overlay
         try {
@@ -2408,6 +2407,7 @@
       bossDevourWarning: false,
       _lastBossEatHintTime: 0, // 用于节流boss体积提示
     };
+    window.__state = state;
 
     // 检测设备类型
       function detectDevice() {
