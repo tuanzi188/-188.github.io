@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>恋爱人格测试 - 30道情景题</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #ff8a6f;
+            --primary-dark: #e86a4f;
+            --primary-light: #ffdde1;
+            --bg-body: #fef6f0;
+            --bg-card: white;
+            --bg-app: #fffbf5;
+            --text-dark: #3b2a25;
+            --text-medium: #4c3730;
+            --text-muted: #8B5A4E;
+            --border-light: #ffe0d4;
+            --bg-option: #f9f3ef;
+            --bg-option-active: #ffe4dc;
+            --bg-score: #f9ede6;
+            --bg-highlight: #fef4ee;
+            --bg-tip: #fff5f0;
+            --radius-xl: 40px;
+            --radius-lg: 32px;
+            --radius-md: 20px;
+            --radius-sm: 12px;
+            --shadow-card: 0 8px 24px rgba(0,0,0,0.06);
+            --shadow-btn: 0 4px 12px rgba(255,138,111,0.3);
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+            --color-anxiety: #F7C59F;
+            --color-avoidance: #B5C9E2;
+            --color-secure: #98D2C0;
+            --color-guide: #FFA07A;
+            --color-fearful: #D9A7B0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-body);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding-bottom: 30px;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        .app {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--bg-app);
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 36px 20px 28px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f9c9c2 100%);
+            border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+            color: #5e2e2e;
+            position: relative;
+            overflow: hidden;
+        }
+        .header h1 { font-size: 28px; letter-spacing: 2px; }
+        .header h2 { font-size: 22px; letter-spacing: 1px; }
+        .header p { margin-top: 8px; opacity: 0.8; font-size: 14px; }
+
+        .hearts-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .floating-heart {
+            position: absolute;
+            bottom: -30px;
+            animation: floatUp linear infinite;
+            opacity: 0;
+            pointer-events: none;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.7; }
+            50% { opacity: 0.4; }
+            100% { transform: translateY(-220px) rotate(30deg) scale(0.4); opacity: 0; }
+        }
+
+        .card {
+            background: var(--bg-card);
+            margin: 20px 16px;
+            border-radius: var(--radius-lg);
+            padding: 24px 20px;
+            box-shadow: var(--shadow-card);
+            animation: cardIn 0.4s ease both;
+        }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+        }
+
+        .progress-wrapper { margin: 16px 20px; }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .progress {
+            background: #f0e2da;
+            border-radius: 20px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            height: 100%;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 20px;
+        }
+
+        .option-item {
+            background: var(--bg-option);
+            border-radius: 48px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: 1.5px solid var(--border-light);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .option-item:hover { background: #fdf0ea; }
+        .option-item:active, .option-item.selected {
+            background: var(--bg-option-active);
+            transform: scale(0.97);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255,138,111,0.15);
+        }
+        .option-prefix {
+            font-weight: bold;
+            background: #fff0e6;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            color: #c26b55;
+            flex-shrink: 0;
+            transition: all var(--transition-fast);
+        }
+        .option-item.selected .option-prefix {
+            background: var(--primary);
+            color: white;
+        }
+        .option-text { flex: 1; font-size: 16px; color: #4a2e26; }
+
+        .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+        button {
+            flex: 1;
+            background: var(--primary);
+            border: none;
+            padding: 14px;
+            border-radius: 80px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-btn);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        button:active { transform: scale(0.96); }
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        button:disabled:active { transform: none; }
+        button.secondary {
+            background: #e9d9d0;
+            color: #6f4e41;
+            box-shadow: none;
+        }
+        button.ghost {
+            background: transparent;
+            color: var(--primary);
+            box-shadow: none;
+            border: 1.5px solid var(--primary);
+        }
+
+        .result-type {
+            font-size: 32px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 12px;
+            color: #cc6b51;
+        }
+        .result-emoji { font-size: 48px; text-align: center; margin-bottom: 8px; }
+        .result-desc {
+            background: var(--bg-highlight);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin: 18px 0;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-medium);
+        }
+
+        .score-section { margin: 16px 0; }
+        .score-bar-item { margin-bottom: 14px; }
+        .score-bar-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+        .score-bar-track {
+            background: #f0e2da;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .detail-section { margin: 16px 0; }
+        .detail-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: var(--bg-highlight);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all var(--transition-fast);
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 15px;
+        }
+        .detail-toggle:active { background: #fde8dc; }
+        .detail-toggle .arrow {
+            transition: transform var(--transition-normal);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .detail-toggle .arrow.open { transform: rotate(180deg); }
+        .detail-content {
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+        }
+        .detail-card {
+            margin-top: 12px;
+            padding: 16px;
+            background: #fdf8f5;
+            border-radius: var(--radius-md);
+            border: 1px solid #f0e2da;
+        }
+        .detail-card h4 {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .detail-card ul { list-style: none; padding: 0; }
+        .detail-card li {
+            padding: 4px 0;
+            font-size: 14px;
+            color: var(--text-medium);
+            line-height: 1.5;
+        }
+        .detail-card li::before {
+            content: "•";
+            margin-right: 8px;
+            color: var(--primary);
+        }
+        .detail-card p {
+            font-size: 14px;
+            color: var(--text-medium);
+            line-height: 1.6;
+        }
+
+        .share-buttons { display: flex; gap: 12px; margin: 20px 0; }
+        .share-buttons button i { margin-right: 6px; }
+
+        .radar-container { margin: 20px 0; height: 280px; width: 100%; max-width: 100%; overflow: hidden; }
+
+        .disclaimer {
+            text-align: center;
+            font-size: 11px;
+            color: #c4a89e;
+            padding: 12px 16px 0;
+            line-height: 1.5;
+        }
+
+        .history-item {
+            background: #fdf8f5;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #f0e2da;
+            transition: all var(--transition-fast);
+        }
+        .history-item:active { background: #fde8dc; }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .history-type { font-weight: 700; font-size: 16px; color: var(--text-dark); }
+        .history-date { font-size: 12px; color: var(--text-muted); }
+        .history-scores { display: flex; gap: 8px; flex-wrap: wrap; }
+        .history-score-tag {
+            background: var(--bg-highlight);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-medium);
+        }
+
+        .daily-tip {
+            background: linear-gradient(135deg, var(--bg-tip), #fff0e6);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            border: 1px solid var(--border-light);
+        }
+        .daily-tip-label {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+        .daily-tip-text {
+            font-size: 14px;
+            color: var(--text-medium);
+            line-height: 1.6;
+        }
+
+        .dimensions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 16px 0;
+        }
+        .dimension-chip {
+            background: #fdf8f5;
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #f0e2da;
+            transition: transform var(--transition-fast);
+        }
+        .dimension-chip:active { transform: scale(0.96); }
+        .dimension-chip .dim-icon { font-size: 24px; margin-bottom: 4px; }
+        .dimension-chip .dim-name { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+        .dimension-chip .dim-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        .compat-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-light), #f9c9c2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #5e2e2e;
+            margin-top: 8px;
+        }
+
+        .poster-hidden {
+            position: fixed;
+            left: -9999px;
+            top: 0;
+            width: 375px;
+            background: white;
+            padding: 24px;
+            border-radius: var(--radius-xl);
+            text-align: center;
+            z-index: -1;
+        }
+
+        .fade-slide-enter-active { transition: all 0.35s ease; }
+        .fade-slide-leave-active { transition: all 0.2s ease; position: absolute; width: 100%; }
+        .fade-slide-enter-from { opacity: 0; transform: translateX(40px); }
+        .fade-slide-leave-to { opacity: 0; transform: translateX(-40px); }
+
+        .fade-enter-active { transition: all 0.3s ease; }
+        .fade-leave-active { transition: all 0.2s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(59,42,37,0.82);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 999;
+            pointer-events: none;
+            animation: toastIn 0.3s ease;
+            white-space: nowrap;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .clear-history-btn {
+            background: transparent;
+            color: #c26b55;
+            border: 1px solid #f0c4b8;
+            font-size: 13px;
+            padding: 10px 16px;
+            box-shadow: none;
+        }
+        .clear-history-btn:active { background: #fef0e8; }
+
+        .gender-cards {
+            display: flex;
+            gap: 16px;
+            margin: 16px 0;
+            justify-content: center;
+        }
+        .gender-card {
+            flex: 1;
+            max-width: 160px;
+            background: #fdf8f5;
+            border: 2px solid #f0e2da;
+            border-radius: var(--radius-lg);
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .gender-card:active, .gender-card.active {
+            border-color: var(--primary);
+            background: #fff0e8;
+            box-shadow: 0 0 0 3px rgba(255,138,111,0.15);
+            transform: scale(0.97);
+        }
+        .gender-card .gender-icon { font-size: 40px; margin-bottom: 8px; }
+        .gender-card .gender-label { font-size: 16px; font-weight: 600; color: var(--text-dark); }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 32px 16px;
+        }
+        .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+        .empty-state p { font-size: 14px; }
+
+        ::-webkit-scrollbar { width: 0; }
+
+        i { margin-right: 6px; }
+    </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+const questions = [
+    { text: "周末下午你窝在沙发上看手机，对方突然凑过来贴着你坐下，把头靠在你肩膀上。你最可能的反应是？", options: [
+        { text: "把手机架在旁边，说「一起看个东西吧？」", scores: { guide: 1 } },
+        { text: "手指在屏幕上停了一下，过几秒才继续划", scores: { anxiety: 1 } },
+        { text: "自然地揽过对方肩膀说「靠着吧」，继续刷手机", scores: { secure: 1 } },
+        { text: "没说什么，把手机往另一边挪了挪，继续看自己的", scores: { avoidance: 1 } }
+    ]},
+    { text: "你今天的工作从早忙到晚，中间有好几个小时完全没看手机。下班后打开手机发现对方发了好几条消息。你的第一反应是？", options: [
+        { text: "先回了句「在忙」，然后翻了翻消息继续往前走", scores: { avoidance: 1 } },
+        { text: "回完消息后直接说「这周日我空出来了，咱们出去走走？」", scores: { guide: 1 } },
+        { text: "先打了个电话过去，连打了两个才接通", scores: { anxiety: 1 } },
+        { text: "边走边回消息「刚看到，今天忙死了，好想你」", scores: { secure: 1 } }
+    ]},
+    { text: "你们一起吃火锅，对方帮你调的蘸料里有你从来不吃的香菜。你的第一反应是？", options: [
+        { text: "把蘸料碗挪到自己这边，默默把香菜挑出来吃了", scores: { anxiety: 1 } },
+        { text: "拿筷子把香菜一根根挑出来放到碟子边", scores: { secure: 1 } },
+        { text: "蘸了一口吃了，没提香菜的事", scores: { avoidance: 1 } },
+        { text: "跟对方说「你帮我挑出来，我给你夹虾滑」", scores: { guide: 1 } }
+    ]},
+    { text: "你们打算下个月去一个从来没去过的城市短途旅行，正在一起查攻略、选酒店。遇到这种情况，你一般会？", options: [
+        { text: "跟对方说「你定吧，我都可以」，然后去收拾行李了", scores: { avoidance: 1 } },
+        { text: "自己一口气查了好几个攻略，查完才想起来问对方「你有什么想法？」", scores: { anxiety: 1 } },
+        { text: "跟对方说「你看酒店，我查吃的，分工来」", scores: { guide: 1 } },
+        { text: "打开手机查了两个酒店，说「你看这个离景区近，那个早餐好」", scores: { secure: 1 } }
+    ]},
+    { text: "你们提前一周约好了周六去看电影，但周五晚上对方发消息说公司临时安排周六加班。如果是你，你会怎么做？", options: [
+        { text: "回消息问「那周日有空吗？换个时间也行」", scores: { guide: 1 } },
+        { text: "回了个「好」，关了手机，没再想这件事", scores: { avoidance: 1 } },
+        { text: "回消息说「好吧，那下周再约」", scores: { secure: 1 } },
+        { text: "回了个「好」，之后又打开对话框看了好几次", scores: { anxiety: 1 } }
+    ]},
+    { text: "你们一起在家居店挑沙发，两个人喜欢的款式不一样，已经在这两张沙发之间来回坐了好几轮。接下来你最可能？", options: [
+        { text: "拿起手机搜了一下这两款的评价，边看边问对方「你觉得呢？」", scores: { anxiety: 1 } },
+        { text: "跟对方说「两个都坐了一轮了，要不列个优缺点对比一下？」", scores: { guide: 1 } },
+        { text: "跟对方说「你定吧，我都可以」", scores: { avoidance: 1 } },
+        { text: "跟对方说「这个深色的耐脏，我喜欢这个」", scores: { secure: 1 } }
+    ]},
+    { text: "晚上你们并排躺在床上，对方背对着你在刷短视频，屏幕的光亮映在墙上。你会怎么做？", options: [
+        { text: "翻了个身背对对方，把被子往上拉了拉", scores: { avoidance: 1 } },
+        { text: "也打开手机刷，但几分钟就解锁看一次对方有没有转过来", scores: { anxiety: 1 } },
+        { text: "拍拍对方肩膀问「今天累不累？」", scores: { secure: 1 } },
+        { text: "把手机放到一边，说「我们聊会儿天吧？」", scores: { guide: 1 } }
+    ]},
+    { text: "周末在家，突然停电了，手机也没剩多少电。你和对方一起坐在黑暗的客厅里。你接下来会？", options: [
+        { text: "拿了个毯子裹住两个人，说了句「停电也挺好的」", scores: { secure: 1 } },
+        { text: "缩在毯子里，偶尔抬头看看对方，等对方先开口", scores: { anxiety: 1 } },
+        { text: "打开手机手电筒，说「来，我们玩个游戏，谁先笑谁去洗碗」", scores: { guide: 1 } },
+        { text: "找了个充电宝给手机充上电，自己刷起了手机", scores: { avoidance: 1 } }
+    ]},
+    { text: "你们一起组装网购的书架，说明书看了半天没看懂，两个人都有点烦躁。接下来你会？", options: [
+        { text: "一直在翻说明书，翻了好几遍，嘴上说「等一下等一下」", scores: { anxiety: 1 } },
+        { text: "跟对方说「要不找个师傅来装吧」，然后去客厅坐下了", scores: { avoidance: 1 } },
+        { text: "拍了张零件的照片说「我去网上搜个视频教程」", scores: { guide: 1 } },
+        { text: "跟对方说「没事，咱们慢慢来，不着急」", scores: { secure: 1 } }
+    ]},
+    { text: "你们在商量周末去哪儿，你说去公园对方说太晒，你说去商场对方又说人太多。接下来你会怎么做？", options: [
+        { text: "跟对方说「行，你说你想要什么样的？我再想想」", scores: { secure: 1 } },
+        { text: "打开手机搜了一圈，说「我找到几个地方你看看」", scores: { guide: 1 } },
+        { text: "拿起遥控器换了个台，说「那就在家待着吧」", scores: { avoidance: 1 } },
+        { text: "又提了第三个方案，说完盯着对方的反应", scores: { anxiety: 1 } }
+    ]},
+    { text: "你下午在公司被一个项目方案卡住了，想了两个小时没思路。遇到这种情况你会怎么做？", options: [
+        { text: "回家后该干嘛干嘛，没提工作的事", scores: { avoidance: 1 } },
+        { text: "回家后吃饭时跟对方说「今天工作遇到个事，挺烦的」", scores: { secure: 1 } },
+        { text: "发了条消息给对方说「工作好烦」，隔几分钟就看一次手机", scores: { anxiety: 1 } },
+        { text: "回家后跟对方说「我卡在一个地方了，你帮我换个角度想想？」", scores: { guide: 1 } }
+    ]},
+    { text: "你和对方视频通话，聊到一半对方开始边聊边刷朋友圈。你最可能的反应是？", options: [
+        { text: "说话变少了，对方问怎么了才回了一句「没事」", scores: { anxiety: 1 } },
+        { text: "跟对方说「嘿，我给你看个东西」，然后发了一张搞笑图", scores: { guide: 1 } },
+        { text: "跟对方说「嘿，你在听吗？我感觉你好像在忙别的」", scores: { secure: 1 } },
+        { text: "自己也打开别的app，一边看一边应着", scores: { avoidance: 1 } }
+    ]},
+    { text: "你加班到晚上九点多才到家，推开门发现对方在桌上给你留了一碗还温着的汤和一张写着「辛苦了」的便签。你的第一反应是？", options: [
+        { text: "喝完汤，拍了张照片发给对方说「明天你也别做饭了，我来」", scores: { guide: 1 } },
+        { text: "喝了汤，把便签夹在笔记本里，没特别说什么", scores: { avoidance: 1 } },
+        { text: "喝完汤，把便签翻过来又看了一遍，放在枕头旁边", scores: { anxiety: 1 } },
+        { text: "拍了张照片发给对方说「看到汤了，你也早点休息」", scores: { secure: 1 } }
+    ]},
+    { text: "你们一起参加朋友聚餐，对方在饭桌上当着六七个人的面讲了你大学时挂科的事。你通常会？", options: [
+        { text: "跟着大家笑了，顺嘴说了句「行了别揭我老底了」", scores: { secure: 1 } },
+        { text: "话题过去后才重新加入聊天，之后没再提这件事", scores: { avoidance: 1 } },
+        { text: "笑着说「行了行了，下次我来讲你上次在商场迷路的事」", scores: { guide: 1 } },
+        { text: "低头扒了两口饭，没接话", scores: { anxiety: 1 } }
+    ]},
+    { text: "你发烧 38.5 度躺在床上，对方煮了一碗白粥端到床头，然后说「我先去忙了」就走了。你的第一反应是？", options: [
+        { text: "喊住对方说「能不能再帮我拿个体温计」", scores: { guide: 1 } },
+        { text: "等对方带上门，自己盯着粥看了一会儿才端起来喝", scores: { anxiety: 1 } },
+        { text: "端起碗喝了两口，把碗放到一边继续刷手机", scores: { avoidance: 1 } },
+        { text: "说了声「谢谢」，端起碗喝了一口说「好喝，你去忙吧，有事我叫你」", scores: { secure: 1 } }
+    ]},
+    { text: "你换了一件新衣服问对方好不好看，对方看了一眼说「你最近是不是又胖了？」。你会怎么做？", options: [
+        { text: "回了一句「哦」，把衣服挂回衣柜了", scores: { avoidance: 1 } },
+        { text: "跟对方说「那你觉得我穿什么好看？下次一起去挑」", scores: { guide: 1 } },
+        { text: "笑了一下，转身去照镜子整理衣服", scores: { secure: 1 } },
+        { text: "没接话，过了一会儿又换了一件衣服出来问对方「这件呢？」", scores: { anxiety: 1 } }
+    ]},
+    { text: "你们连续三天没有主动给对方发消息，对方也没有联系你。接下来你会怎么做？", options: [
+        { text: "打了「你还好吗」又删掉，改成「在干嘛」又删掉，最后锁了屏幕", scores: { anxiety: 1 } },
+        { text: "有天下班路上看到有趣的东西，随手拍了发过去", scores: { secure: 1 } },
+        { text: "拍了张晚饭的照片发过去，配文「今天做了你爱吃的」", scores: { guide: 1 } },
+        { text: "那几天刚好约了朋友吃饭逛街，过得挺充实", scores: { avoidance: 1 } }
+    ]},
+    { text: "你提前花了两个小时规划好了周末约会的餐厅和路线，出发前对方突然说「要不我们去另一个地方吧」。你脑子里冒出的第一个想法是？", options: [
+        { text: "说「行啊，你有想去的地方吗？」", scores: { secure: 1 } },
+        { text: "关了导航，说「那你定吧」", scores: { avoidance: 1 } },
+        { text: "跟对方说「这次先按我的来，下次你安排」", scores: { guide: 1 } },
+        { text: "打开了之前规划的餐厅页面又关掉了，说「行吧」", scores: { anxiety: 1 } }
+    ]},
+    { text: "你无意间看到对方手机相册里还存着几张和前任的合影。遇到这种情况你会怎么做？", options: [
+        { text: "退出相册，把手机放回原处", scores: { avoidance: 1 } },
+        { text: "找了个时间跟对方说「我在你相册看到几张旧照片，能聊聊吗」", scores: { guide: 1 } },
+        { text: "看了一眼就划过去了，没特意点开", scores: { secure: 1 } },
+        { text: "把那几张照片的日期记住了，后来又去翻了一次", scores: { anxiety: 1 } }
+    ]},
+    { text: "你加班到晚上十一点多回到家，对方已经关灯睡了，床头给你留了一盏小夜灯。你最可能的反应是？", options: [
+        { text: "把手机放在床头充上电，屏幕亮了好几次才睡着", scores: { anxiety: 1 } },
+        { text: "轻手轻脚洗漱完，躺下时帮对方把被子拉了拉", scores: { secure: 1 } },
+        { text: "把明天的早餐材料从冰箱拿出来解冻，才去洗漱", scores: { guide: 1 } },
+        { text: "洗完澡在客厅坐了一会儿才进卧室", scores: { avoidance: 1 } }
+    ]},
+    { text: "你们和对方的一个朋友一起吃饭，吃完后对方当着朋友的面问你「你觉得我这个朋友怎么样？」。你会怎么做？", options: [
+        { text: "说「挺好的，上次你生日他/她还特意来了」", scores: { guide: 1 } },
+        { text: "含糊回了一句「还行吧」，把话题岔开了", scores: { avoidance: 1 } },
+        { text: "先看了对方一眼，才说了句「不错啊」", scores: { anxiety: 1 } },
+        { text: "当面说了句「挺好的啊」，继续吃东西", scores: { secure: 1 } }
+    ]},
+    { text: "你和对方在一起快一年了，但对方每次都不记得你们的纪念日是几号。遇到这种情况你会怎么做？", options: [
+        { text: "到了那天，跟对方提了一句「今天是什么日子？」，看对方反应", scores: { anxiety: 1 } },
+        { text: "到了那天自己买了块蛋糕，没跟对方提", scores: { avoidance: 1 } },
+        { text: "提前把那天的安排都计划好了，跟对方说「那天我订了个地方，一起去吧」", scores: { guide: 1 } },
+        { text: "到了那天在手机日历上标记了一下，晚上跟对方说「今天是我们纪念日」", scores: { secure: 1 } }
+    ]},
+    { text: "你们坐在沙发上一起看电视，对方突然接到一个电话，挂完电话后对方红了眼眶，说家里出了一些事。你的第一反应是？", options: [
+        { text: "等对方哭了一会儿，说「要不要喝点水？」", scores: { avoidance: 1 } },
+        { text: "把遥控器放下，抱住对方说「你想说的时候再说」", scores: { guide: 1 } },
+        { text: "站起来走了两步，又坐回沙发另一头", scores: { anxiety: 1 } },
+        { text: "拍拍对方的后背，等对方平复", scores: { secure: 1 } }
+    ]},
+    { text: "你们冷战了两天，第三天中午对方突然给你发了一条搞笑短视频，没有配任何文字。你通常会？", options: [
+        { text: "也回了一条搞笑视频过去，顺便发了个「这个你肯定喜欢」", scores: { secure: 1 } },
+        { text: "回了一条消息「不生气了？晚上出来吃饭」", scores: { guide: 1 } },
+        { text: "看了视频，回了个表情包，但之后又打开对话框看了好几遍", scores: { anxiety: 1 } },
+        { text: "看了一眼，没回，把手机放下了", scores: { avoidance: 1 } }
+    ]},
+    { text: "晚上九点多你和朋友在外面吃烧烤，对方发消息问你「大概几点回来？」。如果是你，你会怎么做？", options: [
+        { text: "回消息「大概十点，你先睡」", scores: { secure: 1 } },
+        { text: "打了个电话说「快了，等我回去陪你」", scores: { guide: 1 } },
+        { text: "拍了张桌上的照片发过去，附上「和朋友在一起」", scores: { anxiety: 1 } },
+        { text: "回了句「还没定」，继续吃", scores: { avoidance: 1 } }
+    ]},
+    { text: "过年放假只有一周，你想回自己老家，对方也想回自己家。你们商量了几次都没达成一致。你通常会？", options: [
+        { text: "提出「今年先去你家，明年去我家」", scores: { guide: 1 } },
+        { text: "说「那要不今年先去你家，明年去我家？」", scores: { secure: 1 } },
+        { text: "翻了好几次日历，最后跟对方说「那要不今年先去你家？」", scores: { anxiety: 1 } },
+        { text: "跟对方说「你说了算吧」", scores: { avoidance: 1 } }
+    ]},
+    { text: "对方今天说了一句很普通的话，但你听完后莫名觉得不太舒服，又说不上来具体哪里不对。你会怎么做？", options: [
+        { text: "跟对方说「我先说我的理解，你看对不对」", scores: { guide: 1 } },
+        { text: "跟对方说「我也不知道怎么了，但那句话让我不太舒服」", scores: { secure: 1 } },
+        { text: "睡前把聊天记录翻到那句话，看了好几遍", scores: { anxiety: 1 } },
+        { text: "洗了个澡，出来就忘了", scores: { avoidance: 1 } }
+    ]},
+    { text: "你翻手机相册时看到去年这个时候对方给你拍的一张照片。如果是你，你会怎么做？", options: [
+        { text: "把照片发给对方说「你看，去年的今天」", scores: { guide: 1 } },
+        { text: "看笑了，顺手把这张照片存进了收藏夹", scores: { secure: 1 } },
+        { text: "把照片放大看了好一会儿，又翻了翻最近的合照对比", scores: { anxiety: 1 } },
+        { text: "划过去了，继续清相册", scores: { avoidance: 1 } }
+    ]},
+    { text: "你们在家一起做西红柿炒蛋，对方往锅里倒了太多盐。你最可能的反应是？", options: [
+        { text: "尝了一口说「有点咸，还能吃」", scores: { secure: 1 } },
+        { text: "跟对方说「我来，你去剥个蒜」", scores: { guide: 1 } },
+        { text: "在旁边看着，说了一句「会不会有点多？」，但声音很小", scores: { anxiety: 1 } },
+        { text: "盛到碗里吃了，没说什么", scores: { avoidance: 1 } }
+    ]},
+    { text: "你们在一起一周年，对方送了你一个你平时完全用不到的摆件。你的第一反应是？", options: [
+        { text: "接过来摆在桌上说「谢谢」", scores: { secure: 1 } },
+        { text: "跟对方说「下次我们可以一起去挑」", scores: { guide: 1 } },
+        { text: "拿着摆件翻来覆去看了好一会儿，问「在哪买的呀」", scores: { anxiety: 1 } },
+        { text: "说了声谢谢，放进柜子里了", scores: { avoidance: 1 } }
+    ]}
+];
+
+const dailyTips = [
+    "今天试着对伴侣说一句具体的赞美，比如「你今天做的饭真好吃」",
+    "给对方一个不需要理由的拥抱，持续至少7秒",
+    "分享一件今天让你开心的小事，让对方参与你的生活",
+    "主动问对方「今天过得怎么样？」并认真倾听到底",
+    "回忆你们第一次见面的场景，和对方分享你的感受",
+    "给对方发一条暖心的消息，不需要特别的理由",
+    "今天尝试用「我感觉」代替「你总是」来表达不满",
+    "一起做一件没做过的事，创造新的共同记忆",
+    "认真看着对方的眼睛说「谢谢你一直在我身边」",
+    "今天练习：吵架前先深呼吸5秒再开口",
+    "记录三件对方让你感动的小事",
+    "给彼此留出30分钟独处时间，尊重对方的空间",
+    "今天试着理解对方的一个「坏习惯」背后的原因",
+    "写一张小纸条放在对方能看到的地方",
+    "回忆你们最甜蜜的一次约会，然后计划下一次"
+];
+
+function getDailyTip() {
+    const d = new Date();
+    const idx = (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % dailyTips.length;
+    return dailyTips[idx];
+}
+
+function getPersonalityType(scores) {
+    const { anxiety, avoidance, secure, guide } = scores;
+    if (anxiety >= 12 && avoidance >= 12) return "fearful";
+    if (guide >= 10 && guide >= anxiety && guide >= avoidance && guide >= secure) return "guide";
+    if (secure >= 10 && secure >= anxiety && secure >= avoidance && secure >= guide) return "secure";
+    if (anxiety > avoidance) return "anxious";
+    if (avoidance > anxiety) return "avoidant";
+    return "secure";
+}
+
+const typeDetails = {
+    guide: {
+        name: "引导型恋人",
+        emoji: "✨",
+        desc: "你擅长主动带领关系，理性包容，陪伴伴侣成长。温柔而坚定，是关系里的定心锚。",
+        color: "#FFA07A",
+        traits: ["主动沟通，不回避问题", "情绪管理能力强", "善于规划关系的未来方向", "在冲突中保持理性"],
+        strengths: ["能有效化解矛盾，推动关系前进", "给伴侣强烈的安全感和方向感", "善于引导双方共同成长", "在关系中保持稳定的情绪输出"],
+        growth: ["偶尔也需要示弱，让对方照顾你", "不要过度承担所有决策的责任", "允许对方也有主导权和表达空间", "学会接受「不完美的解决方案」"],
+        compatibility: "最适合与安全型恋人搭配，双方互相尊重、共同成长。也能引导焦虑型伴侣建立安全感，但需要注意不要让自己太累。",
+        idealPartner: "安全型恋人",
+        genderAdvice: {
+            male: "作为引导型男生，你散发着稳重和担当的魅力。建议找一个能欣赏你领导力、同时也愿意表达自我的女生。避免选择过于被动的伴侣，否则你容易感到疲惫。",
+            female: "作为引导型女生，你既有主见又温柔体贴。建议找一个尊重你想法、不觉得被威胁的男生。与安全型男生搭配最和谐，双方互相欣赏、共同决策。"
+        }
+    },
+    secure: {
+        name: "安全型恋人",
+        emoji: "🌿",
+        desc: "你信任、稳定，不会过度焦虑或回避。和你恋爱很舒服，彼此有空间也有亲密。",
+        color: "#98D2C0",
+        traits: ["对关系有基本的信任感", "能自在地表达需求和感受", "尊重彼此的独立空间", "面对冲突时保持冷静"],
+        strengths: ["让伴侣感到被信任和被尊重", "在关系中营造轻松舒适的氛围", "能给予对方适当的自由和空间", "情绪稳定，是关系中的「定海神针」"],
+        growth: ["有时可能显得不够热情，需要主动表达爱意", "对伴侣的情绪波动可能缺乏敏感度", "适当学习更深层的情感连接方式", "在对方需要时，可以更主动地提供支持"],
+        compatibility: "与任何类型都能良好相处，尤其与引导型恋人搭配最佳。和焦虑型在一起时，你的稳定能帮助对方建立安全感。",
+        idealPartner: "引导型恋人",
+        genderAdvice: {
+            male: "作为安全型男生，你是恋爱中的「理想型」。你的稳定和信任感让女生很有安全感。建议在关系中多主动制造浪漫和惊喜，避免让对方觉得你「太佛系」。",
+            female: "作为安全型女生，你情绪稳定、独立自信，非常有吸引力。建议找一个同样成熟稳重的男生，你们的相处会非常舒服自然，彼此成就。"
+        }
+    },
+    anxious: {
+        name: "焦虑型恋人",
+        emoji: "😰",
+        desc: "你渴望亲密，害怕失去，容易胡思乱想。学会给自己安全感会让关系更轻松。",
+        color: "#F7C59F",
+        traits: ["对关系高度敏感", "渴望频繁的亲密互动", "容易过度解读对方的行为", "害怕被抛弃或忽视"],
+        strengths: ["对伴侣极其用心和关注", "愿意为关系付出大量精力", "善于察觉对方的情绪变化", "在关系中充满热情和投入"],
+        growth: ["学会给自己安全感，而不是完全依赖对方", "区分「真实的忽视」和「自己的想象」", "培养独立的兴趣爱好和社交圈", "在不安时先自我安抚，再与对方沟通"],
+        compatibility: "与安全型恋人在一起最稳定，对方的可靠能缓解你的不安。与引导型搭配也不错，对方能帮你建立信心。避免与回避型陷入「追-逃」模式。",
+        idealPartner: "安全型恋人",
+        genderAdvice: {
+            male: "作为焦虑型男生，你对感情的用心和专注是很大的优点。建议把部分精力放在事业和兴趣上，一个有自己生活的你会更有魅力。找一个能给你稳定回应的女生。",
+            female: "作为焦虑型女生，你对爱的渴望是真实而美好的。建议找一个愿意主动沟通、给你安全感的男生。学会区分「他忙」和「他不在乎」，会让你在关系中更轻松。"
+        }
+    },
+    avoidant: {
+        name: "回避型恋人",
+        emoji: "🏃",
+        desc: "你习惯独立，不喜欢过度亲密。适当敞开心扉，你会发现依赖也是一种美好。",
+        color: "#B5C9E2",
+        traits: ["重视个人独立和自由", "不喜欢过度的情感表达", "面对亲密需求时倾向于后退", "习惯自己解决问题"],
+        strengths: ["给伴侣充足的个人空间", "在关系中保持理性和客观", "独立性强，不会过度依赖对方", "在危机时刻能保持冷静"],
+        growth: ["尝试在安全的环境中表达脆弱", "学习接受伴侣的关心和支持", "主动分享内心感受，而不是沉默", "理解「亲密」不等于「失去自我」"],
+        compatibility: "与安全型恋人搭配最舒适，对方不会给你太大压力。与引导型在一起也能成长，但需要你愿意打开心扉。避免与焦虑型互相消耗。",
+        idealPartner: "安全型恋人",
+        genderAdvice: {
+            male: "作为回避型男生，你的独立和冷静是优势，但恋爱中需要适度表达情感。建议找一个不黏人但温暖的女生，给你足够空间的同时也能让你感受到爱。试着主动分享你的日常。",
+            female: "作为回避型女生，你的独立和理性很有魅力。建议找一个尊重你空间、不强迫你表达的男生。与安全型或同样独立的男生在一起，你们可以各自精彩又彼此陪伴。"
+        }
+    },
+    fearful: {
+        name: "恐惧型恋人",
+        emoji: "💔",
+        desc: "你既渴望爱又怕受伤，忽冷忽热。先接纳自己的矛盾，慢慢建立信任。",
+        color: "#D9A7B0",
+        traits: ["在亲密和疏远之间反复摇摆", "内心渴望连接但害怕受伤", "情绪波动较大", "对关系既期待又恐惧"],
+        strengths: ["对感情有深刻的感知力", "在关系中愿意深度投入（当感到安全时）", "对伴侣的需求有很强的同理心", "一旦建立信任，会非常忠诚"],
+        growth: ["接纳自己的矛盾情绪，不要自我批判", "寻求专业心理咨询帮助理解依恋模式", "在关系中设定清晰的边界", "练习在不安全感出现时自我安抚"],
+        compatibility: "最需要与安全型恋人在一起，对方的稳定能帮你慢慢建立信任。避免与同样不安全的类型陷入不稳定的循环。考虑寻求专业的情感咨询支持。",
+        idealPartner: "安全型恋人",
+        genderAdvice: {
+            male: "作为恐惧型男生，你内心的矛盾并不罕见。建议先接纳自己的不安全感，找一个有耐心、情绪稳定的女生。不要害怕展现脆弱，真正爱你的人会接纳你的全部。",
+            female: "作为恐惧型女生，你既渴望爱又害怕受伤的心情值得被理解。建议找一个能给你持续稳定回应的男生。考虑寻求专业支持，学会自我安抚，你会拥有更健康的关系。"
+        }
+    }
+};
+
+const scoreDimensions = [
+    { key: 'anxiety', label: '焦虑倾向', icon: '😰', max: 30, color: '#F7C59F' },
+    { key: 'avoidance', label: '回避倾向', icon: '🏃', max: 30, color: '#B5C9E2' },
+    { key: 'secure', label: '安全型', icon: '🌿', max: 30, color: '#98D2C0' },
+    { key: 'guide', label: '引导型', icon: '✨', max: 32, color: '#FFA07A' }
+];
+
+const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+createApp({
+    setup() {
+        const currentView = ref('home');
+        const currentIndex = ref(0);
+        const selectedIdx = ref(-1);
+        const answers = ref([]);
+        const finalScores = ref(null);
+        const resultType = ref('');
+        const gender = ref('');
+        const showDetail = ref(false);
+        const toastMsg = ref('');
+        const history = ref([]);
+        const startTestTime = ref(0);
+        const testDuration = ref(0);
+        let radarChartInstance = null;
+        let toastTimer = null;
+
+        const dailyTip = computed(() => getDailyTip());
+        const genderAdviceText = computed(() => {
+            if (!resultType.value || !gender.value) return '';
+            const detail = typeDetails[resultType.value];
+            if (!detail || !detail.genderAdvice) return '';
+            return detail.genderAdvice[gender.value] || '';
+        });
+
+        const floatingHearts = computed(() => {
+            const arr = [];
+            const colors = ['#ff8a6f','#ff6b8a','#ffa07a','#ff69b4','#ff1493'];
+            for (let i = 0; i < 8; i++) {
+                arr.push({
+                    id: i,
+                    left: (Math.random() * 80 + 10) + '%',
+                    size: (Math.random() * 12 + 12) + 'px',
+                    duration: (Math.random() * 3 + 3) + 's',
+                    delay: (Math.random() * 4) + 's',
+                    color: colors[i % colors.length]
+                });
+            }
+            return arr;
+        });
+
+        function showToast(msg, duration) {
+            if (!duration) duration = 1500;
+            toastMsg.value = msg;
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() { toastMsg.value = ''; }, duration);
+        }
+
+        function loadHistory() {
+            try {
+                const raw = localStorage.getItem('loveTestHistory');
+                if (raw) history.value = JSON.parse(raw);
+            } catch(e) { history.value = []; }
+        }
+
+        function saveToHistory(type, scores) {
+            const record = { type: type, gender: gender.value, scores: { anxiety: scores.anxiety, avoidance: scores.avoidance, secure: scores.secure, guide: scores.guide }, timestamp: Date.now() };
+            history.value.unshift(record);
+            if (history.value.length > 10) history.value = history.value.slice(0, 10);
+            localStorage.setItem('loveTestHistory', JSON.stringify(history.value));
+            localStorage.setItem('loveTestResult', JSON.stringify(record));
+        }
+
+        function formatDate(ts) {
+            const d = new Date(ts);
+            return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+        }
+
+        function startTest() {
+            answers.value = [];
+            currentIndex.value = 0;
+            selectedIdx.value = -1;
+            finalScores.value = null;
+            showDetail.value = false;
+            gender.value = '';
+            currentView.value = 'gender';
+        }
+
+        function confirmGender() {
+            if (!gender.value) {
+                showToast('请先选择性别');
+                return;
+            }
+            startTestTime.value = Date.now();
+            currentView.value = 'test';
+        }
+
+        function goBack() {
+            if (currentIndex.value > 0) {
+                currentIndex.value--;
+                if (currentIndex.value < answers.value.length) {
+                    const prev = answers.value[currentIndex.value];
+                    const matchIdx = questions[currentIndex.value].options.findIndex(function(o) {
+                        return JSON.stringify(o.scores) === JSON.stringify(prev);
+                    });
+                    selectedIdx.value = matchIdx >= 0 ? matchIdx : -1;
+                } else {
+                    selectedIdx.value = -1;
+                }
+            }
+        }
+
+        function selectOption(optionScores, idx) {
+            selectedIdx.value = idx;
+        }
+
+        function nextQuestion() {
+            if (selectedIdx.value === -1) {
+                showToast('请先选择一个选项');
+                return;
+            }
+            const currentOpts = questions[currentIndex.value].options;
+            const selectedScores = currentOpts[selectedIdx.value].scores;
+            if (currentIndex.value < answers.value.length) {
+                answers.value[currentIndex.value] = selectedScores;
+            } else {
+                answers.value.push(selectedScores);
+            }
+            if (currentIndex.value + 1 < questions.length) {
+                currentIndex.value++;
+                if (currentIndex.value < answers.value.length) {
+                    const prev = answers.value[currentIndex.value];
+                    const matchIdx = questions[currentIndex.value].options.findIndex(function(o) {
+                        return JSON.stringify(o.scores) === JSON.stringify(prev);
+                    });
+                    selectedIdx.value = matchIdx >= 0 ? matchIdx : -1;
+                } else {
+                    selectedIdx.value = -1;
+                }
+            } else {
+                computeResult();
+            }
+        }
+
+        function formatScore(val) {
+            return val % 1 === 0 ? val.toString() : val.toFixed(1);
+        }
+
+        function computeResult() {
+            const totals = { anxiety: 0, avoidance: 0, secure: 0, guide: 0 };
+            for (let i = 0; i < answers.value.length; i++) {
+                const ans = answers.value[i];
+                if (ans.anxiety) totals.anxiety += ans.anxiety;
+                if (ans.avoidance) totals.avoidance += ans.avoidance;
+                if (ans.secure) totals.secure += ans.secure;
+                if (ans.guide) totals.guide += ans.guide;
+            }
+            testDuration.value = Math.round((Date.now() - startTestTime.value) / 1000);
+            finalScores.value = totals;
+            resultType.value = getPersonalityType(totals);
+            saveToHistory(resultType.value, totals);
+            currentView.value = 'result';
+            nextTick(function() { drawRadar(); });
+        }
+
+        function drawRadar() {
+            if (!finalScores.value) return;
+            const chartDom = document.getElementById('radarChart');
+            if (!chartDom) return;
+            if (radarChartInstance) radarChartInstance.dispose();
+            radarChartInstance = echarts.init(chartDom);
+            const scores = finalScores.value;
+            radarChartInstance.setOption({
+                radar: {
+                    indicator: [
+                        { name: '焦虑倾向', max: 30 },
+                        { name: '回避倾向', max: 30 },
+                        { name: '安全型', max: 30 },
+                        { name: '引导型', max: 32 }
+                    ],
+                    shape: 'circle',
+                    center: ['50%', '50%'],
+                    radius: '65%',
+                    name: { textStyle: { fontSize: 12, color: '#8B5A4E' } }
+                },
+                series: [{
+                    type: 'radar',
+                    data: [{ value: [scores.anxiety, scores.avoidance, scores.secure, scores.guide], name: '你的分数' }],
+                    areaStyle: { color: 'rgba(255,138,111,0.2)' },
+                    lineStyle: { color: '#FF8A6F', width: 2 },
+                    symbolSize: 6,
+                    symbol: 'circle',
+                    itemStyle: { color: '#E86A4F' },
+                    animationDuration: 1000
+                }]
+            });
+        }
+
+        async function generatePoster() {
+            const container = document.getElementById('posterContainer');
+            if (!container) return;
+            const detail = typeDetails[resultType.value];
+            const scores = finalScores.value;
+            document.getElementById('posterEmoji').innerText = detail.emoji;
+            document.getElementById('posterTypeName').innerText = detail.name;
+            document.getElementById('posterDesc').innerText = detail.desc;
+            document.getElementById('posterScores').innerHTML =
+                '焦虑 ' + scores.anxiety.toFixed(1) + ' &nbsp; 回避 ' + scores.avoidance.toFixed(1) + '<br>安全 ' + scores.secure.toFixed(1) + ' &nbsp; 引导 ' + scores.guide.toFixed(1);
+            const qrDiv = document.getElementById('posterQR');
+            qrDiv.innerHTML = '';
+            new QRCode(qrDiv, { text: window.location.href, width: 90, height: 90 });
+            await nextTick();
+            html2canvas(container, { scale: 2, backgroundColor: '#fffbf5' }).then(function(canvas) {
+                const imgData = canvas.toDataURL();
+                const win = window.open();
+                win.document.write(
+                    '<body style="text-align:center; background:#fff; padding:20px;">' +
+                    '<h3>长按图片保存</h3>' +
+                    '<p style="font-size:13px; color:#999; margin:8px 0 16px;">保存后可放大查看或分享给朋友</p>' +
+                    '<img src="' + imgData + '" style="max-width:100%; border-radius:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1);"/>' +
+                    '</body>'
+                );
+            });
+        }
+
+        function shareResult() {
+            const typeName = typeDetails[resultType.value] ? typeDetails[resultType.value].name : '';
+            if (navigator.share) {
+                navigator.share({
+                    title: '我的恋爱人格测试',
+                    text: '我是' + typeName + '，快来测测你是哪种？',
+                    url: window.location.href,
+                }).catch(function() {});
+            } else {
+                showToast('点击右上角分享或复制链接给朋友~');
+            }
+        }
+
+        function retest() {
+            currentView.value = 'home';
+            answers.value = [];
+            currentIndex.value = 0;
+            selectedIdx.value = -1;
+            finalScores.value = null;
+            resultType.value = '';
+            gender.value = '';
+            showDetail.value = false;
+            startTestTime.value = 0;
+            testDuration.value = 0;
+            if (radarChartInstance) radarChartInstance.dispose();
+        }
+
+        function clearHistory() {
+            history.value = [];
+            localStorage.removeItem('loveTestHistory');
+            localStorage.removeItem('loveTestResult');
+            showToast('历史记录已清空');
+        }
+
+        onMounted(function() { loadHistory(); });
+
+        return {
+            currentView, currentIndex, selectedIdx, questions, answers, finalScores, resultType,
+            gender, showDetail, toastMsg, history, dailyTip, floatingHearts, scoreDimensions,
+            genderAdviceText, testDuration, formatScore,
+            startTest, confirmGender, goBack, selectOption, nextQuestion, retest, shareResult,
+            generatePoster, typeDetails, formatDate, clearHistory
+        };
+    },
+    template: `
+        <div class="app">
+            <template v-if="currentView === 'home'">
+                <div class="header">
+                    <div class="hearts-container">
+                        <span v-for="h in floatingHearts" :key="h.id" class="floating-heart"
+                            :style="{left: h.left, fontSize: h.size, animationDuration: h.duration, animationDelay: h.delay, color: h.color}">❤</span>
+                    </div>
+                    <h1>❤️ 恋爱人格测试</h1>
+                    <p>你了解自己的恋爱相处模式吗？</p>
+                </div>
+                <div class="card" style="text-align:center">
+                    <div class="question-text">30道情景题<br>发现你的恋爱相处模式</div>
+                    <button @click="startTest" style="width:80%; margin-top:16px">开始测试</button>
+                    <button v-if="history.length" @click="currentView='history'" class="ghost" style="width:80%; margin-top:12px">
+                        <i class="fas fa-history"></i> 查看历史记录
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="daily-tip">
+                        <div class="daily-tip-label">💡 每日恋爱小贴士</div>
+                        <div class="daily-tip-text">{{ dailyTip }}</div>
+                    </div>
+                </div>
+                <div class="disclaimer">本测试仅供娱乐参考，不构成专业心理评估</div>
+            </template>
+
+            <template v-if="currentView === 'gender'">
+                <div class="header">
+                    <h2>选择你的性别</h2>
+                    <p>帮助我们为你提供更精准的恋爱搭配建议</p>
+                </div>
+                <div class="card">
+                    <div class="gender-cards">
+                        <div class="gender-card" :class="{active: gender === 'male'}" @click="gender = 'male'">
+                            <div class="gender-icon">👨</div>
+                            <div class="gender-label">男生</div>
+                        </div>
+                        <div class="gender-card" :class="{active: gender === 'female'}" @click="gender = 'female'">
+                            <div class="gender-icon">👩</div>
+                            <div class="gender-label">女生</div>
+                        </div>
+                    </div>
+                    <button @click="confirmGender" style="width:80%; margin-top:20px">
+                        <i class="fas fa-arrow-right"></i> 开始答题
+                    </button>
+                    <div style="margin-top:12px">
+                        <button class="secondary" @click="currentView='home'" style="width:80%"><i class="fas fa-arrow-left"></i> 返回</button>
+                    </div>
+                </div>
+            </template>
+
+            <template v-if="currentView === 'test'">
+                <div class="progress-wrapper">
+                    <div class="progress-info">
+                        <span>第 {{ currentIndex + 1 }} / {{ questions.length }} 题</span>
+                        <span>{{ Math.round(((currentIndex + 1) / questions.length) * 100) }}%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" :style="{width: ((currentIndex + 1)/questions.length)*100 + '%'}"></div>
+                    </div>
+                </div>
+                <div style="text-align:center; padding:0 20px 4px; font-size:12px; color:#c4a89e;">请选择你最真实的反应，而不是你认为正确的做法</div>
+                <transition name="fade-slide" mode="out-in">
+                    <div class="card" :key="currentIndex">
+                        <div class="question-text">{{ questions[currentIndex].text }}</div>
+                        <div v-for="(opt, idx) in questions[currentIndex].options" :key="idx"
+                            class="option-item" @click="selectOption(opt.scores, idx)"
+                            :class="{selected: selectedIdx === idx}">
+                            <div class="option-prefix">{{ String.fromCharCode(65+idx) }}</div>
+                            <div class="option-text">{{ opt.text }}</div>
+                        </div>
+                        <div class="btn-group">
+                            <button v-if="currentIndex > 0" class="secondary" @click="goBack"><i class="fas fa-arrow-left"></i> 上一题</button>
+                            <button @click="nextQuestion" :disabled="selectedIdx === -1">{{ currentIndex === questions.length - 1 ? '完成' : '下一题' }} <i class="fas fa-arrow-right"></i></button>
+                            <button class="secondary" @click="retest"><i class="fas fa-times"></i> 放弃</button>
+                        </div>
+                    </div>
+                </transition>
+            </template>
+
+            <template v-if="currentView === 'result' && finalScores">
+                <div class="header" :style="{background: 'linear-gradient(135deg, ' + (typeDetails[resultType] ? typeDetails[resultType].color : '#f9c9c2') + '88, ' + (typeDetails[resultType] ? typeDetails[resultType].color : '#f9c9c2') + '44)'}">
+                    <div class="result-emoji">{{ typeDetails[resultType] ? typeDetails[resultType].emoji : '' }}</div>
+                    <h2>你的恋爱人格</h2>
+                    <div class="result-type">{{ typeDetails[resultType] ? typeDetails[resultType].name : '' }}</div>
+                </div>
+                <div class="card">
+                    <div class="result-desc">{{ typeDetails[resultType] ? typeDetails[resultType].desc : '' }}</div>
+
+                    <div class="score-section">
+                        <div v-for="dim in scoreDimensions" :key="dim.key" class="score-bar-item">
+                            <div class="score-bar-header">
+                                <span>{{ dim.icon }} {{ dim.label }}</span>
+                                <span>{{ finalScores[dim.key].toFixed(1) }} / {{ dim.max }}</span>
+                            </div>
+                            <div class="score-bar-track">
+                                <div class="score-bar-fill" :style="{width: (finalScores[dim.key] / dim.max * 100) + '%', background: dim.color}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="radarChart" class="radar-container"></div>
+
+                    <div class="detail-section">
+                        <button class="detail-toggle" @click="showDetail = !showDetail">
+                            <span>📖 查看详细解读</span>
+                            <span class="arrow" :class="{open: showDetail}">▼</span>
+                        </button>
+                        <div class="detail-content" :style="{maxHeight: showDetail ? '1200px' : '0', opacity: showDetail ? 1 : 0}">
+                            <div class="detail-card">
+                                <h4>🌟 核心特质</h4>
+                                <ul><li v-for="t in (typeDetails[resultType] ? typeDetails[resultType].traits : [])" :key="t">{{ t }}</li></ul>
+                            </div>
+                            <div class="detail-card">
+                                <h4>💪 你的优势</h4>
+                                <ul><li v-for="s in (typeDetails[resultType] ? typeDetails[resultType].strengths : [])" :key="s">{{ s }}</li></ul>
+                            </div>
+                            <div class="detail-card">
+                                <h4>🌱 成长空间</h4>
+                                <ul><li v-for="g in (typeDetails[resultType] ? typeDetails[resultType].growth : [])" :key="g">{{ g }}</li></ul>
+                            </div>
+                            <div class="detail-card">
+                                <h4>💕 恋爱搭配建议</h4>
+                                <p>{{ typeDetails[resultType] ? typeDetails[resultType].compatibility : '' }}</p>
+                                <div class="compat-badge">最佳搭档：{{ typeDetails[resultType] ? typeDetails[resultType].idealPartner : '' }}</div>
+                            </div>
+                            <div v-if="genderAdviceText" class="detail-card">
+                                <h4>{{ gender === 'male' ? '👦 给男生的专属建议' : '👧 给女生的专属建议' }}</h4>
+                                <p>{{ genderAdviceText }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="share-buttons">
+                        <button @click="shareResult"><i class="fas fa-share-alt"></i> 分享</button>
+                        <button @click="generatePoster"><i class="fas fa-image"></i> 海报</button>
+                        <button class="secondary" @click="retest"><i class="fas fa-redo"></i> 重测</button>
+                    </div>
+                </div>
+            </template>
+
+            <template v-if="currentView === 'history'">
+                <div class="header">
+                    <h2>📜 测试历史</h2>
+                    <p>回顾你的恋爱人格变化</p>
+                </div>
+                <div class="card">
+                    <div v-if="!history.length" class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>暂无历史记录</p>
+                    </div>
+                    <div v-for="(item, idx) in history" :key="idx" class="history-item">
+                        <div class="history-header">
+                            <span class="history-type">{{ typeDetails[item.type] ? typeDetails[item.type].emoji : '' }} {{ typeDetails[item.type] ? typeDetails[item.type].name : '' }}{{ item.gender ? (item.gender === 'male' ? ' 👦' : ' 👧') : '' }}</span>
+                            <span class="history-date">{{ formatDate(item.timestamp) }}</span>
+                        </div>
+                        <div class="history-scores">
+                            <span class="history-score-tag">😰 {{ item.scores.anxiety.toFixed(1) }}</span>
+                            <span class="history-score-tag">🏃 {{ item.scores.avoidance.toFixed(1) }}</span>
+                            <span class="history-score-tag">🌿 {{ item.scores.secure.toFixed(1) }}</span>
+                            <span class="history-score-tag">✨ {{ item.scores.guide.toFixed(1) }}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:12px; margin-top:16px;">
+                        <button @click="currentView='home'" class="secondary" style="flex:1"><i class="fas fa-arrow-left"></i> 返回</button>
+                        <button v-if="history.length" @click="clearHistory" class="clear-history-btn" style="flex:1"><i class="fas fa-trash"></i> 清空记录</button>
+                    </div>
+                </div>
+            </template>
+
+            <div id="posterContainer" class="poster-hidden" style="width:340px; background:#fffaf5; padding:24px; border-radius:40px;">
+                <div style="text-align:center; font-size:12px; color:#ff8a6f; letter-spacing:2px; margin-bottom:4px;">LOVE PERSONALITY</div>
+                <div style="text-align:center; font-size:24px; font-weight:bold; margin:8px 0;">恋爱人格报告</div>
+                <div id="posterEmoji" style="font-size:40px; text-align:center;"></div>
+                <div id="posterTypeName" style="font-size:28px; font-weight:800; color:#D2694E; margin:8px 0; text-align:center;"></div>
+                <div id="posterScores" style="background:#FEF0E8; padding:14px; border-radius:20px; margin:12px 0; font-size:14px; line-height:1.8;"></div>
+                <div id="posterDesc" style="background:#FEF0E8; padding:14px; border-radius:20px; margin:12px 0; font-size:13px; line-height:1.6;"></div>
+                <div id="posterQR" style="display:flex; justify-content:center; margin:12px 0;"></div>
+                <div style="text-align:center; font-size:12px; color:#aaa;">扫码测测你的恋爱人格</div>
+            </div>
+
+            <transition name="fade">
+                <div v-if="toastMsg" class="toast">{{ toastMsg }}</div>
+            </transition>
+        </div>
+    `
+}).mount('#app');
+</script>
+</body>
+</html>
