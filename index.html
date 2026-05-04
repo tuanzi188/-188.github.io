@@ -65,6 +65,7 @@
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: none;
+            position: relative;
         }
 
         .app {
@@ -140,6 +141,9 @@
             animation: cardIn 0.4s ease both;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
+            min-height: 520px;
+            position: relative;
+            overflow: hidden;
         }
         @-webkit-keyframes cardIn {
             from { opacity: 0; -webkit-transform: translateY(20px); }
@@ -150,6 +154,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .test-container {
+            position: relative;
+            min-height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
         .question-text {
             font-size: 20px;
             font-weight: 600;
@@ -1726,6 +1736,9 @@ createApp({
             }
             startTestTime.value = Date.now();
             currentView.value = 'test';
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
         }
 
         function goBack() {
@@ -1741,6 +1754,9 @@ createApp({
                 } else {
                     selectedIdx.value = -1;
                 }
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
             }
         }
 
@@ -1780,8 +1796,12 @@ createApp({
                 } else {
                     selectedIdx.value = -1;
                 }
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
             } else {
                 computeResult();
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
             }
         }
 
@@ -2120,34 +2140,36 @@ createApp({
             </template>
 
             <template v-if="currentView === 'test'">
-                <div class="progress-wrapper">
-                    <div class="progress-info">
-                        <span v-if="!isBonusQuestion">第 {{ currentIndex + 1 }} / {{ questions.length }} 题</span>
-                        <span v-else>💫 彩蛋题</span>
-                        <span v-if="estimatedTimeLeft && !isBonusQuestion" style="color:#c4a89e; font-size:12px; font-weight:400;">{{ estimatedTimeLeft }}</span>
-                        <span>{{ Math.round(((currentIndex + 1) / totalSteps) * 100) }}%</span>
+                <div class="test-container">
+                    <div class="progress-wrapper">
+                        <div class="progress-info">
+                            <span v-if="!isBonusQuestion">第 {{ currentIndex + 1 }} / {{ questions.length }} 题</span>
+                            <span v-else>💫 彩蛋题</span>
+                            <span v-if="estimatedTimeLeft && !isBonusQuestion" style="color:#c4a89e; font-size:12px; font-weight:400;">{{ estimatedTimeLeft }}</span>
+                            <span>{{ Math.round(((currentIndex + 1) / totalSteps) * 100) }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" :style="{width: ((currentIndex + 1)/totalSteps)*100 + '%'}"></div>
+                        </div>
                     </div>
-                    <div class="progress">
-                        <div class="progress-bar" :style="{width: ((currentIndex + 1)/totalSteps)*100 + '%'}"></div>
-                    </div>
+                    <div style="text-align:center; padding:0 20px 4px; font-size:12px; color:#c4a89e;">请选择你最真实的反应，而不是你认为正确的做法</div>
+                    <transition name="fade-slide" mode="out-in">
+                        <div class="card" :key="currentIndex">
+                            <div class="question-text" :class="{'bonus-question': isBonusQuestion}">{{ currentQuestion.text }}</div>
+                            <div v-for="(opt, idx) in currentQuestion.options" :key="idx"
+                                class="option-item" @click="selectOption(opt.scores, idx, $event)"
+                                :class="{selected: selectedIdx === idx}">
+                                <div class="option-prefix">{{ String.fromCharCode(65+idx) }}</div>
+                                <div class="option-text">{{ opt.text }}</div>
+                            </div>
+                            <div class="btn-group">
+                                <button v-if="currentIndex > 0" class="secondary" @click="goBack"><i class="fa fa-arrow-left"></i> 上一题</button>
+                                <button @click="nextQuestion" :disabled="selectedIdx === -1">{{ isBonusQuestion ? '完成测试' : '下一题' }} <i class="fa fa-arrow-right"></i></button>
+                                <button class="secondary" @click="retest"><i class="fa fa-times"></i> 放弃</button>
+                            </div>
+                        </div>
+                    </transition>
                 </div>
-                <div style="text-align:center; padding:0 20px 4px; font-size:12px; color:#c4a89e;">请选择你最真实的反应，而不是你认为正确的做法</div>
-                <transition name="fade-slide" mode="out-in">
-                    <div class="card" :key="currentIndex">
-                        <div class="question-text" :class="{'bonus-question': isBonusQuestion}">{{ currentQuestion.text }}</div>
-                        <div v-for="(opt, idx) in currentQuestion.options" :key="idx"
-                            class="option-item" @click="selectOption(opt.scores, idx, $event)"
-                            :class="{selected: selectedIdx === idx}">
-                            <div class="option-prefix">{{ String.fromCharCode(65+idx) }}</div>
-                            <div class="option-text">{{ opt.text }}</div>
-                        </div>
-                        <div class="btn-group">
-                            <button v-if="currentIndex > 0" class="secondary" @click="goBack"><i class="fa fa-arrow-left"></i> 上一题</button>
-                            <button @click="nextQuestion" :disabled="selectedIdx === -1">{{ isBonusQuestion ? '完成测试' : '下一题' }} <i class="fa fa-arrow-right"></i></button>
-                            <button class="secondary" @click="retest"><i class="fa fa-times"></i> 放弃</button>
-                        </div>
-                    </div>
-                </transition>
             </template>
 
             <template v-if="currentView === 'result' && finalScores">
