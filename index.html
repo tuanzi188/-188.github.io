@@ -13,11 +13,15 @@
     <meta property="og:title" content="恋爱人格测试">
     <meta property="og:description" content="30道情景题测出你的恋爱人格类型">
     <meta property="og:type" content="website">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; img-src 'self' data: https: blob:; font-src 'self' https: data:;">
     <title>恋爱人格测试 - 30道情景题</title>
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
             --primary: #ff8a6f;
@@ -54,12 +58,13 @@
 
         body {
             background: var(--bg-body);
-            font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
             padding-bottom: 30px;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
         }
 
         .app {
@@ -67,10 +72,17 @@
             margin: 0 auto;
             background: var(--bg-app);
             min-height: 100vh;
-            min-height: 100dvh;
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
             position: relative;
             overflow: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            will-change: transform;
+        }
+        @supports (min-height: 100dvh) {
+            .app {
+                min-height: 100dvh;
+            }
         }
 
         .header {
@@ -104,11 +116,13 @@
             will-change: transform, opacity;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
         @-webkit-keyframes floatUp {
-            0% { -webkit-transform: translateY(0) rotate(0deg) scale(1); transform: translateY(0) rotate(0deg) scale(1); opacity: 0.7; }
+            0% { -webkit-transform: translateY(0) rotate(0deg) scale(1); opacity: 0.7; }
             50% { opacity: 0.4; }
-            100% { -webkit-transform: translateY(-220px) rotate(30deg) scale(0.4); transform: translateY(-220px) rotate(30deg) scale(0.4); opacity: 0; }
+            100% { -webkit-transform: translateY(-220px) rotate(30deg) scale(0.4); opacity: 0; }
         }
         @keyframes floatUp {
             0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.7; }
@@ -122,11 +136,14 @@
             border-radius: var(--radius-lg);
             padding: 24px 20px;
             box-shadow: var(--shadow-card);
+            -webkit-animation: cardIn 0.4s ease both;
             animation: cardIn 0.4s ease both;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
         @-webkit-keyframes cardIn {
-            from { opacity: 0; -webkit-transform: translateY(20px); transform: translateY(20px); }
-            to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+            from { opacity: 0; -webkit-transform: translateY(20px); }
+            to { opacity: 1; -webkit-transform: translateY(0); }
         }
         @keyframes cardIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -186,6 +203,8 @@
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
             outline: none;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-touch-callout: none;
         }
         .option-item:hover { background: #fdf0ea; }
         .option-item:active, .option-item.selected {
@@ -234,6 +253,8 @@
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
             outline: none;
+            -webkit-appearance: none;
+            appearance: none;
         }
         button:active { transform: scale(0.96); -webkit-transform: scale(0.96); }
         button:disabled {
@@ -1375,6 +1396,43 @@ const scoreDimensions = [
 
 const { createApp, ref, computed, onMounted, nextTick } = Vue;
 
+(function() {
+    // iOS性能优化
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    // iOS特定优化
+    if (isIOS) {
+        // 防止橡皮筋滚动
+        let lastTouchY = 0;
+        document.addEventListener('touchstart', function(e) {
+            lastTouchY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', function(e) {
+            if (document.body.scrollTop === 0 && e.touches[0].clientY > lastTouchY) {
+                if (e.cancelable) e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // 禁用双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+    }
+    
+    // 减少初始渲染优化
+    if (window.requestIdleCallback) {
+        window.requestIdleCallback(() => {
+            // 延迟加载非关键资源
+        });
+    }
+})();
+
 createApp({
     setup() {
         const currentView = ref('home');
@@ -1536,19 +1594,23 @@ createApp({
 
         const totalSteps = questions.length + 1;
 
+        // 浮动爱心 - 缓存结果以提高性能
+        let heartsCache = null;
         const floatingHearts = computed(() => {
+            if (heartsCache) return heartsCache;
             const arr = [];
             const colors = ['#ff8a6f','#ff6b8a','#ffa07a','#ff69b4','#ff1493'];
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 3; i++) {
                 arr.push({
                     id: i,
                     left: (Math.random() * 80 + 10) + '%',
-                    size: (Math.random() * 12 + 12) + 'px',
+                    size: (Math.random() * 10 + 10) + 'px',
                     duration: (Math.random() * 3 + 4) + 's',
                     delay: (i * 2) + 's',
                     color: colors[i % colors.length]
                 });
             }
+            heartsCache = arr;
             return arr;
         });
 
@@ -1682,7 +1744,8 @@ createApp({
             }
         }
 
-        function selectOption(optionScores, idx) {
+        function selectOption(optionData, idx, event) {
+            if (event) event.preventDefault();
             selectedIdx.value = idx;
         }
 
@@ -1881,11 +1944,6 @@ createApp({
                 radarDiv.innerHTML = '<div style="padding:20px;color:#999;font-size:12px;">雷达图加载失败</div>';
             }
             setTimeout(function() {
-                var qrDiv = document.getElementById('posterQR');
-                qrDiv.innerHTML = '';
-                try {
-                    new QRCode(qrDiv, { text: window.location.href, width: 90, height: 90 });
-                } catch (e) {}
                 nextTick(function() {
                     html2canvas(container, { scale: 2, backgroundColor: '#fffbf5', useCORS: true }).then(function(canvas) {
                         if (posterRadar) posterRadar.dispose();
@@ -1893,13 +1951,16 @@ createApp({
                         try {
                             var win = window.open();
                             if (win) {
+                                win.document.open();
                                 win.document.write(
-                                    '<body style="text-align:center; background:#fff; padding:20px;">' +
-                                    '<h3>长按图片保存</h3>' +
+                                    '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>海报</title></head>' +
+                                    '<body style="text-align:center; background:#fff; padding:20px; margin:0;">' +
+                                    '<h3 style="margin:10px 0;">长按图片保存</h3>' +
                                     '<p style="font-size:13px; color:#999; margin:8px 0 16px;">保存后可放大查看或分享给朋友</p>' +
                                     '<img src="' + imgData + '" style="max-width:100%; border-radius:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1);"/>' +
-                                    '</body>'
+                                    '</body></html>'
                                 );
+                                win.document.close();
                             } else {
                                 downloadPosterFallback(imgData);
                             }
@@ -1962,7 +2023,15 @@ createApp({
             showToast('历史记录已清空');
         }
 
-        onMounted(function() { loadHistory(); });
+        onMounted(function() {
+            loadHistory();
+            // 延迟加载ECharts等库，优化初始加载
+            if (typeof echarts === 'undefined' && window.requestIdleCallback) {
+                window.requestIdleCallback(() => {
+                    // 等待库加载完成
+                });
+            }
+        });
 
         return {
                     currentView, currentIndex, selectedIdx, questions, bonusQuestion, currentQuestion, isBonusQuestion, totalSteps,
@@ -1989,7 +2058,7 @@ createApp({
                     <div class="question-text">30道情景题<br>发现你的恋爱相处模式</div>
                     <button @click="startTest" style="width:80%; margin-top:16px">开始测试</button>
                     <button v-if="history.length" @click="currentView='history'" class="ghost" style="width:80%; margin-top:12px">
-                        <i class="fas fa-history"></i> 查看历史记录
+                        <i class="fa fa-history"></i> 查看历史记录
                     </button>
                 </div>
                 <div class="card">
@@ -2043,9 +2112,9 @@ createApp({
                     </div>
                     <div class="btn-container">
                         <button @click="confirmGender" style="width:80%">
-                            <i class="fas fa-arrow-right"></i> 开始答题
+                            <i class="fa fa-arrow-right"></i> 开始答题
                         </button>
-                        <button class="secondary" @click="currentView='home'" style="width:80%"><i class="fas fa-arrow-left"></i> 返回</button>
+                        <button class="secondary" @click="currentView='home'" style="width:80%"><i class="fa fa-arrow-left"></i> 返回</button>
                     </div>
                 </div>
             </template>
@@ -2067,15 +2136,15 @@ createApp({
                     <div class="card" :key="currentIndex">
                         <div class="question-text" :class="{'bonus-question': isBonusQuestion}">{{ currentQuestion.text }}</div>
                         <div v-for="(opt, idx) in currentQuestion.options" :key="idx"
-                            class="option-item" @click="selectOption(opt.scores, idx)"
+                            class="option-item" @click="selectOption(opt.scores, idx, $event)"
                             :class="{selected: selectedIdx === idx}">
                             <div class="option-prefix">{{ String.fromCharCode(65+idx) }}</div>
                             <div class="option-text">{{ opt.text }}</div>
                         </div>
                         <div class="btn-group">
-                            <button v-if="currentIndex > 0" class="secondary" @click="goBack"><i class="fas fa-arrow-left"></i> 上一题</button>
-                            <button @click="nextQuestion" :disabled="selectedIdx === -1">{{ isBonusQuestion ? '完成测试' : '下一题' }} <i class="fas fa-arrow-right"></i></button>
-                            <button class="secondary" @click="retest"><i class="fas fa-times"></i> 放弃</button>
+                            <button v-if="currentIndex > 0" class="secondary" @click="goBack"><i class="fa fa-arrow-left"></i> 上一题</button>
+                            <button @click="nextQuestion" :disabled="selectedIdx === -1">{{ isBonusQuestion ? '完成测试' : '下一题' }} <i class="fa fa-arrow-right"></i></button>
+                            <button class="secondary" @click="retest"><i class="fa fa-times"></i> 放弃</button>
                         </div>
                     </div>
                 </transition>
@@ -2221,9 +2290,9 @@ createApp({
                     </div>
 
                     <div class="share-buttons">
-                        <button @click="shareResult"><i class="fas fa-share-alt"></i> 分享</button>
-                        <button @click="generatePoster"><i class="fas fa-image"></i> 海报</button>
-                        <button class="secondary" @click="retest"><i class="fas fa-redo"></i> 重测</button>
+                        <button @click="shareResult"><i class="fa fa-share-alt"></i> 分享</button>
+                        <button @click="generatePoster"><i class="fa fa-image"></i> 海报</button>
+                        <button class="secondary" @click="retest"><i class="fa fa-refresh"></i> 重测</button>
                     </div>
                 </div>
             </template>
@@ -2243,7 +2312,7 @@ createApp({
                             <span class="history-type">{{ typeDetails[item.type] ? typeDetails[item.type].emoji : '' }} {{ typeDetails[item.type] ? typeDetails[item.type].name : '' }}{{ item.gender ? (item.gender === 'male' ? ' 👦' : ' 👧') : '' }}<span v-if="item.mbti && item.mbti.code" style="margin-left:8px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;background:linear-gradient(135deg,#98D2C0,#F7C59F,#B5C9E2,#FFA07A);color:#fff;">{{ item.mbti.code }}</span>
                             <div style="display:flex;gap:8px;align-items:center;">
                                 <span class="history-date">{{ item.date || formatDate(item.id) }}</span>
-                                <button style="border:0;background:transparent;color:#aaa;cursor:pointer;font-size:13px;padding:2px 6px;" @click.stop="deleteHistoryById(item.id)"><i class="fas fa-trash"></i></button>
+                                <button style="border:0;background:transparent;color:#aaa;cursor:pointer;font-size:13px;padding:2px 6px;" @click.stop="deleteHistoryById(item.id)"><i class="fa fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="history-scores">
@@ -2254,8 +2323,8 @@ createApp({
                         </div>
                     </div>
                     <div style="display:flex; margin-top:16px;">
-                        <button @click="currentView='home'" class="secondary" style="flex:1; margin-right:12px;"><i class="fas fa-arrow-left"></i> 返回</button>
-                        <button v-if="history.length" @click="clearHistory" class="clear-history-btn" style="flex:1"><i class="fas fa-trash"></i> 清空记录</button>
+                        <button @click="currentView='home'" class="secondary" style="flex:1; margin-right:12px;"><i class="fa fa-arrow-left"></i> 返回</button>
+                        <button v-if="history.length" @click="clearHistory" class="clear-history-btn" style="flex:1"><i class="fa fa-trash"></i> 清空记录</button>
                     </div>
                 </div>
             </template>
@@ -2268,8 +2337,7 @@ createApp({
                 <div id="posterScores" style="background:#FEF0E8; padding:14px; border-radius:20px; margin:12px 0; font-size:14px; line-height:1.8;"></div>
                 <div id="posterRadar" style="width:280px; height:220px; margin:8px auto;"></div>
                 <div id="posterDesc" style="background:#FEF0E8; padding:14px; border-radius:20px; margin:12px 0; font-size:13px; line-height:1.6;"></div>
-                <div id="posterQR" style="display:flex; justify-content:center; margin:12px 0;"></div>
-                <div style="text-align:center; font-size:12px; color:#aaa;">扫码测测你的恋爱人格</div>
+                <div style="text-align:center; font-size:12px; color:#aaa; margin-top:10px;">分享给朋友测测吧~</div>
             </div>
 
             <transition name="fade">
