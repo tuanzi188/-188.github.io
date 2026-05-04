@@ -253,6 +253,115 @@
             border-radius: 10px;
             transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .score-level {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 8px;
+            margin-right: 4px;
+        }
+        .score-pct {
+            font-size: 12px;
+            color: #999;
+            margin-left: 2px;
+        }
+        .dim-definition {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 4px;
+            padding-left: 2px;
+        }
+        .secondary-type-card {
+            background: linear-gradient(135deg, #fff5f0, #f0f4ff);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border: 1px solid #f0e2da;
+        }
+        .secondary-type-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        .secondary-type-content {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .secondary-type-content > * + * {
+            margin-left: 8px;
+        }
+        .secondary-type-icon {
+            font-size: 24px;
+        }
+        .secondary-type-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .secondary-type-score {
+            font-size: 13px;
+            color: #888;
+            margin-left: auto;
+        }
+        .secondary-type-hint {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+        .duration-info {
+            text-align: center;
+            padding: 10px 0;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .positive-view-card {
+            background: linear-gradient(135deg, #fff8f0, #f0f8ff);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            border: 1px solid #f0e8da;
+        }
+        .positive-view-label {
+            font-size: 12px;
+            color: #E86A4F;
+            margin-bottom: 6px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .positive-view-text {
+            font-size: 14px;
+            color: var(--text-medium);
+            line-height: 1.7;
+        }
+        .scenario-advice-item {
+            background: #fef8f4;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border: 1px solid #f0e8da;
+        }
+        .scenario-advice-item:last-child { margin-bottom: 0; }
+        .scenario-advice-scene {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        .scenario-advice-reaction {
+            font-size: 13px;
+            color: var(--text-medium);
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+        .scenario-advice-tip {
+            font-size: 13px;
+            color: #E86A4F;
+            line-height: 1.5;
+        }
 
         .detail-section { margin: 16px 0; }
         .detail-toggle {
@@ -313,6 +422,38 @@
             font-size: 14px;
             color: var(--text-medium);
             line-height: 1.6;
+        }
+
+        .detail-tabs {
+            display: flex;
+            background: #f9ede6;
+            border-radius: 14px;
+            padding: 4px;
+            margin-top: 12px;
+        }
+        .detail-tabs > * + * { margin-left: 4px; }
+        .detail-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: none;
+            text-align: center;
+        }
+        .detail-tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .detail-tab-btn:active { transform: scale(0.96); }
+        .detail-tab-content {
+            margin-top: 12px;
         }
 
         .share-buttons { display: flex; margin: 20px 0; }
@@ -456,19 +597,25 @@
         }
         .clear-history-btn:active { background: #fef0e8; }
 
+        .gender-section-label {
+            font-size: 12px;
+            color: #c4a89e;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
         .gender-cards {
             display: flex;
-            margin: 16px 0;
             justify-content: center;
         }
         .gender-cards > * + * { margin-left: 16px; }
         .gender-card {
             flex: 1;
-            max-width: 160px;
+            max-width: 140px;
             background: #fdf8f5;
             border: 2px solid #f0e2da;
             border-radius: var(--radius-lg);
-            padding: 24px 16px;
+            padding: 24px 16px 20px;
             text-align: center;
             cursor: pointer;
             transition: all var(--transition-fast);
@@ -479,7 +626,7 @@
             box-shadow: 0 0 0 3px rgba(255,138,111,0.15);
             transform: scale(0.97);
         }
-        .gender-card .gender-icon { font-size: 40px; margin-bottom: 8px; }
+        .gender-card .gender-icon { font-size: 42px; margin-bottom: 10px; }
         .gender-card .gender-label { font-size: 16px; font-weight: 600; color: var(--text-dark); }
 
         .empty-state {
@@ -489,6 +636,60 @@
         }
         .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
         .empty-state p { font-size: 14px; }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0 16px;
+        }
+        .section-divider::before,
+        .section-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #f0e2da;
+        }
+        .section-divider span {
+            padding: 0 14px;
+            font-size: 12px;
+            color: #c4a89e;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+        .stage-cards {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .stage-cards > * { flex: 1 1 calc(50% - 5px); min-width: 0; }
+        .stage-cards > *:nth-child(odd) { margin-right: 5px; }
+        .stage-cards > *:nth-child(even) { margin-left: 5px; }
+        .stage-cards > *:nth-child(n+3) { margin-top: 10px; }
+        .stage-card {
+            background: #fdf8f5;
+            border: 2px solid #f0e2da;
+            border-radius: 16px;
+            padding: 14px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .stage-card:active, .stage-card.active {
+            border-color: var(--primary);
+            background: #fff0e8;
+            box-shadow: 0 0 0 3px rgba(255,138,111,0.12);
+            transform: scale(0.97);
+        }
+        .stage-card .stage-icon { font-size: 26px; margin-bottom: 4px; }
+        .stage-card .stage-label { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+        .stage-card .stage-desc { font-size: 11px; color: #b8a8a0; margin-top: 4px; line-height: 1.4; }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
 
         ::-webkit-scrollbar { width: 0; }
 
@@ -501,185 +702,185 @@
 <script src="https://cdn.bootcdn.net/ajax/libs/vue/3.3.4/vue.global.prod.js"></script>
 <script>
 const questions = [
-    { text: "周末下午你窝在沙发上看手机，对方突然凑过来贴着你坐下，把头靠在你肩膀上。你最可能的反应是？", options: [
-        { text: "把手机架在旁边，说「一起看个东西吧？」", scores: { guide: 1 } },
-        { text: "手指在屏幕上停了一下，过几秒才继续划", scores: { anxiety: 1 } },
-        { text: "自然地揽过对方肩膀说「靠着吧」，继续刷手机", scores: { secure: 1 } },
-        { text: "没说什么，把手机往另一边挪了挪，继续看自己的", scores: { avoidance: 1 } }
+    { text: "周末下午你窝在沙发上自顾刷手机，对方一言不发凑过来挨着你坐下，直接把头靠在你肩膀上，没有任何语言交流。你最可能的反应是？", options: [
+        { text: "心跳突然变快，不敢乱动，忍不住胡思乱想TA是不是心情低落、急需安慰", scores: { anxiety: 1 } },
+        { text: "暗自开心，主动放下手机接住这份亲近，顺势主动闲聊，拉近两人氛围", scores: { guide: 1 } },
+        { text: "心里暖暖的，顺其自然接受亲近，继续安静刷手机，不刻意主动搭话", scores: { secure: 1 } },
+        { text: "有点不习惯亲密靠得太近，表面不动声色，下意识心里拉开一点距离", scores: { avoidance: 1 } }
     ]},
-    { text: "你今天的工作从早忙到晚，中间有好几个小时完全没看手机。下班后打开手机发现对方发了好几条消息。你的第一反应是？", options: [
-        { text: "先回了句「在忙」，然后翻了翻消息继续往前走", scores: { avoidance: 1 } },
-        { text: "回完消息后直接说「这周日我空出来了，咱们出去走走？」", scores: { guide: 1 } },
-        { text: "先打了个电话过去，连打了两个才接通", scores: { anxiety: 1 } },
-        { text: "边走边回消息「刚看到，今天忙死了，好想你」", scores: { secure: 1 } }
+    { text: "你从早忙工作一整天，中途好几个小时没看手机，下班点开发现对方断断续续给你发了好几条日常琐事消息。你的第一反应是？", options: [
+        { text: "没太大感觉，没必要秒回，什么时候有空什么时候再回复就行", scores: { avoidance: 1 } },
+        { text: "心里反复纠结，想立刻回又怕显得太主动，害怕自己热情不被珍惜", scores: { anxiety: 1 } },
+        { text: "感受到对方的惦记，会主动及时回应，顺势开启聊天，维系日常互动感", scores: { guide: 1 } },
+        { text: "看了下时间，理解对方有自己的生活，先忙完手头事，晚点再从容回复", scores: { secure: 1 } }
     ]},
-    { text: "你们一起吃火锅，对方帮你调的蘸料里有你从来不吃的香菜。你的第一反应是？", options: [
-        { text: "把蘸料碗挪到自己这边，默默把香菜挑出来吃了", scores: { anxiety: 1 } },
-        { text: "拿筷子把香菜一根根挑出来放到碟子边", scores: { secure: 1 } },
-        { text: "蘸了一口吃了，没提香菜的事", scores: { avoidance: 1 } },
-        { text: "跟对方说「你帮我挑出来，我给你夹虾滑」", scores: { guide: 1 } }
+    { text: "你们一起吃火锅，对方不知情顺手帮你调好了蘸料，坐下你发现里面有你从来不吃的香菜。你的第一反应是？", options: [
+        { text: "轻松笑着说明自己不吃香菜，玩笑化解尴尬，顺便让对方记住自己的喜好", scores: { guide: 1 } },
+        { text: "心里有点委屈失落，介意对方没记住自己忌口，又不好意思直接说出口", scores: { anxiety: 1 } },
+        { text: "懒得特意解释纠正，将就着吃下去，这种小事不值得放在心上", scores: { avoidance: 1 } },
+        { text: "稍微愣了下，默默把香菜挑干净正常吃饭，不责怪也不特意多说什么", scores: { secure: 1 } }
     ]},
-    { text: "你们打算下个月去一个从来没去过的城市短途旅行，正在一起查攻略、选酒店。遇到这种情况，你一般会？", options: [
-        { text: "跟对方说「你定吧，我都可以」，然后去收拾行李了", scores: { avoidance: 1 } },
-        { text: "自己一口气查了好几个攻略，查完才想起来问对方「你有什么想法？」", scores: { anxiety: 1 } },
-        { text: "跟对方说「你看酒店，我查吃的，分工来」", scores: { guide: 1 } },
-        { text: "打开手机查了两个酒店，说「你看这个离景区近，那个早餐好」", scores: { secure: 1 } }
+    { text: "你们提前一周约好周六一起看电影，周五晚上对方临时说公司紧急加班，当天没法赴约也没有主动改期。你的第一反应是？", options: [
+        { text: "反倒觉得清静自在，不用刻意迁就行程，简单回复就自顾做自己的事", scores: { avoidance: 1 } },
+        { text: "心里空落落的，反复琢磨聊天记录，担心对方本来就不想跟自己见面", scores: { anxiety: 1 } },
+        { text: "理解工作无奈，主动开口提议换时间，轻松圆住氛围不冷场", scores: { guide: 1 } },
+        { text: "难免有点小失落，但理解工作突发情况，坦然接受，等对方后续安排", scores: { secure: 1 } }
     ]},
-    { text: "你们提前一周约好了周六去看电影，但周五晚上对方发消息说公司临时安排周六加班。如果是你，你会怎么做？", options: [
-        { text: "回消息问「那周日有空吗？换个时间也行」", scores: { guide: 1 } },
-        { text: "回了个「好」，关了手机，没再想这件事", scores: { avoidance: 1 } },
-        { text: "回消息说「好吧，那下周再约」", scores: { secure: 1 } },
-        { text: "回了个「好」，之后又打开对话框看了好几次", scores: { anxiety: 1 } }
+    { text: "晚上躺在床上准备休息，对方全程背对着你自顾刷短视频，全程不说话、不主动搭理你。你的第一反应是？", options: [
+        { text: "主动凑过去搭话互动，温柔拉回相处氛围，不让两人一直冷冰冰各玩各的", scores: { guide: 1 } },
+        { text: "心里莫名堵得慌，感觉被冷落，默默等着对方主动转头顾及自己", scores: { anxiety: 1 } },
+        { text: "能接受各自独处放松，有点无聊但自己打发时间，不胡思乱想不纠结", scores: { secure: 1 } },
+        { text: "正好互不打扰，戴上耳机沉浸自己世界，不需要刻意找话题维系", scores: { avoidance: 1 } }
     ]},
-    { text: "你们一起在家居店挑沙发，两个人喜欢的款式不一样，已经在这两张沙发之间来回坐了好几轮。接下来你最可能？", options: [
-        { text: "拿起手机搜了一下这两款的评价，边看边问对方「你觉得呢？」", scores: { anxiety: 1 } },
-        { text: "跟对方说「两个都坐了一轮了，要不列个优缺点对比一下？」", scores: { guide: 1 } },
-        { text: "跟对方说「你定吧，我都可以」", scores: { avoidance: 1 } },
-        { text: "跟对方说「这个深色的耐脏，我喜欢这个」", scores: { secure: 1 } }
+    { text: "你们因为家务分工吵了几句，谁都没让步，冷战一阵后对方直接躺床背过身先睡，拒绝当下沟通。你最可能的反应是？", options: [
+        { text: "不想纠结争吵对错，也懒得主动哄人，转身睡觉避开情绪拉扯", scores: { avoidance: 1 } },
+        { text: "即便还在生气，也愿意留台阶给对方，等时机合适主动沟通化解矛盾", scores: { guide: 1 } },
+        { text: "又委屈又不安，翻来覆去睡不着，害怕矛盾一直搁置，盼着赶紧和好", scores: { anxiety: 1 } },
+        { text: "心里还有情绪，但不愿深夜僵持，先好好休息，等第二天自然缓和相处", scores: { secure: 1 } }
     ]},
-    { text: "晚上你们并排躺在床上，对方背对着你在刷短视频，屏幕的光亮映在墙上。你会怎么做？", options: [
-        { text: "翻了个身背对对方，把被子往上拉了拉", scores: { avoidance: 1 } },
-        { text: "也打开手机刷，但几分钟就解锁看一次对方有没有转过来", scores: { anxiety: 1 } },
-        { text: "拍拍对方肩膀问「今天累不累？」", scores: { secure: 1 } },
-        { text: "把手机放到一边，说「我们聊会儿天吧？」", scores: { guide: 1 } }
+    { text: "你发烧38.5度浑身难受躺在床上，对方给你煮了一碗白粥放到床头，没问你身体感受，只说了句我先去忙自己的事就径直走开。你的第一反应是？", options: [
+        { text: "明白对方有照顾的心意，自己安静喝粥休息，理解对方有事，不主动要求陪伴", scores: { secure: 1 } },
+        { text: "早就习惯不依赖别人，有人送粥就够了，有没有人陪伴都无所谓", scores: { avoidance: 1 } },
+        { text: "心里又难过又委屈，忍不住多想自己生病对方也不上心，嫌自己麻烦", scores: { anxiety: 1 } },
+        { text: "理解对方忙碌，也会轻声表达自己难受，委婉希望对方能抽空多陪一会儿", scores: { guide: 1 } }
     ]},
-    { text: "周末在家，突然停电了，手机也没剩多少电。你和对方一起坐在黑暗的客厅里。你接下来会？", options: [
-        { text: "拿了个毯子裹住两个人，说了句「停电也挺好的」", scores: { secure: 1 } },
-        { text: "缩在毯子里，偶尔抬头看看对方，等对方先开口", scores: { anxiety: 1 } },
-        { text: "打开手机手电筒，说「来，我们玩个游戏，谁先笑谁去洗碗」", scores: { guide: 1 } },
-        { text: "找了个充电宝给手机充上电，自己刷起了手机", scores: { avoidance: 1 } }
+    { text: "在一起快一年，日常相处尚可，但对方总是记不住你们的纪念日，当天毫无表示也不提一句。你的第一反应是？", options: [
+        { text: "不会生闷气，轻松跟对方提起纪念日，一起商量小仪式，慢慢培养默契", scores: { guide: 1 } },
+        { text: "有点小遗憾，但不看重形式感，感情重在日常，合适时机随口温和提一句", scores: { secure: 1 } },
+        { text: "本身就不在意这些仪式日子，忘了也无所谓，不会放在心上纠结", scores: { avoidance: 1 } },
+        { text: "一整天心神不宁暗自失落，敏感在意自己在对方心里够不够重要", scores: { anxiety: 1 } }
     ]},
-    { text: "你们一起组装网购的书架，说明书看了半天没看懂，两个人都有点烦躁。接下来你会？", options: [
-        { text: "一直在翻说明书，翻了好几遍，嘴上说「等一下等一下」", scores: { anxiety: 1 } },
-        { text: "跟对方说「要不找个师傅来装吧」，然后去客厅坐下了", scores: { avoidance: 1 } },
-        { text: "拍了张零件的照片说「我去网上搜个视频教程」", scores: { guide: 1 } },
-        { text: "跟对方说「没事，咱们慢慢来，不着急」", scores: { secure: 1 } }
+    { text: "你特意换上新衣服问对方好不好看，对方随口直白调侃你最近好像长胖了，语气不算恶意但很直接。你的第一反应是？", options: [
+        { text: "没什么情绪起伏，淡淡回应一句，不再聊这个话题，默默换件衣服", scores: { avoidance: 1 } },
+        { text: "心里像被刺了一下，暗自难过在意，之后忍不住纠结自己身材形象", scores: { anxiety: 1 } },
+        { text: "用玩笑调侃回去化解尴尬，顺势约一起运动，把氛围变得温和舒服", scores: { guide: 1 } },
+        { text: "坦然一笑带过不往心里去，顺势闲聊作息运动，心态平和不敏感", scores: { secure: 1 } }
     ]},
-    { text: "你们在商量周末去哪儿，你说去公园对方说太晒，你说去商场对方又说人太多。接下来你会怎么做？", options: [
-        { text: "跟对方说「行，你说你想要什么样的？我再想想」", scores: { secure: 1 } },
-        { text: "打开手机搜了一圈，说「我找到几个地方你看看」", scores: { guide: 1 } },
-        { text: "拿起遥控器换了个台，说「那就在家待着吧」", scores: { avoidance: 1 } },
-        { text: "又提了第三个方案，说完盯着对方的反应", scores: { anxiety: 1 } }
+    { text: "你们整整三天没有任何人主动发消息聊天，彼此默契断联，谁也没有先找对方。你的第一反应是？", options: [
+        { text: "偶尔会想起对方，但理解各自生活节奏，顺其自然，不刻意强求联系", scores: { secure: 1 } },
+        { text: "不想关系一直冷下去，主动轻松发消息破冰，温柔拉回疏离氛围", scores: { guide: 1 } },
+        { text: "脑补各种不好的可能，想主动又拉不下面子，憋着情绪反复内耗", scores: { anxiety: 1 } },
+        { text: "完全沉浸自己生活，没留意断联多久，也不会主动想着破冰联系", scores: { avoidance: 1 } }
     ]},
-    { text: "你下午在公司被一个项目方案卡住了，想了两个小时没思路。遇到这种情况你会怎么做？", options: [
-        { text: "回家后该干嘛干嘛，没提工作的事", scores: { avoidance: 1 } },
-        { text: "回家后吃饭时跟对方说「今天工作遇到个事，挺烦的」", scores: { secure: 1 } },
-        { text: "发了条消息给对方说「工作好烦」，隔几分钟就看一次手机", scores: { anxiety: 1 } },
-        { text: "回家后跟对方说「我卡在一个地方了，你帮我换个角度想想？」", scores: { guide: 1 } }
+    { text: "你们商量下个月旅行，你提议去海边对方嫌太晒，提议去山里对方又嫌太累，一直达不成一致。你的第一反应是？", options: [
+        { text: "主动折中想方案，兼顾两人喜好，好好商量选出双方都舒服的计划", scores: { guide: 1 } },
+        { text: "怕惹对方不开心，不敢坚持想法，下意识委屈自己顺着对方意愿", scores: { anxiety: 1 } },
+        { text: "有点纠结无奈，愿意慢慢磨合商量，不强迫对方迁就自己喜好", scores: { secure: 1 } },
+        { text: "觉得来回商量很麻烦，干脆甩手让对方决定，自己随便配合就行", scores: { avoidance: 1 } }
     ]},
-    { text: "你和对方视频通话，聊到一半对方开始边聊边刷朋友圈。你最可能的反应是？", options: [
-        { text: "说话变少了，对方问怎么了才回了一句「没事」", scores: { anxiety: 1 } },
-        { text: "跟对方说「嘿，我给你看个东西」，然后发了一张搞笑图", scores: { guide: 1 } },
-        { text: "跟对方说「嘿，你在听吗？我感觉你好像在忙别的」", scores: { secure: 1 } },
-        { text: "自己也打开别的app，一边看一边应着", scores: { avoidance: 1 } }
+    { text: "对方接到一通私人电话，挂完眼眶泛红情绪低落，只简单说家里出了点事，不愿多解释也不主动倾诉。你的第一反应是？", options: [
+        { text: "知道对方需要独处空间，不多过问悄悄走开，刻意避开情绪场面", scores: { avoidance: 1 } },
+        { text: "温柔陪在身边安抚，告诉对方不用硬扛，愿意随时倾听、一起分担", scores: { guide: 1 } },
+        { text: "心里跟着不好受，安静陪在身边递上水杯，不追问隐私，默默等TA愿意开口", scores: { secure: 1 } },
+        { text: "心里七上八下胡思乱想，忍不住担心是不是跟自己有关，小心翼翼不敢多问", scores: { anxiety: 1 } }
     ]},
-    { text: "你加班到晚上九点多才到家，推开门发现对方在桌上给你留了一碗还温着的汤和一张写着「辛苦了」的便签。你的第一反应是？", options: [
-        { text: "喝完汤，拍了张照片发给对方说「明天你也别做饭了，我来」", scores: { guide: 1 } },
-        { text: "喝了汤，把便签夹在笔记本里，没特别说什么", scores: { avoidance: 1 } },
-        { text: "喝完汤，把便签翻过来又看了一遍，放在枕头旁边", scores: { anxiety: 1 } },
-        { text: "拍了张照片发给对方说「看到汤了，你也早点休息」", scores: { secure: 1 } }
+    { text: "朋友聚餐饭局上，对方当着一众熟人面，随口调侃说出你以前比较尴尬的私事，没顾及你的感受。你的第一反应是？", options: [
+        { text: "瞬间脸红窘迫，心里又羞又难过，介意对方不懂得给自己留面子", scores: { anxiety: 1 } },
+        { text: "当场幽默回怼不伤和气，事后认真沟通，约定人前互相尊重、私下再玩笑", scores: { guide: 1 } },
+        { text: "表面不动声色不发作，话题翻篇，但心里悄悄和对方拉开一点距离", scores: { avoidance: 1 } },
+        { text: "当场淡淡一笑化解尴尬，事后找时机温和提醒对方注意分寸", scores: { secure: 1 } }
     ]},
-    { text: "你们一起参加朋友聚餐，对方在饭桌上当着六七个人的面讲了你大学时挂科的事。你通常会？", options: [
-        { text: "跟着大家笑了，顺嘴说了句「行了别揭我老底了」", scores: { secure: 1 } },
-        { text: "话题过去后才重新加入聊天，之后没再提这件事", scores: { avoidance: 1 } },
-        { text: "笑着说「行了行了，下次我来讲你上次在商场迷路的事」", scores: { guide: 1 } },
-        { text: "低头扒了两口饭，没接话", scores: { anxiety: 1 } }
+    { text: "晚上九点多，没有任何争执前兆，对方突然说想一个人静静，让你暂时别打扰TA。你的第一反应是？", options: [
+        { text: "尊重对方独处需求，坦然退让不纠缠，安静不打扰，等TA自己缓过来", scores: { secure: 1 } },
+        { text: "刚好顺着台阶离开乐得清静，不追问原因，也不主动关心后续情绪", scores: { avoidance: 1 } },
+        { text: "体谅对方情绪，同时温柔表达陪伴，告诉对方想独处可以理解，想说话随时都在", scores: { guide: 1 } },
+        { text: "心里一下子慌了，患得患失，害怕对方厌烦自己、慢慢疏远感情", scores: { anxiety: 1 } }
     ]},
-    { text: "你发烧 38.5 度躺在床上，对方煮了一碗白粥端到床头，然后说「我先去忙了」就走了。你的第一反应是？", options: [
-        { text: "喊住对方说「能不能再帮我拿个体温计」", scores: { guide: 1 } },
-        { text: "等对方带上门，自己盯着粥看了一会儿才端起来喝", scores: { anxiety: 1 } },
-        { text: "端起碗喝了两口，把碗放到一边继续刷手机", scores: { avoidance: 1 } },
-        { text: "说了声「谢谢」，端起碗喝了一口说「好喝，你去忙吧，有事我叫你」", scores: { secure: 1 } }
+    { text: "你帮对方收拾抽屉找东西，无意间翻到小盒子，里面放着前任曾经送过的纪念品手链。你的第一反应是？", options: [
+        { text: "心里堵得慌很不是滋味，反复胡思乱想对方是不是还放不下旧人", scores: { anxiety: 1 } },
+        { text: "假装没看见，刻意避开敏感话题，不愿触碰过往，也不想挑起矛盾", scores: { avoidance: 1 } },
+        { text: "找合适时机温和坦诚沟通，不带质问，好好聊彼此对待过往物品的态度", scores: { guide: 1 } },
+        { text: "尊重对方过往隐私，内心毫无波澜，悄悄放回原处，不多过问不深究", scores: { secure: 1 } }
     ]},
-    { text: "你换了一件新衣服问对方好不好看，对方看了一眼说「你最近是不是又胖了？」。你会怎么做？", options: [
-        { text: "回了一句「哦」，把衣服挂回衣柜了", scores: { avoidance: 1 } },
-        { text: "跟对方说「那你觉得我穿什么好看？下次一起去挑」", scores: { guide: 1 } },
-        { text: "笑了一下，转身去照镜子整理衣服", scores: { secure: 1 } },
-        { text: "没接话，过了一会儿又换了一件衣服出来问对方「这件呢？」", scores: { anxiety: 1 } }
+    { text: "周年纪念日对方送了你一件精致摆件，风格完全不是你喜欢的类型，日常也完全用不上。你的第一反应是？", options: [
+        { text: "礼貌简单道谢，随手收进抽屉，不深究礼物合不合适，不表露真实感受", scores: { avoidance: 1 } },
+        { text: "开心收下感谢心意，温柔跟对方聊自己喜好，慢慢培养彼此送礼默契", scores: { guide: 1 } },
+        { text: "心里有点失落失望，还要强装喜欢，暗自介意对方并不了解自己喜好", scores: { anxiety: 1 } },
+        { text: "懂得珍惜对方心意，礼貌道谢收下默默收好，不扫兴也不刻意多说", scores: { secure: 1 } }
     ]},
-    { text: "你们连续三天没有主动给对方发消息，对方也没有联系你。接下来你会怎么做？", options: [
-        { text: "打了「你还好吗」又删掉，改成「在干嘛」又删掉，最后锁了屏幕", scores: { anxiety: 1 } },
-        { text: "有天下班路上看到有趣的东西，随手拍了发过去", scores: { secure: 1 } },
-        { text: "拍了张晚饭的照片发过去，配文「今天做了你爱吃的」", scores: { guide: 1 } },
-        { text: "那几天刚好约了朋友吃饭逛街，过得挺充实", scores: { avoidance: 1 } }
+    { text: "对方突然神情严肃，认真看着你说有件重要的事，想跟你单独好好谈谈。你的第一反应是？", options: [
+        { text: "平和接纳对方的认真，主动放平心态，耐心倾听、一起沟通解决问题", scores: { guide: 1 } },
+        { text: "心里稍微一紧但保持冷静，愿意腾出时间，平常心好好倾听", scores: { secure: 1 } },
+        { text: "心里沉了一下有点抵触，表面故作平静，被动等着对方开口", scores: { avoidance: 1 } },
+        { text: "瞬间心慌不安，下意识往最坏方向联想，紧张害怕感情出问题", scores: { anxiety: 1 } }
     ]},
-    { text: "你提前花了两个小时规划好了周末约会的餐厅和路线，出发前对方突然说「要不我们去另一个地方吧」。你脑子里冒出的第一个想法是？", options: [
-        { text: "说「行啊，你有想去的地方吗？」", scores: { secure: 1 } },
-        { text: "关了导航，说「那你定吧」", scores: { avoidance: 1 } },
-        { text: "跟对方说「这次先按我的来，下次你安排」", scores: { guide: 1 } },
-        { text: "打开了之前规划的餐厅页面又关掉了，说「行吧」", scores: { anxiety: 1 } }
+    { text: "你深夜加班十一点多才疲惫到家，对方早已躺在床上准备睡觉，没有起身、没有问候，只默默给你留了床头一盏小夜灯，全程躺着不说话。你的第一反应是？", options: [
+        { text: "觉得只是平常小事，内心没什么起伏，照常洗漱休息，不会过度放在心上", scores: { avoidance: 1 } },
+        { text: "记着对方留灯的心意，隔天主动道谢搭话，温柔维系彼此这种小体贴的相处感", scores: { guide: 1 } },
+        { text: "有点感动又有点失落，纠结对方只留灯却不关心自己累不累，暗自觉得不够被重视", scores: { anxiety: 1 } },
+        { text: "能感受到对方这份贴心，心里暖暖的，自己安静洗漱休息，不刻意要求对方多做什么", scores: { secure: 1 } }
     ]},
-    { text: "你无意间看到对方手机相册里还存着几张和前任的合影。遇到这种情况你会怎么做？", options: [
-        { text: "退出相册，把手机放回原处", scores: { avoidance: 1 } },
-        { text: "找了个时间跟对方说「我在你相册看到几张旧照片，能聊聊吗」", scores: { guide: 1 } },
-        { text: "看了一眼就划过去了，没特意点开", scores: { secure: 1 } },
-        { text: "把那几张照片的日期记住了，后来又去翻了一次", scores: { anxiety: 1 } }
+    { text: "两人安静看电视时，对方突然情绪崩溃靠在你怀里哭，坦言最近工作生活压力特别大。你的第一反应是？", options: [
+        { text: "温柔抱住耐心安抚，告诉对方不用硬撑，难过可以安心在你面前释放", scores: { guide: 1 } },
+        { text: "心里跟着心疼柔软，安静抱着安抚，耐心陪TA释放情绪，不催不多问", scores: { secure: 1 } },
+        { text: "一下子手足无措慌乱自责，忍不住总觉得是自己没照顾好对方情绪", scores: { anxiety: 1 } },
+        { text: "不太擅长应对情绪化场面，略显尴尬递纸巾，想尽量避开情绪拉扯", scores: { avoidance: 1 } }
     ]},
-    { text: "你加班到晚上十一点多回到家，对方已经关灯睡了，床头给你留了一盏小夜灯。你最可能的反应是？", options: [
-        { text: "把手机放在床头充上电，屏幕亮了好几次才睡着", scores: { anxiety: 1 } },
-        { text: "轻手轻脚洗漱完，躺下时帮对方把被子拉了拉", scores: { secure: 1 } },
-        { text: "把明天的早餐材料从冰箱拿出来解冻，才去洗漱", scores: { guide: 1 } },
-        { text: "洗完澡在客厅坐了一会儿才进卧室", scores: { avoidance: 1 } }
+    { text: "你偶然发现对方刻意隐瞒一件小事，明明出去玩乐却谎称在加班，被你无意看穿。你的第一反应是？", weight: 1.5, options: [
+        { text: "脑子一下子很乱，忍不住联想翻旧账，担心对方还有更多事瞒着自己", scores: { anxiety: 1 } },
+        { text: "坦诚说出自己的发现和感受，认真沟通边界，约定往后小事不用刻意隐瞒", scores: { guide: 1 } },
+        { text: "看破但不戳破，默默记在心里，悄悄降低一点信任，不再主动深究", scores: { avoidance: 1 } },
+        { text: "心里难免不舒服，但愿意冷静下来，找时机平和问问对方隐瞒的原因", scores: { secure: 1 } }
     ]},
-    { text: "你们和对方的一个朋友一起吃饭，吃完后对方当着朋友的面问你「你觉得我这个朋友怎么样？」。你会怎么做？", options: [
-        { text: "说「挺好的，上次你生日他/她还特意来了」", scores: { guide: 1 } },
-        { text: "含糊回了一句「还行吧」，把话题岔开了", scores: { avoidance: 1 } },
-        { text: "先看了对方一眼，才说了句「不错啊」", scores: { anxiety: 1 } },
-        { text: "当面说了句「挺好的啊」，继续吃东西", scores: { secure: 1 } }
+    { text: "对方认真跟你说，公司有外派机会要调去外地工作至少两年，正式征求你的想法。你的第一反应是？", weight: 1.5, options: [
+        { text: "坦诚说出自己的不舍和顾虑，同时理性分析利弊，共同做对双方负责的决定", scores: { guide: 1 } },
+        { text: "有点意外震惊，但保持理性冷静，愿意坐下来一起规划利弊商量未来", scores: { secure: 1 } },
+        { text: "情绪起伏不大，顺其自然不纠结，心里默默开始为自己往后生活做打算", scores: { avoidance: 1 } },
+        { text: "瞬间慌了没有安全感，害怕距离冲淡感情，担心两人慢慢疏远变淡", scores: { anxiety: 1 } }
     ]},
-    { text: "你和对方在一起快一年了，但对方每次都不记得你们的纪念日是几号。遇到这种情况你会怎么做？", options: [
-        { text: "到了那天，跟对方提了一句「今天是什么日子？」，看对方反应", scores: { anxiety: 1 } },
-        { text: "到了那天自己买了块蛋糕，没跟对方提", scores: { avoidance: 1 } },
-        { text: "提前把那天的安排都计划好了，跟对方说「那天我订了个地方，一起去吧」", scores: { guide: 1 } },
-        { text: "到了那天在手机日历上标记了一下，晚上跟对方说「今天是我们纪念日」", scores: { secure: 1 } }
+    { text: "你们因小事冷战两天互不说话，第三天对方不做解释，只给你发一条搞笑短视频悄悄递台阶。你的第一反应是？", options: [
+        { text: "随手看一眼划过，不回复不接话，等着事情自己翻篇，不主动破冰", scores: { avoidance: 1 } },
+        { text: "反复琢磨对方用意，纠结是不是示好，心里别扭不敢轻易主动接茬", scores: { anxiety: 1 } },
+        { text: "看懂对方递来的台阶，温柔顺势接话回应，主动化解冷战拉回相处氛围", scores: { guide: 1 } },
+        { text: "看了忍不住会心一笑，顺着台阶回个表情，自然让氛围慢慢缓和", scores: { secure: 1 } }
     ]},
-    { text: "你们坐在沙发上一起看电视，对方突然接到一个电话，挂完电话后对方红了眼眶，说家里出了一些事。你的第一反应是？", options: [
-        { text: "等对方哭了一会儿，说「要不要喝点水？」", scores: { avoidance: 1 } },
-        { text: "把遥控器放下，抱住对方说「你想说的时候再说」", scores: { guide: 1 } },
-        { text: "站起来走了两步，又坐回沙发另一头", scores: { anxiety: 1 } },
-        { text: "拍拍对方的后背，等对方平复", scores: { secure: 1 } }
+    { text: "春节假期只有一周，你想回自己老家，对方也坚持回自己家，商量好几次都无法折中统一。你的第一反应是？", options: [
+        { text: "不敢坚持自己想法，害怕争执伤感情，下意识委屈自己迁就对方", scores: { anxiety: 1 } },
+        { text: "主动查行程提折中方案，照顾两边感受，商量出双方都能接受的安排", scores: { guide: 1 } },
+        { text: "有点无奈但理性通透，能接受各回各家，年后再找时间相聚陪伴", scores: { secure: 1 } },
+        { text: "觉得来回拉扯很麻烦，嘴上说随便，私下默默按自己计划安排好", scores: { avoidance: 1 } }
     ]},
-    { text: "你们冷战了两天，第三天中午对方突然给你发了一条搞笑短视频，没有配任何文字。你通常会？", options: [
-        { text: "也回了一条搞笑视频过去，顺便发了个「这个你肯定喜欢」", scores: { secure: 1 } },
-        { text: "回了一条消息「不生气了？晚上出来吃饭」", scores: { guide: 1 } },
-        { text: "看了视频，回了个表情包，但之后又打开对话框看了好几遍", scores: { anxiety: 1 } },
-        { text: "看了一眼，没回，把手机放下了", scores: { avoidance: 1 } }
+    { text: "对方随口说了一句普通日常话，你听完莫名心里别扭不舒服，却说不清具体哪里不妥。你的第一反应是？", options: [
+        { text: "心里一直憋着别扭，反复回想越想越难受，却不敢直接开口说出来", scores: { anxiety: 1 } },
+        { text: "懒得深究细微情绪，得过且过，很快转移注意力不纠结", scores: { avoidance: 1 } },
+        { text: "不会暗自猜心内耗，主动跟对方核对本意，坦诚说出感受把小别扭说开", scores: { guide: 1 } },
+        { text: "能感知自己情绪，找平和时机，温和告诉对方那句话让自己不舒服", scores: { secure: 1 } }
     ]},
-    { text: "晚上九点多你和朋友在外面吃烧烤，对方发消息问你「大概几点回来？」。如果是你，你会怎么做？", options: [
-        { text: "回消息「大概十点，你先睡」", scores: { secure: 1 } },
-        { text: "打了个电话说「快了，等我回去陪你」", scores: { guide: 1 } },
-        { text: "拍了张桌上的照片发过去，附上「和朋友在一起」", scores: { anxiety: 1 } },
-        { text: "回了句「还没定」，继续吃", scores: { avoidance: 1 } }
+    { text: "对方连续一周加班到很晚，两人几乎没有交流，某天准时下班特意带回了你最爱吃的蛋糕。你的第一反应是？", options: [
+        { text: "开心接纳心意，顺势拉近聊天氛围，主动多沟通弥补这段时间的疏离", scores: { guide: 1 } },
+        { text: "内心稍有触动，但表面淡淡回应简单道谢，不流露太多情绪起伏", scores: { avoidance: 1 } },
+        { text: "又感动又有点委屈，开心之余也介意平时陪伴和交流太少", scores: { anxiety: 1 } },
+        { text: "心里暖暖的，自然收下心意，顺口关心对方最近工作累不累", scores: { secure: 1 } }
     ]},
-    { text: "过年放假只有一周，你想回自己老家，对方也想回自己家。你们商量了几次都没达成一致。你通常会？", options: [
-        { text: "提出「今年先去你家，明年去我家」", scores: { guide: 1 } },
-        { text: "说「那要不今年先去你家，明年去我家？」", scores: { secure: 1 } },
-        { text: "翻了好几次日历，最后跟对方说「那要不今年先去你家？」", scores: { anxiety: 1 } },
-        { text: "跟对方说「你说了算吧」", scores: { avoidance: 1 } }
+    { text: "第一次跟对方父母吃饭见面，长辈态度冷淡客气，全程话少、对你并不热情亲近。回去路上你的第一反应是？", options: [
+        { text: "不太放在心上，觉得恋爱是两个人的事，长辈态度随缘不必刻意讨好", scores: { avoidance: 1 } },
+        { text: "理解长辈拘谨陌生，主动和对方沟通，慢慢了解喜好，用心拉近彼此关系", scores: { guide: 1 } },
+        { text: "有点不自在但心态从容，知道初次相处需要磨合，顺其自然慢慢熟悉", scores: { secure: 1 } },
+        { text: "心里特别焦虑不安，反复怀疑自己言行不够好，不被长辈喜欢认可", scores: { anxiety: 1 } }
     ]},
-    { text: "对方今天说了一句很普通的话，但你听完后莫名觉得不太舒服，又说不上来具体哪里不对。你会怎么做？", options: [
-        { text: "跟对方说「我先说我的理解，你看对不对」", scores: { guide: 1 } },
-        { text: "跟对方说「我也不知道怎么了，但那句话让我不太舒服」", scores: { secure: 1 } },
-        { text: "睡前把聊天记录翻到那句话，看了好几遍", scores: { anxiety: 1 } },
-        { text: "洗了个澡，出来就忘了", scores: { avoidance: 1 } }
+    { text: "对方认真看着你说，感觉你最近待人处事、情绪状态跟以前有明显不一样。你的第一反应是？", options: [
+        { text: "轻松放平心态，愿意和对方坦诚交流，聊聊彼此变化、感受和相处状态", scores: { guide: 1 } },
+        { text: "有点不耐烦被审视评价，不愿深入聊这类情绪话题，简单带过草草结束", scores: { avoidance: 1 } },
+        { text: "坦然接纳对方的感受，愿意静下心认真听听对方眼里自己的变化", scores: { secure: 1 } },
+        { text: "瞬间紧张慌乱，急于辩解掩饰，害怕对方对自己印象变差、好感下降", scores: { anxiety: 1 } }
     ]},
-    { text: "你翻手机相册时看到去年这个时候对方给你拍的一张照片。如果是你，你会怎么做？", options: [
-        { text: "把照片发给对方说「你看，去年的今天」", scores: { guide: 1 } },
-        { text: "看笑了，顺手把这张照片存进了收藏夹", scores: { secure: 1 } },
-        { text: "把照片放大看了好一会儿，又翻了翻最近的合照对比", scores: { anxiety: 1 } },
-        { text: "划过去了，继续清相册", scores: { avoidance: 1 } }
+    { text: "两人目前经济都偏紧张、手头不宽裕，对方没跟你商量，私下买了一件价格不低的私人物品。你的第一反应是？", options: [
+        { text: "心里不安别扭，又怕说出来显得自己小气，只能默默憋在心里不敢多提", scores: { anxiety: 1 } },
+        { text: "有点无奈但理解喜好，事后平和跟对方聊往后一起规划收支、理性消费", scores: { secure: 1 } },
+        { text: "心里有隔阂但不拆穿指责，默默划清一点经济边界，不再过多干涉对方花销", scores: { avoidance: 1 } },
+        { text: "理解对方喜欢就想拥有的心情，同时坦诚聊当下经济压力，约定大额消费彼此提前商量", scores: { guide: 1 } }
     ]},
-    { text: "你们在家一起做西红柿炒蛋，对方往锅里倒了太多盐。你最可能的反应是？", options: [
-        { text: "尝了一口说「有点咸，还能吃」", scores: { secure: 1 } },
-        { text: "跟对方说「我来，你去剥个蒜」", scores: { guide: 1 } },
-        { text: "在旁边看着，说了一句「会不会有点多？」，但声音很小", scores: { anxiety: 1 } },
-        { text: "盛到碗里吃了，没说什么", scores: { avoidance: 1 } }
+    { text: "对方突然主动邀约，问你周末愿不愿意跟TA回家，正式见见家里长辈确立关系进度。你的第一反应是？", options: [
+        { text: "有点紧张但心怀期待，愿意认真对待，配合安排好好准备见面", scores: { secure: 1 } },
+        { text: "欣然接受心意，主动和对方商量见面准备、礼数细节，从容认真对待", scores: { guide: 1 } },
+        { text: "既期待又极度焦虑，反复胡思乱想，一直担心自己表现不好不被认可", scores: { anxiety: 1 } },
+        { text: "心里有压力有点抗拒，觉得进度太快，下意识想往后推脱暂缓见家长", scores: { avoidance: 1 } }
     ]},
-    { text: "你们在一起一周年，对方送了你一个你平时完全用不到的摆件。你的第一反应是？", options: [
-        { text: "接过来摆在桌上说「谢谢」", scores: { secure: 1 } },
-        { text: "跟对方说「下次我们可以一起去挑」", scores: { guide: 1 } },
-        { text: "拿着摆件翻来覆去看了好一会儿，问「在哪买的呀」", scores: { anxiety: 1 } },
-        { text: "说了声谢谢，放进柜子里了", scores: { avoidance: 1 } }
+    { text: "深夜安静躺在床上，对方突然转身抱住你，轻声跟你说了一句我爱你。你的第一反应是？", options: [
+        { text: "内心稍有触动，但不习惯直白表露情绪，简单回应保持含蓄内敛", scores: { avoidance: 1 } },
+        { text: "温柔抱紧回应爱意，坦然表达珍惜，顺势拉近深夜里彼此的情感联结", scores: { guide: 1 } },
+        { text: "感动之余有点患得患失，暗自琢磨这份心意能不能一直长久不变", scores: { anxiety: 1 } },
+        { text: "心里安稳温暖，真诚回应心意，内心踏实平和，享受当下亲近", scores: { secure: 1 } }
     ]}
 ];
 
@@ -709,9 +910,11 @@ function getDailyTip() {
 
 function getPersonalityType(scores) {
     const { anxiety, avoidance, secure, guide } = scores;
-    if (anxiety >= 12 && avoidance >= 12) return "fearful";
-    if (guide >= 10 && guide >= anxiety && guide >= avoidance && guide >= secure) return "guide";
-    if (secure >= 10 && secure >= anxiety && secure >= avoidance && secure >= guide) return "secure";
+    const total = anxiety + avoidance + secure + guide;
+    const high = total * 0.30;
+    if (anxiety >= high && avoidance >= high) return "fearful";
+    if (guide >= high && guide >= anxiety && guide >= avoidance && guide >= secure) return "guide";
+    if (secure >= high && secure >= anxiety && secure >= avoidance && secure >= guide) return "secure";
     if (anxiety > avoidance) return "anxious";
     if (avoidance > anxiety) return "avoidant";
     return "secure";
@@ -723,11 +926,17 @@ const typeDetails = {
         emoji: "✨",
         desc: "你擅长主动带领关系，理性包容，陪伴伴侣成长。温柔而坚定，是关系里的定心锚。",
         color: "#FFA07A",
+        positiveView: "你是关系中的「掌舵者」，不等不靠、主动创造，用温柔的力量让两个人走得更稳更远",
         traits: ["主动沟通，不回避问题", "情绪管理能力强", "善于规划关系的未来方向", "在冲突中保持理性"],
         strengths: ["能有效化解矛盾，推动关系前进", "给伴侣强烈的安全感和方向感", "善于引导双方共同成长", "在关系中保持稳定的情绪输出"],
         growth: ["偶尔也需要示弱，让对方照顾你", "不要过度承担所有决策的责任", "允许对方也有主导权和表达空间", "学会接受「不完美的解决方案」"],
         compatibility: "最适合与安全型恋人搭配，双方互相尊重、共同成长。也能引导焦虑型伴侣建立安全感，但需要注意不要让自己太累。",
         idealPartner: "安全型恋人",
+        scenarioAdvice: [
+            { scene: "冷战场景", reaction: "即便还在生气，也会主动递台阶、找合适时机化解矛盾", tip: "注意给对方足够的消化情绪时间，不必每次都是你先开口" },
+            { scene: "对方加班晚归", reaction: "主动表达关心，同时安排好自己的时间，不焦虑等待", tip: "偶尔也可以示弱，告诉对方你也会想TA" },
+            { scene: "送礼不合适", reaction: "温和引导沟通喜好，把送礼变成了解彼此的过程", tip: "引导不等于纠正，注意措辞不要让对方觉得被否定" }
+        ],
         genderAdvice: {
             male: "作为引导型男生，你散发着稳重和担当的魅力。建议找一个能欣赏你领导力、同时也愿意表达自我的女生。避免选择过于被动的伴侣，否则你容易感到疲惫。",
             female: "作为引导型女生，你既有主见又温柔体贴。建议找一个尊重你想法、不觉得被威胁的男生。与安全型男生搭配最和谐，双方互相欣赏、共同决策。"
@@ -738,11 +947,17 @@ const typeDetails = {
         emoji: "🌿",
         desc: "你信任、稳定，不会过度焦虑或回避。和你恋爱很舒服，彼此有空间也有亲密。",
         color: "#98D2C0",
+        positiveView: "你是关系中的「定海神针」，用稳定和信任为彼此营造最舒适的相处空间，让爱自由呼吸",
         traits: ["对关系有基本的信任感", "能自在地表达需求和感受", "尊重彼此的独立空间", "面对冲突时保持冷静"],
         strengths: ["让伴侣感到被信任和被尊重", "在关系中营造轻松舒适的氛围", "能给予对方适当的自由和空间", "情绪稳定，是关系中的「定海神针」"],
         growth: ["有时可能显得不够热情，需要主动表达爱意", "对伴侣的情绪波动可能缺乏敏感度", "适当学习更深层的情感连接方式", "在对方需要时，可以更主动地提供支持"],
         compatibility: "与任何类型都能良好相处，尤其与引导型恋人搭配最佳。和焦虑型在一起时，你的稳定能帮助对方建立安全感。",
         idealPartner: "引导型恋人",
+        scenarioAdvice: [
+            { scene: "冷战场景", reaction: "心里还有情绪但不愿深夜僵持，先好好休息，等第二天自然缓和", tip: "偶尔主动迈出第一步，会让对方更安心" },
+            { scene: "对方加班晚归", reaction: "能感受到对方的贴心留灯，心里暖暖的，不刻意要求更多", tip: "适时主动表达感谢和爱意，别让对方觉得你无所谓" },
+            { scene: "送礼不合适", reaction: "懂得珍惜对方心意，礼貌道谢收下，不扫兴也不多说", tip: "可以更坦率地分享喜好，帮助彼此更了解对方" }
+        ],
         genderAdvice: {
             male: "作为安全型男生，你是恋爱中的「理想型」。你的稳定和信任感让女生很有安全感。建议在关系中多主动制造浪漫和惊喜，避免让对方觉得你「太佛系」。",
             female: "作为安全型女生，你情绪稳定、独立自信，非常有吸引力。建议找一个同样成熟稳重的男生，你们的相处会非常舒服自然，彼此成就。"
@@ -753,11 +968,17 @@ const typeDetails = {
         emoji: "😰",
         desc: "你渴望亲密，害怕失去，容易胡思乱想。学会给自己安全感会让关系更轻松。",
         color: "#F7C59F",
+        positiveView: "你只是更珍惜这段关系，愿意为对方投入更多情绪，这份用心本身就是爱的证明",
         traits: ["对关系高度敏感", "渴望频繁的亲密互动", "容易过度解读对方的行为", "害怕被抛弃或忽视"],
         strengths: ["对伴侣极其用心和关注", "愿意为关系付出大量精力", "善于察觉对方的情绪变化", "在关系中充满热情和投入"],
         growth: ["学会给自己安全感，而不是完全依赖对方", "区分「真实的忽视」和「自己的想象」", "培养独立的兴趣爱好和社交圈", "在不安时先自我安抚，再与对方沟通"],
         compatibility: "与安全型恋人在一起最稳定，对方的可靠能缓解你的不安。与引导型搭配也不错，对方能帮你建立信心。避免与回避型陷入「追-逃」模式。",
         idealPartner: "安全型恋人",
+        scenarioAdvice: [
+            { scene: "冷战场景", reaction: "又委屈又不安，翻来覆去睡不着，害怕矛盾搁置，盼着赶紧和好", tip: "试着先给自己一个冷静缓冲期，写下来你的感受，等情绪平复再沟通" },
+            { scene: "对方加班晚归", reaction: "有点感动又有点失落，纠结对方只留灯却不关心自己累不累", tip: "练习用「我感受到…」代替「你为什么不…」，表达需求而非指责" },
+            { scene: "送礼不合适", reaction: "心里有点失落失望，还要强装喜欢，暗自介意对方不了解自己", tip: "温和分享你的真实喜好，这不是挑剔而是帮助对方更懂你" }
+        ],
         genderAdvice: {
             male: "作为焦虑型男生，你对感情的用心和专注是很大的优点。建议把部分精力放在事业和兴趣上，一个有自己生活的你会更有魅力。找一个能给你稳定回应的女生。",
             female: "作为焦虑型女生，你对爱的渴望是真实而美好的。建议找一个愿意主动沟通、给你安全感的男生。学会区分「他忙」和「他不在乎」，会让你在关系中更轻松。"
@@ -768,11 +989,17 @@ const typeDetails = {
         emoji: "🏃",
         desc: "你习惯独立，不喜欢过度亲密。适当敞开心扉，你会发现依赖也是一种美好。",
         color: "#B5C9E2",
+        positiveView: "你的独立和冷静是珍贵的特质，在关系中你给予彼此充足的空间，让爱不成为负担",
         traits: ["重视个人独立和自由", "不喜欢过度的情感表达", "面对亲密需求时倾向于后退", "习惯自己解决问题"],
         strengths: ["给伴侣充足的个人空间", "在关系中保持理性和客观", "独立性强，不会过度依赖对方", "在危机时刻能保持冷静"],
         growth: ["尝试在安全的环境中表达脆弱", "学习接受伴侣的关心和支持", "主动分享内心感受，而不是沉默", "理解「亲密」不等于「失去自我」"],
         compatibility: "与安全型恋人搭配最舒适，对方不会给你太大压力。与引导型在一起也能成长，但需要你愿意打开心扉。避免与焦虑型互相消耗。",
         idealPartner: "安全型恋人",
+        scenarioAdvice: [
+            { scene: "冷战场景", reaction: "不想纠结争吵对错，也懒得主动哄人，转身睡觉避开情绪拉扯", tip: "试着在第二天主动提一句，哪怕只是一句「昨晚睡得好吗」，就能化解僵局" },
+            { scene: "对方加班晚归", reaction: "觉得平常小事，内心没什么起伏，照常洗漱休息", tip: "偶尔一句简单的关心，对伴侣来说意义远超你的想象" },
+            { scene: "送礼不合适", reaction: "礼貌简单道谢，随手收好，不深究也不表露真实感受", tip: "尝试多分享一点你的真实想法，这是建立亲密感的桥梁" }
+        ],
         genderAdvice: {
             male: "作为回避型男生，你的独立和冷静是优势，但恋爱中需要适度表达情感。建议找一个不黏人但温暖的女生，给你足够空间的同时也能让你感受到爱。试着主动分享你的日常。",
             female: "作为回避型女生，你的独立和理性很有魅力。建议找一个尊重你空间、不强迫你表达的男生。与安全型或同样独立的男生在一起，你们可以各自精彩又彼此陪伴。"
@@ -783,11 +1010,17 @@ const typeDetails = {
         emoji: "💔",
         desc: "你既渴望爱又怕受伤，忽冷忽热。先接纳自己的矛盾，慢慢建立信任。",
         color: "#D9A7B0",
+        positiveView: "你对爱的感知比任何人都深刻，正因为太在乎，才会在靠近和退缩之间反复衡量",
         traits: ["在亲密和疏远之间反复摇摆", "内心渴望连接但害怕受伤", "情绪波动较大", "对关系既期待又恐惧"],
         strengths: ["对感情有深刻的感知力", "在关系中愿意深度投入（当感到安全时）", "对伴侣的需求有很强的同理心", "一旦建立信任，会非常忠诚"],
         growth: ["接纳自己的矛盾情绪，不要自我批判", "寻求专业心理咨询帮助理解依恋模式", "在关系中设定清晰的边界", "练习在不安全感出现时自我安抚"],
         compatibility: "最需要与安全型恋人在一起，对方的稳定能帮你慢慢建立信任。避免与同样不安全的类型陷入不稳定的循环。考虑寻求专业的情感咨询支持。",
         idealPartner: "安全型恋人",
+        scenarioAdvice: [
+            { scene: "冷战场景", reaction: "既想主动和好又怕被拒绝，内心反复拉扯，情绪波动很大", tip: "给自己写一封「情绪日记」，把矛盾的感受写下来，再决定是否行动" },
+            { scene: "对方加班晚归", reaction: "一会儿觉得理解，一会儿又觉得被忽视，在两种情绪间反复切换", tip: "和伴侣约定固定的「安心信号」，比如睡前一句晚安，帮你稳定情绪基线" },
+            { scene: "送礼不合适", reaction: "想表达真实感受又怕破坏关系，内心纠结不知道该坦诚还是忍耐", tip: "从小事开始练习坦诚，比如分享你喜欢的咖啡口味，逐步建立表达信心" }
+        ],
         genderAdvice: {
             male: "作为恐惧型男生，你内心的矛盾并不罕见。建议先接纳自己的不安全感，找一个有耐心、情绪稳定的女生。不要害怕展现脆弱，真正爱你的人会接纳你的全部。",
             female: "作为恐惧型女生，你既渴望爱又害怕受伤的心情值得被理解。建议找一个能给你持续稳定回应的男生。考虑寻求专业支持，学会自我安抚，你会拥有更健康的关系。"
@@ -796,11 +1029,11 @@ const typeDetails = {
 };
 
 const scoreDimensions = [
-    { key: 'anxiety', label: '焦虑倾向', icon: '😰', max: 30, color: '#F7C59F' },
-    { key: 'avoidance', label: '回避倾向', icon: '🏃', max: 30, color: '#B5C9E2' },
-    { key: 'secure', label: '安全型', icon: '🌿', max: 30, color: '#98D2C0' },
-    { key: 'guide', label: '引导型', icon: '✨', max: 32, color: '#FFA07A' }
-];
+            { key: 'anxiety', label: '焦虑倾向', icon: '😰', max: 30, color: '#F7C59F', definition: '过度在意对方反应，通过反复确认缓解不安' },
+            { key: 'avoidance', label: '回避倾向', icon: '🏃', max: 30, color: '#B5C9E2', definition: '淡化重要性，转移注意力，物理撤退' },
+            { key: 'secure', label: '安全型', icon: '🌿', max: 30, color: '#98D2C0', definition: '稳定接纳，自然表达需求，情绪平稳' },
+            { key: 'guide', label: '引导型', icon: '✨', max: 30, color: '#FFA07A', definition: '主动注入结构，引导沟通，不强迫' }
+        ];
 
 const { createApp, ref, computed, onMounted, nextTick } = Vue;
 
@@ -813,7 +1046,9 @@ createApp({
         const finalScores = ref(null);
         const resultType = ref('');
         const gender = ref('');
+        const relationshipStage = ref('');
         const showDetail = ref(false);
+        const detailTab = ref('traits');
         const toastMsg = ref('');
         const history = ref([]);
         const startTestTime = ref(0);
@@ -826,19 +1061,112 @@ createApp({
             if (!resultType.value || !gender.value) return '';
             const detail = typeDetails[resultType.value];
             if (!detail || !detail.genderAdvice) return '';
-            return detail.genderAdvice[gender.value] || '';
+            var base = detail.genderAdvice[gender.value] || '';
+            if (!finalScores.value) return base;
+            var scores = finalScores.value;
+            var insights = [];
+            if (scores.guide >= 8) insights.push('你的引导能力较强，在关系中善于主动营造沟通氛围');
+            if (scores.secure >= 8) insights.push('你的情绪稳定性很好，能在关系中给对方安全感');
+            if (scores.anxiety >= 8) insights.push('你的焦虑倾向偏高，建议在关系中多练习自我安抚');
+            if (scores.avoidance >= 8) insights.push('你的回避倾向偏高，建议尝试更主动地表达需求');
+            if (scores.guide >= 8 && scores.secure >= 8) insights.push('你同时具备引导力和安全感，是非常理想的伴侣特质');
+            if (scores.anxiety >= 8 && scores.avoidance >= 8) insights.push('你内心可能存在矛盾，既渴望亲密又害怕受伤，建议关注自我成长');
+            if (insights.length === 0) return base;
+            var result = base + '\n\n基于你的分数分析：' + insights.join('；') + '。';
+            if (relationshipStage.value) {
+                var stageAdvice = {
+                    single: {
+                        guide: '单身期正是锻炼引导力的好时机，多参加社交活动，主动创造与人交流的机会，你的主导气质会自然吸引合适的人。',
+                        secure: '你的安全感和稳定感本身就是最好的吸引力，保持自然的生活节奏，爱情会在合适的时候到来。',
+                        anxious: '单身期容易陷入「是不是自己不够好」的焦虑，建议把注意力放在自我成长上，一个充实的你更有魅力。',
+                        avoidant: '单身期的独立自在是你的舒适区，但如果想脱单，需要适度走出舒适区，给潜在对象靠近你的机会。',
+                        fearful: '单身期的自由也是疗愈的窗口，先学会和自己好好相处，等内心更稳定了再开启关系会更顺利。'
+                    },
+                    dating: {
+                        guide: '暧昧期你的引导特质很有优势，建议适度主动但保留神秘感，让对方也有探索你的欲望。',
+                        secure: '暧昧期你的安全感是加分项，建议保持自然节奏，不要急于定义关系，享受这个过程。',
+                        anxious: '暧昧期焦虑感容易放大，建议给自己设定「不主动联系」的小挑战，培养安全感。',
+                        avoidant: '暧昧期你的独立感可以适度放松，尝试多回应对方的热情，别让对方觉得你没兴趣。',
+                        fearful: '暧昧期的不确定性对你来说是挑战，建议专注当下的相处质量，而不是猜测对方心意。'
+                    },
+                    relationship: {
+                        guide: '恋爱中你的引导力是关系的推进器，记得也给对方主导的机会，让关系更平衡。',
+                        secure: '恋爱中你的稳定性是最大的礼物，偶尔制造小浪漫会让关系保持新鲜感。',
+                        anxious: '恋爱中试着建立「安心仪式」，比如睡前通话，帮你减少不必要的焦虑。',
+                        avoidant: '恋爱中适度的亲密表达很重要，尝试每周主动分享一次你的内心感受。',
+                        fearful: '恋爱中稳定的日常互动是最好的安全感来源，建立属于你们的小习惯。'
+                    },
+                    marriage: {
+                        guide: '婚姻中你的引导力体现在家庭规划上，记得也要关注伴侣的情感需求，不只是事务性沟通。',
+                        secure: '婚姻中你的稳定性是家庭的基石，注意保持情感的深度连接，不要变成「室友」。',
+                        anxious: '婚姻中长期的承诺感能帮你缓解焦虑，学会在日常琐事中找到安全感。',
+                        avoidant: '婚姻中独立空间很重要，但也要确保伴侣感受到你的参与和关心。',
+                        fearful: '婚姻是建立信任的最好土壤，持续稳定的互动能帮你慢慢放下防备。'
+                    }
+                };
+                var stage = relationshipStage.value;
+                var type = resultType.value;
+                if (stageAdvice[stage] && stageAdvice[stage][type]) {
+                    result += '\n\n' + stageAdvice[stage][type];
+                }
+            }
+            return result;
+        });
+
+        const secondaryType = computed(() => {
+            if (!finalScores.value || !resultType.value) return null;
+            const scores = finalScores.value;
+            const typeKeyMap = { anxiety: 'anxious', avoidance: 'avoidant', secure: 'secure', guide: 'guide' };
+            const sorted = scoreDimensions.slice().sort((a, b) => scores[b.key] - scores[a.key]);
+            const primary = typeKeyMap[resultType.value] || resultType.value;
+            for (var i = 0; i < sorted.length; i++) {
+                var dim = sorted[i];
+                var mapped = typeKeyMap[dim.key];
+                if (mapped && mapped !== primary && mapped !== 'fearful') {
+                    var pct = scores[dim.key] / dim.max;
+                    if (pct >= 0.25) {
+                        return { key: dim.key, label: dim.label, icon: dim.icon, score: scores[dim.key], max: dim.max, pct: Math.round(pct * 100) };
+                    }
+                }
+            }
+            return null;
+        });
+
+        function formatDuration(sec) {
+            if (!sec) return '';
+            var min = Math.floor(sec / 60);
+            var s = sec % 60;
+            if (min > 0) return min + '分' + s + '秒';
+            return s + '秒';
+        }
+
+        function getScoreLevel(score, max) {
+            var pct = score / max;
+            if (pct >= 0.7) return '高';
+            if (pct >= 0.4) return '中';
+            return '低';
+        }
+
+        const estimatedTimeLeft = computed(() => {
+            if (!startTestTime.value || currentIndex.value === 0) return '';
+            var elapsed = (Date.now() - startTestTime.value) / 1000;
+            var perQ = elapsed / currentIndex.value;
+            var remaining = Math.ceil(perQ * (questions.length - currentIndex.value));
+            if (remaining < 10) return '';
+            if (remaining >= 60) return '约' + Math.ceil(remaining / 60) + '分钟';
+            return '约' + remaining + '秒';
         });
 
         const floatingHearts = computed(() => {
             const arr = [];
             const colors = ['#ff8a6f','#ff6b8a','#ffa07a','#ff69b4','#ff1493'];
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 5; i++) {
                 arr.push({
                     id: i,
                     left: (Math.random() * 80 + 10) + '%',
                     size: (Math.random() * 12 + 12) + 'px',
-                    duration: (Math.random() * 3 + 3) + 's',
-                    delay: (Math.random() * 4) + 's',
+                    duration: (Math.random() * 3 + 4) + 's',
+                    delay: (i * 2) + 's',
                     color: colors[i % colors.length]
                 });
             }
@@ -860,7 +1188,7 @@ createApp({
         }
 
         function saveToHistory(type, scores) {
-            const record = { type: type, gender: gender.value, scores: { anxiety: scores.anxiety, avoidance: scores.avoidance, secure: scores.secure, guide: scores.guide }, timestamp: Date.now() };
+            const record = { type: type, gender: gender.value, stage: relationshipStage.value, scores: { anxiety: scores.anxiety, avoidance: scores.avoidance, secure: scores.secure, guide: scores.guide }, timestamp: Date.now() };
             history.value.unshift(record);
             if (history.value.length > 10) history.value = history.value.slice(0, 10);
             localStorage.setItem('loveTestHistory', JSON.stringify(history.value));
@@ -946,17 +1274,36 @@ createApp({
             const totals = { anxiety: 0, avoidance: 0, secure: 0, guide: 0 };
             for (let i = 0; i < answers.value.length; i++) {
                 const ans = answers.value[i];
-                if (ans.anxiety) totals.anxiety += ans.anxiety;
-                if (ans.avoidance) totals.avoidance += ans.avoidance;
-                if (ans.secure) totals.secure += ans.secure;
-                if (ans.guide) totals.guide += ans.guide;
+                const w = questions[i].weight || 1;
+                if (ans.anxiety) totals.anxiety += ans.anxiety * w;
+                if (ans.avoidance) totals.avoidance += ans.avoidance * w;
+                if (ans.secure) totals.secure += ans.secure * w;
+                if (ans.guide) totals.guide += ans.guide * w;
             }
+            totals.anxiety = Math.round(totals.anxiety * 10) / 10;
+            totals.avoidance = Math.round(totals.avoidance * 10) / 10;
+            totals.secure = Math.round(totals.secure * 10) / 10;
+            totals.guide = Math.round(totals.guide * 10) / 10;
             testDuration.value = Math.round((Date.now() - startTestTime.value) / 1000);
             finalScores.value = totals;
             resultType.value = getPersonalityType(totals);
             saveToHistory(resultType.value, totals);
             currentView.value = 'result';
-            nextTick(function() { drawRadar(); });
+            nextTick(function() {
+                var chartDom = document.getElementById('radarChart');
+                if (!chartDom) return;
+                if ('IntersectionObserver' in window) {
+                    var observer = new IntersectionObserver(function(entries) {
+                        if (entries[0].isIntersecting) {
+                            drawRadar();
+                            observer.disconnect();
+                        }
+                    }, { threshold: 0.3 });
+                    observer.observe(chartDom);
+                } else {
+                    drawRadar();
+                }
+            });
         }
 
         function drawRadar() {
@@ -966,13 +1313,38 @@ createApp({
             if (radarChartInstance) radarChartInstance.dispose();
             radarChartInstance = echarts.init(chartDom);
             const scores = finalScores.value;
+            var dimDefs = ['过度在意对方反应，通过反复确认缓解不安', '淡化重要性，转移注意力，物理撤退', '稳定接纳，自然表达需求，情绪平稳', '主动注入结构，引导沟通，不强迫'];
+            var dimScores = [scores.anxiety, scores.avoidance, scores.secure, scores.guide];
+            var dimMax = [30, 30, 30, 30];
+            var dimLabels = ['焦虑倾向', '回避倾向', '安全型', '引导型'];
             radarChartInstance.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        if (params.componentType === 'series' && params.value) {
+                            var html = '<div style="font-weight:bold;margin-bottom:6px;">你的维度分数</div>';
+                            for (var i = 0; i < dimLabels.length; i++) {
+                                var pct = Math.round(dimScores[i] / dimMax[i] * 100);
+                                var level = pct >= 70 ? '高' : (pct >= 40 ? '中' : '低');
+                                html += '<div style="margin:4px 0;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:' + ['#F7C59F','#B5C9E2','#98D2C0','#FFA07A'][i] + ';"></span>' + dimLabels[i] + '：<b>' + dimScores[i] + '</b>分（' + level + '）</div>';
+                                html += '<div style="font-size:11px;color:#999;padding-left:14px;">' + dimDefs[i] + '</div>';
+                            }
+                            return html;
+                        }
+                        return '';
+                    },
+                    backgroundColor: 'rgba(255,255,255,0.96)',
+                    borderColor: '#f0e2da',
+                    borderWidth: 1,
+                    textStyle: { color: '#3b2a25', fontSize: 12 },
+                    padding: [10, 14]
+                },
                 radar: {
                     indicator: [
                         { name: '焦虑倾向', max: 30 },
                         { name: '回避倾向', max: 30 },
                         { name: '安全型', max: 30 },
-                        { name: '引导型', max: 32 }
+                        { name: '引导型', max: 30 }
                     ],
                     shape: 'circle',
                     center: ['50%', '50%'],
@@ -1001,12 +1373,43 @@ createApp({
             document.getElementById('posterTypeName').innerText = detail.name;
             document.getElementById('posterDesc').innerText = detail.desc;
             document.getElementById('posterScores').innerHTML =
-                '焦虑 ' + scores.anxiety.toFixed(1) + ' &nbsp; 回避 ' + scores.avoidance.toFixed(1) + '<br>安全 ' + scores.secure.toFixed(1) + ' &nbsp; 引导 ' + scores.guide.toFixed(1);
+                '焦虑 ' + scores.anxiety + ' &nbsp; 回避 ' + scores.avoidance + '<br>安全 ' + scores.secure + ' &nbsp; 引导 ' + scores.guide;
+            var radarDiv = document.getElementById('posterRadar');
+            radarDiv.innerHTML = '';
+            var posterRadar = echarts.init(radarDiv);
+            posterRadar.setOption({
+                radar: {
+                    indicator: [
+                        { name: '焦虑倾向', max: 30 },
+                        { name: '回避倾向', max: 30 },
+                        { name: '安全型', max: 30 },
+                        { name: '引导型', max: 30 }
+                    ],
+                    shape: 'circle',
+                    splitNumber: 4,
+                    axisName: { color: '#888', fontSize: 11 },
+                    splitLine: { lineStyle: { color: '#f0e2da' } },
+                    splitArea: { show: false },
+                    axisLine: { lineStyle: { color: '#f0e2da' } }
+                },
+                series: [{
+                    type: 'radar',
+                    data: [{ value: [scores.anxiety, scores.avoidance, scores.secure, scores.guide] }],
+                    areaStyle: { opacity: 0.25, color: detail.color || '#E86A4F' },
+                    lineStyle: { color: detail.color || '#E86A4F', width: 2 },
+                    itemStyle: { color: detail.color || '#E86A4F' },
+                    symbol: 'circle',
+                    symbolSize: 6,
+                    animation: false
+                }]
+            });
+            await new Promise(function(resolve) { setTimeout(resolve, 300); });
             const qrDiv = document.getElementById('posterQR');
             qrDiv.innerHTML = '';
             new QRCode(qrDiv, { text: window.location.href, width: 90, height: 90 });
             await nextTick();
-            html2canvas(container, { scale: 2, backgroundColor: '#fffbf5' }).then(function(canvas) {
+            html2canvas(container, { scale: 2, backgroundColor: '#fffbf5', useCORS: true }).then(function(canvas) {
+                posterRadar.dispose();
                 const imgData = canvas.toDataURL();
                 const win = window.open();
                 win.document.write(
@@ -1040,7 +1443,9 @@ createApp({
             finalScores.value = null;
             resultType.value = '';
             gender.value = '';
+            relationshipStage.value = '';
             showDetail.value = false;
+            detailTab.value = 'traits';
             startTestTime.value = 0;
             testDuration.value = 0;
             if (radarChartInstance) radarChartInstance.dispose();
@@ -1057,8 +1462,9 @@ createApp({
 
         return {
             currentView, currentIndex, selectedIdx, questions, answers, finalScores, resultType,
-            gender, showDetail, toastMsg, history, dailyTip, floatingHearts, scoreDimensions,
-            genderAdviceText, testDuration, formatScore,
+            gender, relationshipStage, showDetail, detailTab, toastMsg, history, dailyTip, floatingHearts, scoreDimensions,
+            genderAdviceText, testDuration, formatScore, secondaryType, formatDuration, getScoreLevel,
+            estimatedTimeLeft,
             startTest, confirmGender, goBack, selectOption, nextQuestion, retest, shareResult,
             generatePoster, typeDetails, formatDate, clearHistory
         };
@@ -1096,6 +1502,7 @@ createApp({
                     <p>帮助我们为你提供更精准的恋爱搭配建议</p>
                 </div>
                 <div class="card">
+                    <div class="gender-section-label">选择性别</div>
                     <div class="gender-cards">
                         <div class="gender-card" :class="{active: gender === 'male'}" @click="gender = 'male'">
                             <div class="gender-icon">👨</div>
@@ -1106,10 +1513,33 @@ createApp({
                             <div class="gender-label">女生</div>
                         </div>
                     </div>
-                    <button @click="confirmGender" style="width:80%; margin-top:20px">
-                        <i class="fas fa-arrow-right"></i> 开始答题
-                    </button>
-                    <div style="margin-top:12px">
+                    <div class="section-divider"><span>关系阶段</span></div>
+                    <div class="stage-cards">
+                        <div class="stage-card" :class="{active: relationshipStage === 'single'}" @click="relationshipStage = 'single'">
+                            <div class="stage-icon">🌟</div>
+                            <div class="stage-label">没有对象</div>
+                            <div class="stage-desc">期待爱情</div>
+                        </div>
+                        <div class="stage-card" :class="{active: relationshipStage === 'dating'}" @click="relationshipStage = 'dating'">
+                            <div class="stage-icon">💕</div>
+                            <div class="stage-label">暧昧期</div>
+                            <div class="stage-desc">互相试探</div>
+                        </div>
+                        <div class="stage-card" :class="{active: relationshipStage === 'relationship'}" @click="relationshipStage = 'relationship'">
+                            <div class="stage-icon">💑</div>
+                            <div class="stage-label">恋爱中</div>
+                            <div class="stage-desc">稳定交往</div>
+                        </div>
+                        <div class="stage-card" :class="{active: relationshipStage === 'marriage'}" @click="relationshipStage = 'marriage'">
+                            <div class="stage-icon">💍</div>
+                            <div class="stage-label">已婚</div>
+                            <div class="stage-desc">携手同行</div>
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button @click="confirmGender" style="width:80%">
+                            <i class="fas fa-arrow-right"></i> 开始答题
+                        </button>
                         <button class="secondary" @click="currentView='home'" style="width:80%"><i class="fas fa-arrow-left"></i> 返回</button>
                     </div>
                 </div>
@@ -1119,6 +1549,7 @@ createApp({
                 <div class="progress-wrapper">
                     <div class="progress-info">
                         <span>第 {{ currentIndex + 1 }} / {{ questions.length }} 题</span>
+                        <span v-if="estimatedTimeLeft" style="color:#c4a89e; font-size:12px; font-weight:400;">{{ estimatedTimeLeft }}</span>
                         <span>{{ Math.round(((currentIndex + 1) / questions.length) * 100) }}%</span>
                     </div>
                     <div class="progress">
@@ -1152,17 +1583,40 @@ createApp({
                 </div>
                 <div class="card">
                     <div class="result-desc">{{ typeDetails[resultType] ? typeDetails[resultType].desc : '' }}</div>
+                    <div v-if="typeDetails[resultType] && typeDetails[resultType].positiveView" class="positive-view-card">
+                        <div class="positive-view-label">💡 正向解读</div>
+                        <div class="positive-view-text">{{ typeDetails[resultType].positiveView }}</div>
+                    </div>
 
                     <div class="score-section">
                         <div v-for="dim in scoreDimensions" :key="dim.key" class="score-bar-item">
                             <div class="score-bar-header">
                                 <span>{{ dim.icon }} {{ dim.label }}</span>
-                                <span>{{ finalScores[dim.key].toFixed(1) }} / {{ dim.max }}</span>
+                                <span>
+                                    <span class="score-level" :style="{background: dim.color, color:'#fff'}">{{ getScoreLevel(finalScores[dim.key], dim.max) }}</span>
+                                    {{ finalScores[dim.key] }} / {{ dim.max }}
+                                    <span class="score-pct">（{{ Math.round(finalScores[dim.key] / dim.max * 100) }}%）</span>
+                                </span>
                             </div>
                             <div class="score-bar-track">
                                 <div class="score-bar-fill" :style="{width: (finalScores[dim.key] / dim.max * 100) + '%', background: dim.color}"></div>
                             </div>
+                            <div class="dim-definition">{{ dim.definition }}</div>
                         </div>
+                    </div>
+
+                    <div v-if="secondaryType" class="secondary-type-card">
+                        <div class="secondary-type-label">次倾向</div>
+                        <div class="secondary-type-content">
+                            <span class="secondary-type-icon">{{ secondaryType.icon }}</span>
+                            <span class="secondary-type-name">{{ secondaryType.label }}</span>
+                            <span class="secondary-type-score">{{ secondaryType.score }} / {{ secondaryType.max }}（{{ secondaryType.pct }}%）</span>
+                        </div>
+                        <div class="secondary-type-hint">你的{{ secondaryType.label }}占比也较高，说明你在关系中同时具备{{ secondaryType.label.replace('倾向','').replace('型','') }}的特质</div>
+                    </div>
+
+                    <div v-if="testDuration" class="duration-info">
+                        <span>⏱️ 测试用时：{{ formatDuration(testDuration) }}</span>
                     </div>
 
                     <div id="radarChart" class="radar-container"></div>
@@ -1172,27 +1626,48 @@ createApp({
                             <span>📖 查看详细解读</span>
                             <span class="arrow" :class="{open: showDetail}">▼</span>
                         </button>
-                        <div class="detail-content" :style="{maxHeight: showDetail ? '1200px' : '0', opacity: showDetail ? 1 : 0}">
-                            <div class="detail-card">
-                                <h4>🌟 核心特质</h4>
-                                <ul><li v-for="t in (typeDetails[resultType] ? typeDetails[resultType].traits : [])" :key="t">{{ t }}</li></ul>
+                        <div class="detail-content" :style="{maxHeight: showDetail ? '1600px' : '0', opacity: showDetail ? 1 : 0}">
+                            <div class="detail-tabs">
+                                <button class="detail-tab-btn" :class="{active: detailTab === 'traits'}" @click="detailTab = 'traits'">🌟 核心特质</button>
+                                <button class="detail-tab-btn" :class="{active: detailTab === 'advice'}" @click="detailTab = 'advice'">💡 相处建议</button>
+                                <button class="detail-tab-btn" :class="{active: detailTab === 'match'}" @click="detailTab = 'match'">💕 适配人格</button>
                             </div>
-                            <div class="detail-card">
-                                <h4>💪 你的优势</h4>
-                                <ul><li v-for="s in (typeDetails[resultType] ? typeDetails[resultType].strengths : [])" :key="s">{{ s }}</li></ul>
-                            </div>
-                            <div class="detail-card">
-                                <h4>🌱 成长空间</h4>
-                                <ul><li v-for="g in (typeDetails[resultType] ? typeDetails[resultType].growth : [])" :key="g">{{ g }}</li></ul>
-                            </div>
-                            <div class="detail-card">
-                                <h4>💕 恋爱搭配建议</h4>
-                                <p>{{ typeDetails[resultType] ? typeDetails[resultType].compatibility : '' }}</p>
-                                <div class="compat-badge">最佳搭档：{{ typeDetails[resultType] ? typeDetails[resultType].idealPartner : '' }}</div>
-                            </div>
-                            <div v-if="genderAdviceText" class="detail-card">
-                                <h4>{{ gender === 'male' ? '👦 给男生的专属建议' : '👧 给女生的专属建议' }}</h4>
-                                <p>{{ genderAdviceText }}</p>
+                            <div class="detail-tab-content">
+                                <div v-if="detailTab === 'traits'">
+                                    <div class="detail-card">
+                                        <h4>🌟 核心特质</h4>
+                                        <ul><li v-for="t in (typeDetails[resultType] ? typeDetails[resultType].traits : [])" :key="t">{{ t }}</li></ul>
+                                    </div>
+                                    <div class="detail-card">
+                                        <h4>💪 你的优势</h4>
+                                        <ul><li v-for="s in (typeDetails[resultType] ? typeDetails[resultType].strengths : [])" :key="s">{{ s }}</li></ul>
+                                    </div>
+                                </div>
+                                <div v-if="detailTab === 'advice'">
+                                    <div class="detail-card">
+                                        <h4>🌱 成长空间</h4>
+                                        <ul><li v-for="g in (typeDetails[resultType] ? typeDetails[resultType].growth : [])" :key="g">{{ g }}</li></ul>
+                                    </div>
+                                    <div v-if="genderAdviceText" class="detail-card">
+                                        <h4>{{ gender === 'male' ? '👦 给男生的专属建议' : '👧 给女生的专属建议' }}</h4>
+                                        <p>{{ genderAdviceText }}</p>
+                                    </div>
+                                    <div v-if="typeDetails[resultType] && typeDetails[resultType].scenarioAdvice" class="detail-card">
+                                        <h4>🎭 场景化建议</h4>
+                                        <div v-for="(sa, saIdx) in typeDetails[resultType].scenarioAdvice" :key="saIdx" class="scenario-advice-item">
+                                            <div class="scenario-advice-scene">{{ sa.scene }}</div>
+                                            <div class="scenario-advice-reaction"><strong>你的反应：</strong>{{ sa.reaction }}</div>
+                                            <div class="scenario-advice-tip"><strong>优化做法：</strong>{{ sa.tip }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="detailTab === 'match'">
+                                    <div class="detail-card">
+                                        <h4>💕 恋爱搭配建议</h4>
+                                        <p>{{ typeDetails[resultType] ? typeDetails[resultType].compatibility : '' }}</p>
+                                        <div class="compat-badge">最佳搭档：{{ typeDetails[resultType] ? typeDetails[resultType].idealPartner : '' }}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1221,10 +1696,10 @@ createApp({
                             <span class="history-date">{{ formatDate(item.timestamp) }}</span>
                         </div>
                         <div class="history-scores">
-                            <span class="history-score-tag">😰 {{ item.scores.anxiety.toFixed(1) }}</span>
-                            <span class="history-score-tag">🏃 {{ item.scores.avoidance.toFixed(1) }}</span>
-                            <span class="history-score-tag">🌿 {{ item.scores.secure.toFixed(1) }}</span>
-                            <span class="history-score-tag">✨ {{ item.scores.guide.toFixed(1) }}</span>
+                            <span class="history-score-tag">😰 {{ item.scores.anxiety }}</span>
+                            <span class="history-score-tag">🏃 {{ item.scores.avoidance }}</span>
+                            <span class="history-score-tag">🌿 {{ item.scores.secure }}</span>
+                            <span class="history-score-tag">✨ {{ item.scores.guide }}</span>
                         </div>
                     </div>
                     <div style="display:flex; margin-top:16px;">
@@ -1240,6 +1715,7 @@ createApp({
                 <div id="posterEmoji" style="font-size:40px; text-align:center;"></div>
                 <div id="posterTypeName" style="font-size:28px; font-weight:800; color:#D2694E; margin:8px 0; text-align:center;"></div>
                 <div id="posterScores" style="background:#FEF0E8; padding:14px; border-radius:20px; margin:12px 0; font-size:14px; line-height:1.8;"></div>
+                <div id="posterRadar" style="width:280px; height:220px; margin:8px auto;"></div>
                 <div id="posterDesc" style="background:#FEF0E8; padding:14px; border-radius:20px; margin:12px 0; font-size:13px; line-height:1.6;"></div>
                 <div id="posterQR" style="display:flex; justify-content:center; margin:12px 0;"></div>
                 <div style="text-align:center; font-size:12px; color:#aaa;">扫码测测你的恋爱人格</div>
