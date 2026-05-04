@@ -671,6 +671,52 @@
             line-height: 1.6;
         }
 
+        .features-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .feature-item {
+            background: #fef8f5;
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
+
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .feature-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .feature-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .divider-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+            margin: 20px 0;
+        }
+
         .dimensions-grid {
             display: flex;
             flex-wrap: wrap;
@@ -866,17 +912,20 @@
 <script src="https://cdn.bootcdn.net/ajax/libs/vue/3.3.4/vue.global.prod.js"></script>
 <script>
 const questions = [
-    { text: "你刚睡完午觉，正窝在沙发上刷手机。对方一言不发凑过来挨着你坐下，直接把头靠在你肩膀上。你最可能的反应是？", options: [
-        { text: "心跳突然变快，不敢乱动，忍不住胡思乱想TA是不是心情低落、急需安慰", scores: { anxiety: 1 } },
-        { text: "暗自开心，主动放下手机接住这份亲近，顺势主动闲聊，拉近两人氛围", scores: { guide: 1 } },
-        { text: "心里暖暖的，顺其自然接受亲近，继续安静刷手机，不刻意主动搭话", scores: { secure: 1 } },
-        { text: "有点不习惯亲密靠得太近，表面不动声色，下意识心里拉开一点距离", scores: { avoidance: 1 } }
-    ]},
+    {
+    text: "做人生重要决定，你的习惯是？",
+    options: [
+        { text: "纠结犹豫，很需要别人帮我拿主意、给支撑", scores: { anxiety: 1 } },
+        { text: "独立决断，不喜欢被任何人干涉左右", scores: { avoidance: 1 } },
+        { text: "会主动参考意见，理性权衡，也愿意和伴侣沟通对齐想法", scores: { guide: 1 } },
+        { text: "自有判断，随心选择，没必要特意和谁商量磨合", scores: { secure: 1 } }
+    ]
+},
    {
     text: "吵架后双方都有情绪，对方说“先冷静一下”，不想立刻沟通。你的反应是？",
     options: [
         { text: "正好不想聊，立刻撤退，等对方低头或各自冷静直到事情翻篇", scores: { avoidance: 1 } },
-        { text: "非常不安，怕冷静着就散了，必须立刻说清楚", scores: { anxiety: 1 } },
+        { text: "非常不安，很在乎这段关系，怕冷静着就散了，必须立刻说清楚", scores: { anxiety: 1 } },
         { text: "尊重冷静，但约定好时间再聊，不让关系一直僵着", scores: { guide: 1 } },
         { text: "接受冷静，不逼迫、不内耗，等双方平静再自然沟通", scores: { secure: 1 } }
     ]
@@ -885,43 +934,40 @@ const questions = [
     text: "最近一周，对方明显比以前冷淡、话变少了。你的第一反应是？",
     options: [
         { text: "互不打扰就好，你也保持距离，不追问、不靠近", scores: { avoidance: 1 } },
-        { text: "特别不安，反复猜是不是不爱了、是不是想疏远", scores: { anxiety: 1 } },
+        { text: "特别不安，很在意对方态度，反复猜是不是不爱了、是不是想疏远", scores: { anxiety: 1 } },
         { text: "温柔问一句“最近是不是累啦”，温和打开沟通", scores: { guide: 1 } },
         { text: "理解每个人都有状态起伏，不胡思乱想，正常相处", scores: { secure: 1 } }
     ]
 },
     { text: "你期待已久的周六约会，你已经准备好出门，对方突然说临时要加班，无法赴约，也没有提出改期。你通常的第一反应是？", options: [
-        { text: "心里会明显不安，忍不住猜测对方是不是不想见自己，是不是不在意这段关系", scores: { anxiety: 1 } },
+        { text: "心里会明显不安，很在意对方陪伴，忍不住猜测对方是不是不想见自己", scores: { anxiety: 1 } },
         { text: "觉得突然被打断很不舒服，不想多交流，宁愿自己安排接下来的时间，也不想主动追问", scores: { avoidance: 1 } },
         { text: "有点失落但能理解，不会胡思乱想，也不会有压力，等对方有空再商量即可", scores: { secure: 1 } },
         { text: "理解工作突发状况，主动温和地提出改期，不让气氛变得尴尬或冷淡", scores: { guide: 1 } }
     ]},
-    {
-    text: "半夜醒来，发现对方几小时前发了消息，但你睡着没看到。你醒来后的第一反应是？",
-    options: [
-        { text: "觉得没必要立刻回，白天再说就行，不用紧张", scores: { avoidance: 1 } },
-        { text: "立刻有点慌，怕对方等很久、以为你故意不回", scores: { anxiety: 1 } },
-        { text: "温和回一句“刚醒，不好意思呀”，简单安抚对方", scores: { guide: 1 } },
-        { text: "知道对方不会多想，轻松回消息，不焦虑也不刻意", scores: { secure: 1 } }
-    ]
-},
-    { text: "你刚下班回到家累得不行，一进门就因为家务分工跟对方拌了几句嘴，谁都没让步，冷战一阵后对方直接躺床背过身先睡，拒绝当下沟通。你最可能的反应是？", options: [
+    { text: "面对自身情绪起伏，你更像？", options: [
+        { text: "情绪容易被牵动，需要别人哄才能平复", scores: { anxiety: 1 } },
+        { text: "习惯压抑隐藏，独自消化不向外示弱", scores: { avoidance: 1 } },
+        { text: "会主动表达情绪、合理沟通，不让矛盾憋在心里", scores: { guide: 1 } },
+        { text: "自愈能力强，情绪来去随缘，不必刻意表达或找人安抚", scores: { secure: 1 } }
+    ]},
+    { text: "你刚下班回到家累得不行，一进门就因为小事跟对方拌了几句嘴，谁都没让步，冷战一阵后对方直接躺床背过身先睡，拒绝当下沟通。你最可能的反应是？", options: [
         { text: "不想纠结争吵对错，也懒得主动哄人，转身睡觉避开情绪拉扯", scores: { avoidance: 1 } },
         { text: "即便还在生气，也愿意留台阶给对方，等时机合适主动沟通化解矛盾", scores: { guide: 1 } },
-        { text: "又委屈又不安，翻来覆去睡不着，害怕矛盾一直搁置，盼着赶紧和好", scores: { anxiety: 1 } },
+        { text: "又委屈又不安，很需要对方安抚，翻来覆去睡不着，盼着赶紧和好", scores: { anxiety: 1 } },
         { text: "心里还有情绪，但不愿深夜僵持，先好好休息，等第二天自然缓和相处", scores: { secure: 1 } }
     ]},
-    { text: "你正发着高烧虚弱地躺在床上。对方煮了碗粥放到床头，说了句「我先去忙了」就径直走开。你的第一反应是？", options: [
-        { text: "明白对方有照顾的心意，自己安静喝粥休息，理解对方有事，不主动要求陪伴", scores: { secure: 1 } },
-        { text: "不习惯依赖别人陪伴，自己照顾自己就好，不指望对方", scores: { avoidance: 1 } },
-        { text: "心里又难过又委屈，忍不住多想自己生病对方也不上心，嫌自己麻烦", scores: { anxiety: 1 } },
-        { text: "理解对方忙碌，也会轻声表达自己难受，委婉希望对方能抽空多陪一会儿", scores: { guide: 1 } }
+    { text: "恋爱里你最看重的核心是？", options: [
+        { text: "时刻陪伴、被偏爱、被惦记，缺一点就不安", scores: { anxiety: 1 } },
+        { text: "自由不被束缚，不用黏在一起、不用互相捆绑", scores: { avoidance: 1 } },
+        { text: "愿意沟通、懂得包容，出现问题能主动一起解决", scores: { guide: 1 } },
+        { text: "相处舒服、彼此信任，不用刻意经营也不用猜心", scores: { secure: 1 } }
     ]},
-    { text: "你早上醒来第一件事就是看手机，心里暗自期待对方会不会记得今天是什么日子。毕竟在一起快一年了，但对方总是记不住你们的纪念日，当天毫无表示也不提一句。你的第一反应是？", options: [
-        { text: "直接笑着提醒对方，并主动提议晚上补过，把仪式感拉回来", scores: { guide: 1 } },
-        { text: "有点遗憾，但不生气不记挂，顺其自然也不追问", scores: { secure: 1 } },
-        { text: "本身就不在意仪式，忘了也无所谓，完全不纠结", scores: { avoidance: 1 } },
-        { text: "一整天心神不宁暗自失落，敏感在意自己在对方心里够不够重要", scores: { anxiety: 1 } }
+    { text: "在一起许久，对方经常忘记节日，也没有任何表示。你会倾向于？", options: [
+        { text: "主动说出自己的失落与在意，好好沟通，一起约定往后的仪式感和相处方式", scores: { guide: 1 } },
+        { text: "有点小遗憾，但能理解，不会放在心上纠结", scores: { secure: 1 } },
+        { text: "本来就不看重这些形式，记不记得都无所谓", scores: { avoidance: 1 } },
+        { text: "暗自难过失落，忍不住胡思乱想自己是否不被重视", scores: { anxiety: 1 } }
     ]},
     { text: "你换了新衣服问对方好不好看。对方随口调侃你最近好像长胖了，语气不算恶意但很直接。你的第一反应是？", options: [
         { text: "不想继续这个话题，淡淡结束，避免情绪交流", scores: { avoidance: 1 } },
@@ -932,35 +978,32 @@ const questions = [
     { text: "你们已经整整三天默契断联，没有吵架也没有矛盾，谁也没有先找对方。你的第一反应是？", options: [
         { text: "偶尔会想起对方，但理解各自生活节奏，顺其自然，不刻意强求联系", scores: { secure: 1 } },
         { text: "不想关系一直冷下去，主动轻松发消息破冰，温柔拉回疏离氛围", scores: { guide: 1 } },
-        { text: "反复打开聊天框打字又删，最后还是忍不住发了条「在忙吗」，然后每隔几分钟就盯着手机等回复", scores: { anxiety: 1 } },
+        { text: "容易牵挂放不下，反复打开聊天框打字又删，忍不住主动找对方、一直等回复", scores: { anxiety: 1 } },
         { text: "完全沉浸自己生活，没留意断联多久，也不会主动想着破冰联系", scores: { avoidance: 1 } }
     ]},
-    { text: "你兴冲冲提议下个月一起去旅行，但你提了好几个地方，对方都不满意，一直达不成一致。你的第一反应是？", options: [
-        { text: "主动拿出手机查攻略，列两三个折中方案摆TA面前，「这个怎么样？那个呢？」，推动事情往前走", scores: { guide: 1 } },
-        { text: "怕惹对方不开心，不敢坚持想法，下意识委屈自己顺着对方意愿", scores: { anxiety: 1 } },
-        { text: "有点无奈但也不纠结，心想去哪都行，只要两个人一起就好，愿意听对方的安排", scores: { secure: 1 } },
-        { text: "觉得来回商量很麻烦，干脆甩手让对方决定，自己随便配合就行", scores: { avoidance: 1 } }
+    { text: "发现彼此不合适，但你已经习惯了对方的存在，你的态度是？", options: [
+        { text: "舍不得放手，宁愿委屈自己也想勉强维系", scores: { anxiety: 1 } },
+        { text: "慢慢抽离冷淡，不纠缠不解释，自然疏远", scores: { avoidance: 1 } },
+        { text: "主动沟通磨合，尽力修复，实在不行再体面放下", scores: { guide: 1 } },
+        { text: "顺其自然，合得来就处，合不来也坦然接受结果", scores: { secure: 1 } }
     ]},
-   {
-    text: "你看到对方和异性同事/朋友正常聊天、偶尔分享日常，没有暧昧内容。你的反应是？",
-    options: [
+    { text: "你看到对方和异性同事/朋友正常聊天、偶尔分享日常，没有暧昧内容。你的反应是？", options: [
         { text: "不想过问也不想管，各自有社交自由，不干涉不生气", scores: { avoidance: 1 } },
-        { text: "心里很不安、会吃醋，反复确认对方是不是更喜欢别人", scores: { anxiety: 1 } },
+        { text: "心里很不安、容易吃醋，很在意自己在对方心里的分量", scores: { anxiety: 1 } },
         { text: "温和说出自己的感受，沟通彼此的边界，不指责也不冷战", scores: { guide: 1 } },
         { text: "相信对方有分寸，正常社交可以接受，不胡思乱想", scores: { secure: 1 } }
-    ]
-},
-    { text: "你跟朋友聚餐，对方突然当众调侃你以前的尴尬私事，没顾及你的感受。你的第一反应是？", options: [
-        { text: "瞬间脸红窘迫，心里又羞又难过，介意对方不懂得给自己留面子", scores: { anxiety: 1 } },
-        { text: "当场幽默回怼不伤和气，回家后认真跟TA说「下次别拿这个开玩笑了，我会不舒服」，把边界立清楚", scores: { guide: 1 } },
-        { text: "表面不动声色不发作，话题翻篇，但心里悄悄和对方拉开一点距离", scores: { avoidance: 1 } },
-        { text: "当场淡淡一笑帮TA圆过去，事后私下轻描淡写提一句「那个事以后少提哦」，不给对方压力", scores: { secure: 1 } }
+    ]},
+    { text: "你认同恋爱要随时报备、秒回消息吗？", options: [
+        { text: "很认同，这些细节才能让我心里踏实", scores: { anxiety: 1 } },
+        { text: "不认同，太过束缚，反感被事事约束", scores: { avoidance: 1 } },
+        { text: "不刻板报备，但会主动和对方商量好彼此舒服的联系频率", scores: { guide: 1 } },
+        { text: "不强求形式，有就聊没有也不纠结，随缘就好", scores: { secure: 1 } }
     ]},
     { text: "没有任何争执前兆，对方突然说想一个人静静，让你暂时别打扰TA。你的第一反应是？", options: [
         { text: "尊重对方独处需求，完全不打扰不追问，安静等TA自己缓过来", scores: { secure: 1 } },
         { text: "正好乐得清静，不关心原因也不问候，直接做自己的事", scores: { avoidance: 1 } },
         { text: "温柔告诉TA：我尊重你独处，但我一直在，想说随时找我", scores: { guide: 1 } },
-        { text: "瞬间心慌，害怕对方厌烦自己、慢慢疏远感情", scores: { anxiety: 1 } }
+        { text: "瞬间心慌很没底气，害怕对方厌烦、刻意疏远冷落自己", scores: { anxiety: 1 } }
     ]},
     { text: "你帮对方收拾抽屉找东西，无意间翻到小盒子，里面放着前任曾经送过的纪念品手链。你的第一反应是？", options: [
         { text: "心里堵得慌很不是滋味，反复胡思乱想对方是不是还放不下旧人", scores: { anxiety: 1 } },
@@ -974,35 +1017,35 @@ const questions = [
         { text: "心里有点失落失望，还要强装喜欢，暗自介意对方并不了解自己喜好", scores: { anxiety: 1 } },
         { text: "懂得珍惜对方心意，礼貌道谢收下默默收好，不扫兴也不刻意多说", scores: { secure: 1 } }
     ]},
-    { text: "你刚洗完澡出来擦着头发，心情还挺轻松。对方突然神情严肃，认真看着你说有件重要的事，想跟你单独好好谈谈。你的第一反应是？", options: [
-        { text: "平和接纳对方的认真，坐直身子看着TA的眼睛说「你说，我听着，我们一起想办法」，主动引导对话方向", scores: { guide: 1 } },
-        { text: "心里稍微一紧但很快稳住，安静点点头「好，你说」，然后安安静静听完，不急着表态", scores: { secure: 1 } },
-        { text: "心里沉了一下有点抵触，表面故作平静，被动等着对方开口", scores: { avoidance: 1 } },
-        { text: "瞬间心慌不安，下意识往最坏方向联想，紧张害怕感情出问题", scores: { anxiety: 1 } }
+    { text: "和伴侣观念产生分歧，且对方轻微表现出生气，你会？", options: [
+        { text: "不敢坚持想法，习惯性迁就害怕闹矛盾", scores: { anxiety: 1 } },
+        { text: "懒得争辩，沉默回避不愿正面冲突", scores: { avoidance: 1 } },
+        { text: "积极主动表达观点，求同存异，好好沟通磨合相处方式", scores: { guide: 1 } },
+        { text: "观点不同很正常，不必刻意说服也不用刻意磨合", scores: { secure: 1 } }
     ]},
-    { text: "你深夜加班疲惫到家，对方早已躺在床上准备睡觉，没起身没问候，只默默给你留了盏小夜灯。你的第一反应是？", options: [
-        { text: "觉得是平常小事，内心没什么起伏，照常洗漱休息", scores: { avoidance: 1 } },
-        { text: "感受到贴心、心里踏实，不要求更多，安静照顾自己", scores: { secure: 1 } },
-        { text: "记着这份心意，第二天主动温柔道谢，维系彼此小体贴", scores: { guide: 1 } },
-        { text: "有点感动又失落，纠结对方只留灯却不关心你累不累", scores: { anxiety: 1 } }
+    { text: "异地冷战只能隔着屏幕互不说话，你最怕什么？", options: [
+        { text: "最怕隔着距离慢慢疏远，关系无声变淡", scores: { anxiety: 1 } },
+        { text: "最怕被迫和好、被过度捆绑私人情绪和生活", scores: { avoidance: 1 } },
+        { text: "最怕误会越积越深，会主动打破沉默把话说开", scores: { guide: 1 } },
+        { text: "冷战只是暂时情绪，距离不会改变内心笃定", scores: { secure: 1 } }
     ]},
-    { text: "你跟对方一起追剧，气氛正轻松。对方突然靠在你怀里哭，坦言最近压力特别大。你的第一反应是？", options: [
-        { text: "温柔抱住轻拍后背，递上纸巾，然后柔声问「想聊聊吗？还是就想哭一会儿？」，给TA选择也给自己方向", scores: { guide: 1 } },
-        { text: "什么都没说，只是把TA抱得更紧一点，调整个舒服的姿势，让TA靠着自己慢慢哭完", scores: { secure: 1 } },
-        { text: "一下子手足无措慌乱自责，忍不住总觉得是自己没照顾好对方情绪", scores: { anxiety: 1 } },
-        { text: "面对情绪场面会不自在，想避开，简单递纸巾不深入安慰", scores: { avoidance: 1 } }
+    { text: "想到长久走下去，你最大的顾虑是？", options: [
+        { text: "害怕中途被抛下，依赖越深越容易患得患失", scores: { anxiety: 1 } },
+        { text: "害怕被感情捆绑，失去自我自由和空间", scores: { avoidance: 1 } },
+        { text: "顾虑对方不愿敞开心沟通，矛盾越积越伤感情", scores: { guide: 1 } },
+        { text: "没什么多余顾虑，一切讲究顺其自然", scores: { secure: 1 } }
     ]},
-    { text: "你无意间发现对方故意隐瞒，明明出去玩乐却谎称在加班。你的第一反应是？", weight: 1.5, options: [
+    { text: "你无意间发现对方故意隐瞒，明明出去玩乐却谎称在加班。你的第一反应是？", options: [
         { text: "脑子一下子很乱，忍不住联想翻旧账，担心对方还有更多事瞒着自己", scores: { anxiety: 1 } },
         { text: "坦诚说出自己的发现和感受，认真沟通边界，约定往后小事不用刻意隐瞒", scores: { guide: 1 } },
         { text: "看破但不戳破，默默记在心里，悄悄降低一点信任，不再主动深究", scores: { avoidance: 1 } },
         { text: "心里难免不舒服，但愿意冷静下来，找时机平和问问对方隐瞒的原因", scores: { secure: 1 } }
     ]},
-    { text: "对方一脸认真地说，公司有外派机会要调去外地工作至少两年，正式征求你的想法。你的第一反应是？", weight: 1.5, options: [
-        { text: "主动查两地方案，一起规划如何维持感情，推动关系往前走", scores: { guide: 1 } },
-        { text: "不舍但理性，愿意配合对方决定，相信距离不是问题", scores: { secure: 1 } },
-        { text: "情绪起伏不大，顺其自然，默默为自己往后生活做打算", scores: { avoidance: 1 } },
-        { text: "瞬间慌了没有安全感，害怕距离冲淡感情、两人慢慢疏远", scores: { anxiety: 1 } }
+    { text: "在感情里，你能不能接受彼此拥有各自独立的社交圈子？", options: [
+        { text: "很难放下顾虑，容易敏感吃醋，总担心距离变远、感情变淡", scores: { anxiety: 1 } },
+        { text: "很能接受，更希望保留各自生活边界，不必深度介入彼此社交", scores: { avoidance: 1 } },
+        { text: "可以接受独立社交，但希望双方守住分寸，主动避嫌、坦诚相待", scores: { guide: 1 } },
+        { text: "觉得很正常，各自有自己的朋友理所应当，内心信任不会多想", scores: { secure: 1 } }
     ]},
     { text: "你们已经冷战两天了，第三天对方不做解释，只给你发了一条搞笑短视频悄悄递台阶。你的第一反应是？", options: [
         { text: "随手看一眼划过，不回复不接话，等着事情自己翻篇，不主动破冰", scores: { avoidance: 1 } },
@@ -1010,11 +1053,11 @@ const questions = [
         { text: "秒懂TA在递台阶，立刻顺着话题聊开，顺便把这两天的事也一起摊开来好好聊聊，一次性彻底翻篇", scores: { guide: 1 } },
         { text: "看完会心一笑，回个可爱表情包接住这份好意，不急着深聊也不装没事，等见面了再自然和好", scores: { secure: 1 } }
     ]},
-    { text: "春节假期只有一周，你想回自己老家，对方也坚持回自己家，商量好几次都无法统一。你的第一反应是？", options: [
-        { text: "不敢坚持自己想法，害怕争执伤感情，下意识委屈自己迁就对方", scores: { anxiety: 1 } },
-        { text: "主动查行程提折中方案，照顾两边感受，商量出双方都能接受的安排", scores: { guide: 1 } },
-        { text: "有点无奈但理性通透，能接受各回各家，年后再找时间相聚陪伴", scores: { secure: 1 } },
-        { text: "觉得来回拉扯很麻烦，嘴上说随便，私下默默按自己计划安排好", scores: { avoidance: 1 } }
+    { text: "异地恋长期不能见面，你内心最大的感受是？", options: [
+        { text: "很缺安全感，容易脑补多想，总担心感情慢慢变淡、患得患失", scores: { anxiety: 1 } },
+        { text: "反倒觉得自在轻松，不用被日常相处捆绑，保有自己的空间", scores: { avoidance: 1 } },
+        { text: "清楚距离会产生隔阂，会主动维系沟通，也认真规划线下见面", scores: { guide: 1 } },
+        { text: "内心安稳笃定，感情靠本心维系，不会被距离轻易左右心态", scores: { secure: 1 } }
     ]},
     { text: "对方随口说了一句普通的话，你听完莫名心里别扭，却说不清具体哪里不妥。你的第一反应是？", options: [
         { text: "心里一直憋着别扭，反复回想越想越难受，忍不住旁敲侧击追问对方「你刚才那句话是什么意思」", scores: { anxiety: 1 } },
@@ -1034,11 +1077,11 @@ const questions = [
         { text: "有点不自在但心态从容，知道初次相处需要磨合，顺其自然慢慢熟悉", scores: { secure: 1 } },
         { text: "心里特别焦虑不安，反复怀疑自己言行不够好，不被长辈喜欢认可", scores: { anxiety: 1 } }
     ]},
-    { text: "你正靠在沙发上跟对方闲聊，氛围轻松随意。对方突然认真看着你说，感觉你最近待人处事、情绪状态跟以前有明显不一样。你的第一反应是？", options: [
-        { text: "好奇地凑过去「嗯？哪里变了？我也想知道」，主动把话题打开，想听听也愿意分享", scores: { guide: 1 } },
-        { text: "有点不耐烦被审视评价，不愿深入聊这类情绪话题，简单带过草草结束", scores: { avoidance: 1 } },
-        { text: "安静下来认真听着，偶尔点点头表示在听，等TA说完再平静回应「谢谢你告诉我」，不防御也不急", scores: { secure: 1 } },
-        { text: "瞬间紧张慌乱，事后反复追问对方「你觉得我哪里变了」「你是不是不喜欢现在的我了」，想听对方否定", scores: { anxiety: 1 } }
+    { text: "如果处于异地恋状态，你会不会频繁翻看对方社交动态来获取安全感？", options: [
+        { text: "会忍不住经常翻看，想从点滴动态里确认自己被放在心上", scores: { anxiety: 1 } },
+        { text: "基本不会，不愿过度窥探，也不想介入对方私人社交生活", scores: { avoidance: 1 } },
+        { text: "不会刻意刷动态试探，更倾向直接沟通来筑牢彼此信任", scores: { guide: 1 } },
+        { text: "觉得没必要这样求证，内心安稳，不靠外界细节给自己定心", scores: { secure: 1 } }
     ]},
     { text: "你刚算完这个月的账，发现余额不太够用，正发愁呢。两人目前经济都偏紧张、手头不宽裕，对方没跟你商量，私下买了一件价格不低的私人物品。你的第一反应是？", options: [
         { text: "理解对方喜欢，但认真约定：以后贵的东西我们先商量", scores: { guide: 1 } },
@@ -1046,11 +1089,11 @@ const questions = [
         { text: "心里不安别扭，又怕显得小气，只能默默憋在心里不敢提", scores: { anxiety: 1 } },
         { text: "心里有隔阂但不拆穿，默默划清经济边界不再多干涉", scores: { avoidance: 1 } }
     ]},
-    { text: "你正靠在沙发上跟对方一起看综艺，气氛轻松愉快。交往也有一段时间了，对方突然主动邀约，问你周末愿不愿意跟TA回家，正式见见家里长辈确立关系进度。你的第一反应是？", options: [
-        { text: "眼睛一亮「好啊！」，然后立刻开始查攻略，「阿姨喜欢什么？我要不要带礼物？穿什么合适？」，把准备工作主动揽过来", scores: { guide: 1 } },
-        { text: "有点小紧张但更多的是安心，觉得是被认可了，温和地问「那我需要准备什么？听你安排」，配合但不焦虑", scores: { secure: 1 } },
-        { text: "既期待又极度焦虑，反复胡思乱想，一直担心自己表现不好不被认可", scores: { anxiety: 1 } },
-        { text: "心里有压力有点抗拒，觉得进度太快，下意识想往后推脱暂缓见家长", scores: { avoidance: 1 } }
+    { text: "你认为恋爱中，该不该把所有情绪都展露给对方？", options: [
+        { text: "总想全盘展露，只有被完全接纳才觉得安心", scores: { anxiety: 1 } },
+        { text: "习惯隐藏脆弱，不想把负面情绪带给任何人", scores: { avoidance: 1 } },
+        { text: "适度展露真实情绪，也懂得分寸，不肆意消耗对方", scores: { guide: 1 } },
+        { text: "随心流露就好，不必刻意隐藏，也不用刻意全盘倾诉", scores: { secure: 1 } }
     ]},
     { text: "你正迷迷糊糊快要睡着了，意识模模糊糊的。对方突然转身抱住你，轻声跟你说了一句我爱你。你的第一反应是？", options: [
         { text: "内心稍有触动，但不习惯直白表露情绪，简单回应保持含蓄内敛", scores: { avoidance: 1 } },
@@ -1452,7 +1495,6 @@ createApp({
         const finalScores = ref(null);
         const resultType = ref('');
         const gender = ref('');
-        const relationshipStage = ref('');
         const showDetail = ref(false);
         const detailTab = ref('traits');
         const toastMsg = ref('');
@@ -1481,43 +1523,6 @@ createApp({
             if (scores.anxiety >= 8 && scores.avoidance >= 8) insights.push('你内心可能存在矛盾，既渴望亲密又害怕受伤，建议关注自我成长');
             if (insights.length === 0) return base;
             var result = base + '\n\n基于你的分数分析：' + insights.join('；') + '。';
-            if (relationshipStage.value) {
-                var stageAdvice = {
-                    single: {
-                        guide: '单身期正是锻炼引导力的好时机，多参加社交活动，主动创造与人交流的机会，你的主导气质会自然吸引合适的人。',
-                        secure: '你的安全感和稳定感本身就是最好的吸引力，保持自然的生活节奏，爱情会在合适的时候到来。',
-                        anxious: '单身期容易陷入「是不是自己不够好」的焦虑，建议把注意力放在自我成长上，一个充实的你更有魅力。',
-                        avoidant: '单身期的独立自在是你的舒适区，但如果想脱单，需要适度走出舒适区，给潜在对象靠近你的机会。',
-                        fearful: '单身期的自由也是疗愈的窗口，先学会和自己好好相处，等内心更稳定了再开启关系会更顺利。'
-                    },
-                    dating: {
-                        guide: '暧昧期你的引导特质很有优势，建议适度主动但保留神秘感，让对方也有探索你的欲望。',
-                        secure: '暧昧期你的安全感是加分项，建议保持自然节奏，不要急于定义关系，享受这个过程。',
-                        anxious: '暧昧期焦虑感容易放大，建议给自己设定「不主动联系」的小挑战，培养安全感。',
-                        avoidant: '暧昧期你的独立感可以适度放松，尝试多回应对方的热情，别让对方觉得你没兴趣。',
-                        fearful: '暧昧期的不确定性对你来说是挑战，建议专注当下的相处质量，而不是猜测对方心意。'
-                    },
-                    relationship: {
-                        guide: '恋爱中你的引导力是关系的推进器，记得也给对方主导的机会，让关系更平衡。',
-                        secure: '恋爱中你的稳定性是最大的礼物，偶尔制造小浪漫会让关系保持新鲜感。',
-                        anxious: '恋爱中试着建立「安心仪式」，比如睡前通话，帮你减少不必要的焦虑。',
-                        avoidant: '恋爱中适度的亲密表达很重要，尝试每周主动分享一次你的内心感受。',
-                        fearful: '恋爱中稳定的日常互动是最好的安全感来源，建立属于你们的小习惯。'
-                    },
-                    marriage: {
-                        guide: '婚姻中你的引导力体现在家庭规划上，记得也要关注伴侣的情感需求，不只是事务性沟通。',
-                        secure: '婚姻中你的稳定性是家庭的基石，注意保持情感的深度连接，不要变成「室友」。',
-                        anxious: '婚姻中长期的承诺感能帮你缓解焦虑，学会在日常琐事中找到安全感。',
-                        avoidant: '婚姻中独立空间很重要，但也要确保伴侣感受到你的参与和关心。',
-                        fearful: '婚姻是建立信任的最好土壤，持续稳定的互动能帮你慢慢放下防备。'
-                    }
-                };
-                var stage = relationshipStage.value;
-                var type = resultType.value;
-                if (stageAdvice[stage] && stageAdvice[stage][type]) {
-                    result += '\n\n' + stageAdvice[stage][type];
-                }
-            }
             return result;
         });
 
@@ -1645,7 +1650,6 @@ createApp({
                 date: new Date().toLocaleDateString(),
                 type: type,
                 gender: gender.value,
-                stage: relationshipStage.value,
                 scores: { anxiety: scores.anxiety, avoidance: scores.avoidance, secure: scores.secure, guide: scores.guide },
                 mbti: {
                     code: labelInfo.code,
@@ -1686,7 +1690,6 @@ createApp({
             }
             trackingHistoryId.value = id;
             gender.value = target.gender;
-            relationshipStage.value = target.stage;
             resultType.value = target.type;
             finalScores.value = { 
                 anxiety: target.scores.anxiety, 
@@ -1724,7 +1727,6 @@ createApp({
             finalScores.value = null;
             showDetail.value = false;
             gender.value = '';
-            relationshipStage.value = '';
             trackingHistoryId.value = null;
             currentView.value = 'gender';
         }
@@ -1740,6 +1742,8 @@ createApp({
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
         }
+
+
 
         function goBack() {
             if (currentIndex.value > 0) {
@@ -2026,7 +2030,6 @@ createApp({
             finalScores.value = null;
             resultType.value = '';
             gender.value = '';
-            relationshipStage.value = '';
             showDetail.value = false;
             detailTab.value = 'traits';
             startTestTime.value = 0;
@@ -2056,7 +2059,7 @@ createApp({
         return {
                     currentView, currentIndex, selectedIdx, questions, bonusQuestion, currentQuestion, isBonusQuestion, totalSteps,
                     answers, finalScores, resultType,
-                    gender, relationshipStage, showDetail, detailTab, toastMsg, history, dailyTip, floatingHearts, scoreDimensions,
+                    gender, showDetail, detailTab, toastMsg, history, dailyTip, floatingHearts, scoreDimensions,
                     genderAdviceText, testDuration, formatScore, secondaryType, labelResult, bonusResult, trackingHistoryId, isHistoryView, formatDuration, getScoreLevel, getHeaderStyle, getMbtiSectionStyle, formatBlindspot,
                     estimatedTimeLeft,
                     startTest, confirmGender, goBack, selectOption, nextQuestion, retest, shareResult,
@@ -2080,7 +2083,34 @@ createApp({
                     <button v-if="history.length" @click="currentView='history'" class="ghost" style="width:80%; margin-top:12px">
                         <i class="fa fa-history"></i> 查看历史记录
                     </button>
+                    
+                    <div class="divider-line"></div>
+                    
+                    <div class="features-title">✨ 测试特色</div>
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <div class="feature-icon">📝</div>
+                            <div class="feature-text">30道情景题</div>
+                            <div class="feature-desc">真实场景，更有代入感</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🎯</div>
+                            <div class="feature-text">精准分型</div>
+                            <div class="feature-desc">识别你的恋爱人格类型</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💑</div>
+                            <div class="feature-text">匹配建议</div>
+                            <div class="feature-desc">给出恋爱搭配小贴士</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">📊</div>
+                            <div class="feature-text">数据可视化</div>
+                            <div class="feature-desc">雷达图展示你的特质</div>
+                        </div>
+                    </div>
                 </div>
+                
                 <div class="card">
                     <div class="daily-tip">
                         <div class="daily-tip-label">💡 每日恋爱小贴士</div>
@@ -2105,29 +2135,6 @@ createApp({
                         <div class="gender-card" :class="{active: gender === 'female'}" @click="gender = 'female'">
                             <div class="gender-icon">👩</div>
                             <div class="gender-label">女生</div>
-                        </div>
-                    </div>
-                    <div class="section-divider"><span>关系阶段</span></div>
-                    <div class="stage-cards">
-                        <div class="stage-card" :class="{active: relationshipStage === 'single'}" @click="relationshipStage = 'single'">
-                            <div class="stage-icon">🌟</div>
-                            <div class="stage-label">没有对象</div>
-                            <div class="stage-desc">期待爱情</div>
-                        </div>
-                        <div class="stage-card" :class="{active: relationshipStage === 'dating'}" @click="relationshipStage = 'dating'">
-                            <div class="stage-icon">💕</div>
-                            <div class="stage-label">暧昧期</div>
-                            <div class="stage-desc">互相试探</div>
-                        </div>
-                        <div class="stage-card" :class="{active: relationshipStage === 'relationship'}" @click="relationshipStage = 'relationship'">
-                            <div class="stage-icon">💑</div>
-                            <div class="stage-label">恋爱中</div>
-                            <div class="stage-desc">稳定交往</div>
-                        </div>
-                        <div class="stage-card" :class="{active: relationshipStage === 'marriage'}" @click="relationshipStage = 'marriage'">
-                            <div class="stage-icon">💍</div>
-                            <div class="stage-label">已婚</div>
-                            <div class="stage-desc">携手同行</div>
                         </div>
                     </div>
                     <div class="btn-container">
