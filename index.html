@@ -60,12 +60,54 @@
             background: var(--bg-body);
             font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
             padding-bottom: 30px;
+            padding-bottom: calc(30px + env(safe-area-inset-bottom));
+            padding-top: env(safe-area-inset-top);
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: none;
             position: relative;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #ffe0d7;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            -webkit-animation: spin 0.8s linear infinite;
+        }
+        
+        .loading-text {
+            margin-top: 16px;
+            font-size: 15px;
+            color: #7a5a4f;
+            font-weight: 500;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @-webkit-keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
         }
 
         .app {
@@ -141,6 +183,9 @@
             animation: cardIn 0.4s ease both;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            will-change: transform, opacity;
             min-height: 520px;
             position: relative;
             overflow: hidden;
@@ -159,6 +204,28 @@
             min-height: calc(100vh - 200px);
             display: flex;
             flex-direction: column;
+        }
+        @supports (min-height: 100dvh) {
+            .test-container {
+                min-height: calc(100dvh - 200px);
+            }
+        }
+        
+        .test-container {
+            padding-bottom: 20px;
+        }
+        
+        .transition-wrapper {
+            position: relative;
+            min-height: 580px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .transition-wrapper .card {
+            margin-top: 0;
+            margin-bottom: 0;
+            animation: none;
+            -webkit-animation: none;
         }
         .question-text {
             font-size: 20px;
@@ -201,12 +268,12 @@
         .option-item {
             background: var(--bg-option);
             border-radius: 48px;
-            padding: 14px 18px;
+            padding: 16px 20px;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1.5px solid var(--border-light);
             user-select: none;
             -webkit-user-select: none;
@@ -215,34 +282,51 @@
             outline: none;
             -webkit-tap-highlight-color: rgba(0,0,0,0);
             -webkit-touch-callout: none;
+            min-height: 56px;
         }
         .option-item:hover { background: #fdf0ea; }
-        .option-item:active, .option-item.selected {
+        .option-item:active {
+            transform: scale(0.96);
+            -webkit-transform: scale(0.96);
+        }
+        .option-item.selected {
             background: var(--bg-option-active);
-            transform: scale(0.97);
-            -webkit-transform: scale(0.97);
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255,138,111,0.15);
+            box-shadow: 0 0 0 4px rgba(255,138,111,0.18), 0 4px 12px rgba(255,138,111,0.1);
+            animation: selectedPulse 0.3s ease-out;
+            -webkit-animation: selectedPulse 0.3s ease-out;
+        }
+        @keyframes selectedPulse {
+            0% { transform: scale(0.97); }
+            50% { transform: scale(1.01); }
+            100% { transform: scale(1); }
+        }
+        @-webkit-keyframes selectedPulse {
+            0% { -webkit-transform: scale(0.97); }
+            50% { -webkit-transform: scale(1.01); }
+            100% { -webkit-transform: scale(1); }
         }
         .option-prefix {
             font-weight: bold;
             background: #fff0e6;
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 30px;
+            border-radius: 50%;
             color: #c26b55;
             flex-shrink: 0;
             margin-right: 14px;
-            transition: all var(--transition-fast);
+            transition: all 0.25s ease;
         }
         .option-item.selected .option-prefix {
             background: var(--primary);
             color: white;
+            transform: scale(1.1);
+            -webkit-transform: scale(1.1);
         }
-        .option-text { flex: 1; font-size: 16px; color: #4a2e26; }
+        .option-text { flex: 1; font-size: 16px; color: #4a2e26; line-height: 1.4; }
 
         .btn-group { display: flex; margin-top: 24px; }
         .btn-group > * + * { margin-left: 12px; }
@@ -250,13 +334,13 @@
             flex: 1;
             background: var(--primary);
             border: none;
-            padding: 14px;
+            padding: 16px 20px;
             border-radius: 80px;
             font-size: 16px;
             font-weight: 600;
             color: white;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: var(--shadow-btn);
             user-select: none;
             -webkit-user-select: none;
@@ -265,8 +349,12 @@
             outline: none;
             -webkit-appearance: none;
             appearance: none;
+            min-height: 50px;
         }
-        button:active { transform: scale(0.96); -webkit-transform: scale(0.96); }
+        button:active { 
+            transform: scale(0.96); 
+            -webkit-transform: scale(0.96);
+        }
         button:disabled {
             opacity: 0.45;
             cursor: not-allowed;
@@ -762,10 +850,20 @@
             z-index: -1;
         }
 
-        .fade-slide-enter-active { transition: all 0.35s ease; }
-        .fade-slide-leave-active { transition: all 0.2s ease; position: absolute; width: 100%; }
-        .fade-slide-enter-from { opacity: 0; transform: translateX(40px); }
-        .fade-slide-leave-to { opacity: 0; transform: translateX(-40px); }
+        .fade-slide-enter-active { 
+            transition: opacity 0.25s cubic-bezier(0.22, 0.61, 0.36, 1); 
+            will-change: opacity;
+        }
+        .fade-slide-leave-active { 
+            transition: opacity 0.18s cubic-bezier(0.55, 0.055, 0.675, 0.19); 
+            will-change: opacity;
+        }
+        .fade-slide-enter-from { 
+            opacity: 0; 
+        }
+        .fade-slide-leave-to { 
+            opacity: 0; 
+        }
 
         .fade-enter-active { transition: all 0.3s ease; }
         .fade-leave-active { transition: all 0.2s ease; }
@@ -823,17 +921,22 @@
             background: #fdf8f5;
             border: 2px solid #f0e2da;
             border-radius: var(--radius-lg);
-            padding: 24px 16px 20px;
+            padding: 28px 20px 24px;
             text-align: center;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .gender-card:active, .gender-card.active {
             border-color: var(--primary);
             background: #fff0e8;
-            box-shadow: 0 0 0 3px rgba(255,138,111,0.15);
-            transform: scale(0.97);
-            -webkit-transform: scale(0.97);
+            box-shadow: 0 0 0 4px rgba(255,138,111,0.18);
+            transform: scale(0.96);
+            -webkit-transform: scale(0.96);
         }
         .gender-card .gender-icon { font-size: 42px; margin-bottom: 10px; }
         .gender-card .gender-label { font-size: 16px; font-weight: 600; color: var(--text-dark); }
@@ -951,11 +1054,11 @@ const questions = [
         { text: "会主动表达情绪、合理沟通，不让矛盾憋在心里", scores: { guide: 1 } },
         { text: "自愈能力强，情绪来去随缘，不必刻意表达或找人安抚", scores: { secure: 1 } }
     ]},
-    { text: "你刚下班回到家累得不行，一进门就因为小事跟对方拌了几句嘴，谁都没让步，冷战一阵后对方直接躺床背过身先睡，拒绝当下沟通。你最可能的反应是？", options: [
-        { text: "不想纠结争吵对错，也懒得主动哄人，转身睡觉避开情绪拉扯", scores: { avoidance: 1 } },
-        { text: "即便还在生气，也愿意留台阶给对方，等时机合适主动沟通化解矛盾", scores: { guide: 1 } },
-        { text: "又委屈又不安，很需要对方安抚，翻来覆去睡不着，盼着赶紧和好", scores: { anxiety: 1 } },
-        { text: "心里还有情绪，但不愿深夜僵持，先好好休息，等第二天自然缓和相处", scores: { secure: 1 } }
+    { text: "当你和伴侣关系越来越亲密时，你会？", options: [
+        { text: "越来越依赖对方，害怕失去，总想靠得更近", scores: { anxiety: 1 } },
+        { text: "会下意识想保持距离，怕太亲密失去自我空间", scores: { avoidance: 1 } },
+        { text: "坦然靠近，也会主动沟通边界，让关系更稳定", scores: { guide: 1 } },
+        { text: "自然接纳亲密，内心安稳，不紧绷也不回避", scores: { secure: 1 } }
     ]},
     { text: "恋爱里你最看重的核心是？", options: [
         { text: "时刻陪伴、被偏爱、被惦记，缺一点就不安", scores: { anxiety: 1 } },
@@ -1083,7 +1186,7 @@ const questions = [
         { text: "不会刻意刷动态试探，更倾向直接沟通来筑牢彼此信任", scores: { guide: 1 } },
         { text: "觉得没必要这样求证，内心安稳，不靠外界细节给自己定心", scores: { secure: 1 } }
     ]},
-    { text: "你刚算完这个月的账，发现余额不太够用，正发愁呢。两人目前经济都偏紧张、手头不宽裕，对方没跟你商量，私下买了一件价格不低的私人物品。你的第一反应是？", options: [
+    { text: "两人目前经济都偏紧张、手头不宽裕，对方没跟你商量，私下买了一件价格不低的私人物品。你的第一反应是？", options: [
         { text: "理解对方喜欢，但认真约定：以后贵的东西我们先商量", scores: { guide: 1 } },
         { text: "有点无奈，但不指责，等轻松时机再温和提一句建议", scores: { secure: 1 } },
         { text: "心里不安别扭，又怕显得小气，只能默默憋在心里不敢提", scores: { anxiety: 1 } },
@@ -1503,6 +1606,7 @@ createApp({
         const isHistoryView = computed(() => trackingHistoryId.value !== null);
         const startTestTime = ref(0);
         const testDuration = ref(0);
+        const isLoading = ref(false);
         let radarChartInstance = null;
         let toastTimer = null;
 
@@ -1747,26 +1851,35 @@ createApp({
 
         function goBack() {
             if (currentIndex.value > 0) {
-                currentIndex.value--;
-                if (currentIndex.value < answers.value.length) {
-                    const prev = answers.value[currentIndex.value];
-                    const q = currentIndex.value < questions.length ? questions[currentIndex.value] : bonusQuestion;
-                    const matchIdx = q.options.findIndex(function(o) {
-                        return JSON.stringify(o.scores) === JSON.stringify(prev);
+                requestAnimationFrame(function() {
+                    currentIndex.value--;
+                    if (currentIndex.value < answers.value.length) {
+                        const prev = answers.value[currentIndex.value];
+                        const q = currentIndex.value < questions.length ? questions[currentIndex.value] : bonusQuestion;
+                        const matchIdx = q.options.findIndex(function(o) {
+                            return JSON.stringify(o.scores) === JSON.stringify(prev);
+                        });
+                        selectedIdx.value = matchIdx >= 0 ? matchIdx : -1;
+                    } else {
+                        selectedIdx.value = -1;
+                    }
+                    requestAnimationFrame(function() {
+                        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                        document.body.scrollTop = 0;
+                        document.documentElement.scrollTop = 0;
                     });
-                    selectedIdx.value = matchIdx >= 0 ? matchIdx : -1;
-                } else {
-                    selectedIdx.value = -1;
-                }
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                document.body.scrollTop = 0;
-                document.documentElement.scrollTop = 0;
+                });
             }
         }
 
+        function triggerHaptic() {
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+        
         function selectOption(optionData, idx, event) {
             if (event) event.preventDefault();
             selectedIdx.value = idx;
+            triggerHaptic();
         }
 
         function nextQuestion() {
@@ -1776,6 +1889,10 @@ createApp({
             }
             const currentOpts = currentQuestion.value.options;
             const isBonus = isBonusQuestion.value;
+            
+            if (currentIndex.value >= questions.length - 1 && !isBonus) {
+                isLoading.value = true;
+            }
             
             if (!isBonus) {
                 const selectedScores = currentOpts[selectedIdx.value].scores;
@@ -1790,22 +1907,28 @@ createApp({
             }
             
             if (currentIndex.value + 1 < totalSteps) {
-                currentIndex.value++;
-                if (currentIndex.value < answers.value.length) {
-                    const prev = answers.value[currentIndex.value];
-                    const matchIdx = currentQuestion.value.options.findIndex(function(o) {
-                        return JSON.stringify(o.scores) === JSON.stringify(prev);
+                requestAnimationFrame(function() {
+                    currentIndex.value++;
+                    if (currentIndex.value < answers.value.length) {
+                        const prev = answers.value[currentIndex.value];
+                        const matchIdx = currentQuestion.value.options.findIndex(function(o) {
+                            return JSON.stringify(o.scores) === JSON.stringify(prev);
+                        });
+                        selectedIdx.value = matchIdx >= 0 ? matchIdx : -1;
+                    } else {
+                        selectedIdx.value = -1;
+                    }
+                    requestAnimationFrame(function() {
+                        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                        document.body.scrollTop = 0;
+                        document.documentElement.scrollTop = 0;
                     });
-                    selectedIdx.value = matchIdx >= 0 ? matchIdx : -1;
-                } else {
-                    selectedIdx.value = -1;
-                }
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                document.body.scrollTop = 0;
-                document.documentElement.scrollTop = 0;
+                });
             } else {
-                computeResult();
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                requestAnimationFrame(function() {
+                    computeResult();
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                });
             }
         }
 
@@ -1833,6 +1956,8 @@ createApp({
             finalScores.value = { ...totals, mbti: { code: labelInfo.code, label: labelInfo.label, labelEn: labelInfo.labelEn, color: labelInfo.color || '#FFA07A', subLabels: labelInfo.subLabels, oneLiner: labelInfo.oneLiner, description: labelInfo.description, highlight: labelInfo.highlight, blindspot: labelInfo.blindspot, idealPartner: labelInfo.idealPartner } };
             resultType.value = getPersonalityType(totals);
             saveToHistory(resultType.value, totals);
+            isLoading.value = false;
+            showToast('测试完成！');
             currentView.value = 'result';
             nextTick(function() {
                 var chartDom = document.getElementById('radarChart');
@@ -2061,13 +2186,19 @@ createApp({
                     answers, finalScores, resultType,
                     gender, showDetail, detailTab, toastMsg, history, dailyTip, floatingHearts, scoreDimensions,
                     genderAdviceText, testDuration, formatScore, secondaryType, labelResult, bonusResult, trackingHistoryId, isHistoryView, formatDuration, getScoreLevel, getHeaderStyle, getMbtiSectionStyle, formatBlindspot,
-                    estimatedTimeLeft,
+                    estimatedTimeLeft, isLoading,
                     startTest, confirmGender, goBack, selectOption, nextQuestion, retest, shareResult,
                     generatePoster, typeDetails, formatDate, loadHistoryById, deleteHistoryById, clearHistory
                 };
     },
     template: `
         <div class="app">
+            <transition name="fade">
+                <div v-if="isLoading" class="loading-overlay">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在生成你的专属报告...</div>
+                </div>
+            </transition>
             <template v-if="currentView === 'home'">
                 <div class="header">
                     <div class="hearts-container">
@@ -2128,11 +2259,11 @@ createApp({
                 <div class="card">
                     <div class="gender-section-label">选择性别</div>
                     <div class="gender-cards">
-                        <div class="gender-card" :class="{active: gender === 'male'}" @click="gender = 'male'">
+                        <div class="gender-card" :class="{active: gender === 'male'}" @click="gender = 'male'; triggerHaptic()">
                             <div class="gender-icon">👨</div>
                             <div class="gender-label">男生</div>
                         </div>
-                        <div class="gender-card" :class="{active: gender === 'female'}" @click="gender = 'female'">
+                        <div class="gender-card" :class="{active: gender === 'female'}" @click="gender = 'female'; triggerHaptic()">
                             <div class="gender-icon">👩</div>
                             <div class="gender-label">女生</div>
                         </div>
@@ -2160,22 +2291,24 @@ createApp({
                         </div>
                     </div>
                     <div style="text-align:center; padding:0 20px 4px; font-size:12px; color:#c4a89e;">请选择你最真实的反应，而不是你认为正确的做法</div>
-                    <transition name="fade-slide" mode="out-in">
-                        <div class="card" :key="currentIndex">
-                            <div class="question-text" :class="{'bonus-question': isBonusQuestion}">{{ currentQuestion.text }}</div>
-                            <div v-for="(opt, idx) in currentQuestion.options" :key="idx"
-                                class="option-item" @click="selectOption(opt.scores, idx, $event)"
-                                :class="{selected: selectedIdx === idx}">
-                                <div class="option-prefix">{{ String.fromCharCode(65+idx) }}</div>
-                                <div class="option-text">{{ opt.text }}</div>
+                    <div class="transition-wrapper">
+                        <transition name="fade-slide" mode="out-in">
+                            <div class="card" :key="currentIndex">
+                                <div class="question-text" :class="{'bonus-question': isBonusQuestion}">{{ currentQuestion.text }}</div>
+                                <div v-for="(opt, idx) in currentQuestion.options" :key="idx"
+                                    class="option-item" @click="selectOption(opt.scores, idx, $event)"
+                                    :class="{selected: selectedIdx === idx}">
+                                    <div class="option-prefix">{{ String.fromCharCode(65+idx) }}</div>
+                                    <div class="option-text">{{ opt.text }}</div>
+                                </div>
+                                <div class="btn-group">
+                                    <button v-if="currentIndex > 0" class="secondary" @click="goBack"><i class="fa fa-arrow-left"></i> 上一题</button>
+                                    <button @click="nextQuestion" :disabled="selectedIdx === -1">{{ isBonusQuestion ? '完成测试' : '下一题' }} <i class="fa fa-arrow-right"></i></button>
+                                    <button class="secondary" @click="retest"><i class="fa fa-times"></i> 放弃</button>
+                                </div>
                             </div>
-                            <div class="btn-group">
-                                <button v-if="currentIndex > 0" class="secondary" @click="goBack"><i class="fa fa-arrow-left"></i> 上一题</button>
-                                <button @click="nextQuestion" :disabled="selectedIdx === -1">{{ isBonusQuestion ? '完成测试' : '下一题' }} <i class="fa fa-arrow-right"></i></button>
-                                <button class="secondary" @click="retest"><i class="fa fa-times"></i> 放弃</button>
-                            </div>
-                        </div>
-                    </transition>
+                        </transition>
+                    </div>
                 </div>
             </template>
 
