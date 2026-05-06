@@ -1024,7 +1024,7 @@ const questions = [
         { text: "自有判断，随心选择，没必要特意和谁商量磨合", scores: { secure: 1 } }
     ]
 },
-   {
+    {
     text: "吵架后双方都有情绪，对方说“先冷静一下”，不想立刻沟通。你的反应是？",
     options: [
         { text: "正好不想聊，立刻撤退，等对方低头或各自冷静直到事情翻篇", scores: { avoidance: 1 } },
@@ -1072,18 +1072,24 @@ const questions = [
         { text: "本来就不看重这些形式，记不记得都无所谓", scores: { avoidance: 1 } },
         { text: "暗自难过失落，忍不住胡思乱想自己是否不被重视", scores: { anxiety: 1 } }
     ]},
-    { text: "你换了新衣服问对方好不好看。对方随口调侃你最近好像长胖了，语气不算恶意但很直接。你的第一反应是？", options: [
-        { text: "不想继续这个话题，淡淡结束，避免情绪交流", scores: { avoidance: 1 } },
-        { text: "心里像被刺了一下，暗自难过在意，之后忍不住纠结自己身材形象", scores: { anxiety: 1 } },
-        { text: "用玩笑调侃回去化解尴尬，顺势拉起对方的手说「那一起减肥吧」，把话题变成两个人的共同目标", scores: { guide: 1 } },
-        { text: "坦然一笑带过不往心里去，内心知道TA没有恶意，继续开开心心试衣服不往心里去", scores: { secure: 1 } }
-    ]},
-    { text: "你们已经整整三天默契断联，没有吵架也没有矛盾，谁也没有先找对方。你的第一反应是？", options: [
-        { text: "偶尔会想起对方，但理解各自生活节奏，顺其自然，不刻意强求联系", scores: { secure: 1 } },
-        { text: "不想关系一直冷下去，主动轻松发消息破冰，温柔拉回疏离氛围", scores: { guide: 1 } },
-        { text: "容易牵挂放不下，反复打开聊天框打字又删，忍不住主动找对方、一直等回复", scores: { anxiety: 1 } },
-        { text: "完全沉浸自己生活，没留意断联多久，也不会主动想着破冰联系", scores: { avoidance: 1 } }
-    ]},
+    {
+    text: "当你和对方认真聊未来规划，TA态度模糊、不愿多说，你会？",
+    options: [
+        { text: "非常不安，害怕没有未来，忍不住反复追问", scores: { anxiety: 1 } },
+        { text: "不想逼对方，也不再提，顺其自然走一步看一步", scores: { avoidance: 1 } },
+        { text: "耐心沟通彼此期待，理清节奏，共同规划方向", scores: { guide: 1 } },
+        { text: "相信感情节奏不同，不着急，稳定相处就好", scores: { secure: 1 } }
+    ]
+},
+   {
+    text: "对方心情低落、明显不开心，你会？",
+    options: [
+        { text: "跟着不安，怕自己做错，小心翼翼", scores: { anxiety: 1 } },
+        { text: "不打扰，让TA自己静一静，不多问", scores: { avoidance: 1 } },
+        { text: "温柔安抚，耐心鼓励，帮TA舒缓情绪", scores: { guide: 1 } },
+        { text: "安静陪伴，给予空间，不施压不内耗", scores: { secure: 1 } }
+    ]
+},
     { text: "发现彼此不合适，但你已经习惯了对方的存在，你的态度是？", options: [
         { text: "舍不得放手，宁愿委屈自己也想勉强维系", scores: { anxiety: 1 } },
         { text: "慢慢抽离冷淡，不纠缠不解释，自然疏远", scores: { avoidance: 1 } },
@@ -1108,18 +1114,24 @@ const questions = [
         { text: "温柔告诉TA：我尊重你独处，但我一直在，想说随时找我", scores: { guide: 1 } },
         { text: "瞬间心慌很没底气，害怕对方厌烦、刻意疏远冷落自己", scores: { anxiety: 1 } }
     ]},
-    { text: "你帮对方收拾抽屉找东西，无意间翻到小盒子，里面放着前任曾经送过的纪念品手链。你的第一反应是？", options: [
-        { text: "心里堵得慌很不是滋味，反复胡思乱想对方是不是还放不下旧人", scores: { anxiety: 1 } },
-        { text: "假装没看见，刻意避开敏感话题，不愿触碰过往，也不想挑起矛盾", scores: { avoidance: 1 } },
-        { text: "找合适时机温和坦诚沟通，不带质问，好好聊彼此对待过往物品的态度", scores: { guide: 1 } },
-        { text: "尊重对方过往隐私，内心毫无波澜，悄悄放回原处，不多过问不深究", scores: { secure: 1 } }
-    ]},
-    { text: "你打开对方送的周年纪念日礼物，发现是一件精致摆件，风格完全不是你喜欢的类型。你的第一反应是？", options: [
-        { text: "礼貌简单道谢，随手收进抽屉，不深究礼物合不合适，不表露真实感受", scores: { avoidance: 1 } },
-        { text: "开心收下感谢心意，温柔跟对方聊自己喜好，慢慢培养彼此送礼默契", scores: { guide: 1 } },
-        { text: "心里有点失落失望，还要强装喜欢，暗自介意对方并不了解自己喜好", scores: { anxiety: 1 } },
-        { text: "懂得珍惜对方心意，礼貌道谢收下默默收好，不扫兴也不刻意多说", scores: { secure: 1 } }
-    ]},
+   {
+    text: "收拾时翻到对方保留的前任纪念品，你会？",
+    options: [
+        { text: "心里难受，忍不住怀疑对方还念旧", scores: { anxiety: 1 } },
+        { text: "假装没看见，不想提也不想引发矛盾", scores: { avoidance: 1 } },
+        { text: "找机会温和沟通，坦诚聊彼此的态度", scores: { guide: 1 } },
+        { text: "尊重对方过往，悄悄放回，不多过问", scores: { secure: 1 } }
+    ]
+},
+   {
+    text: "纪念日收到的礼物，完全不是你喜欢的风格，你会？",
+    options: [
+        { text: "表面道谢，心里失落，觉得对方不够懂你", scores: { anxiety: 1 } },
+        { text: "简单收下收好，不表露真实感受", scores: { avoidance: 1 } },
+        { text: "感谢心意，温和沟通喜好，培养默契", scores: { guide: 1 } },
+        { text: "珍惜心意，坦然收下，不扫兴不纠结", scores: { secure: 1 } }
+    ]
+}
     { text: "和伴侣观念产生分歧，且对方轻微表现出生气，你会？", options: [
         { text: "不敢坚持想法，习惯性迁就害怕闹矛盾", scores: { anxiety: 1 } },
         { text: "懒得争辩，沉默回避不愿正面冲突", scores: { avoidance: 1 } },
@@ -1174,7 +1186,7 @@ const questions = [
         { text: "内心稍有触动，但表面平静，不流露太多情绪起伏", scores: { avoidance: 1 } },
         { text: "感动之余忍不住撒娇，想听对方哄你、在意你的情绪", scores: { anxiety: 1 } }
     ]},
-    { text: "你第一次跟对方父母吃饭见面，到了饭桌上长辈态度冷淡客气，全程话少。回去路上你的第一反应是？", options: [
+    { text: "你第一次跟对方父母吃饭见面，到了饭桌上长辈态度冷淡客气，全程话少。你的第一反应是？", options: [
         { text: "不太放在心上，觉得恋爱是两个人的事，长辈态度随缘不必刻意讨好", scores: { avoidance: 1 } },
         { text: "理解长辈拘谨陌生，主动和对方沟通，慢慢了解喜好，用心拉近彼此关系", scores: { guide: 1 } },
         { text: "有点不自在但心态从容，知道初次相处需要磨合，顺其自然慢慢熟悉", scores: { secure: 1 } },
@@ -1192,18 +1204,24 @@ const questions = [
         { text: "心里不安别扭，又怕显得小气，只能默默憋在心里不敢提", scores: { anxiety: 1 } },
         { text: "心里有隔阂但不拆穿，默默划清经济边界不再多干涉", scores: { avoidance: 1 } }
     ]},
-    { text: "你认为恋爱中，该不该把所有情绪都展露给对方？", options: [
-        { text: "总想全盘展露，只有被完全接纳才觉得安心", scores: { anxiety: 1 } },
-        { text: "习惯隐藏脆弱，不想把负面情绪带给任何人", scores: { avoidance: 1 } },
-        { text: "适度展露真实情绪，也懂得分寸，不肆意消耗对方", scores: { guide: 1 } },
-        { text: "随心流露就好，不必刻意隐藏，也不用刻意全盘倾诉", scores: { secure: 1 } }
-    ]},
-    { text: "你正迷迷糊糊快要睡着了，意识模模糊糊的。对方突然转身抱住你，轻声跟你说了一句我爱你。你的第一反应是？", options: [
-        { text: "内心稍有触动，但不习惯直白表露情绪，简单回应保持含蓄内敛", scores: { avoidance: 1 } },
-        { text: "温柔抱紧回应爱意，坦然表达珍惜，顺势拉近深夜里彼此的情感联结", scores: { guide: 1 } },
-        { text: "感动之余有点患得患失，暗自琢磨这份心意能不能一直长久不变", scores: { anxiety: 1 } },
-        { text: "心里安稳温暖，真诚回应心意，内心踏实平和，享受当下亲近", scores: { secure: 1 } }
-    ]}
+    {
+    text: "对方带你见好朋友，聚会时TA只顾和朋友聊天，忽略了你，你会？",
+    options: [
+        { text: "心里失落不安，怀疑自己不够被重视", scores: { anxiety: 1 } },
+        { text: "自己安静待着，不介入、不靠近，也不生气", scores: { avoidance: 1 } },
+        { text: "自然融入圈子，偶尔眼神互动，不闹情绪也不尴尬", scores: { guide: 1 } },
+        { text: "理解朋友相聚难得，自己轻松自在，不介意", scores: { secure: 1 } }
+    ]
+},
+    {
+    text: "你快睡着时，对方突然抱住你轻声说“我爱你”，你的第一反应是？",
+    options: [
+        { text: "心里触动，但不习惯表达，简单回应就好", scores: { avoidance: 1 } },
+        { text: "立刻温柔回抱，主动表达心意，加深彼此的情感联结", scores: { guide: 1 } },
+        { text: "很感动但忍不住不安，担心这份温暖不能一直长久", scores: { anxiety: 1 } },
+        { text: "内心安稳温暖，坦然接受这份爱意，安静安心入睡", scores: { secure: 1 } }
+    ]
+}
 ];
 
 const bonusQuestion = {
@@ -1890,10 +1908,6 @@ createApp({
             const currentOpts = currentQuestion.value.options;
             const isBonus = isBonusQuestion.value;
             
-            if (currentIndex.value >= questions.length - 1 && !isBonus) {
-                isLoading.value = true;
-            }
-            
             if (!isBonus) {
                 const selectedScores = currentOpts[selectedIdx.value].scores;
                 if (currentIndex.value < answers.value.length) {
@@ -1925,10 +1939,17 @@ createApp({
                     });
                 });
             } else {
-                requestAnimationFrame(function() {
-                    computeResult();
-                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                });
+                isLoading.value = true;
+                var safetyTimer = setTimeout(function() {
+                    isLoading.value = false;
+                }, 3000);
+                setTimeout(function() {
+                    requestAnimationFrame(function() {
+                        clearTimeout(safetyTimer);
+                        computeResult();
+                        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    });
+                }, 100);
             }
         }
 
