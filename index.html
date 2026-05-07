@@ -14,14 +14,156 @@
     <meta property="og:description" content="30道情景题测出你的恋爱人格类型">
     <meta property="og:type" content="website">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; img-src 'self' data: https: blob:; font-src 'self' https: data:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob:; img-src 'self' data: https: http: blob:; font-src 'self' https: http: data:; connect-src 'self' https: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:;">
     <title>恋爱人格测试 - 30道情景题</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.bootcdn.net">
+    <link rel="preconnect" href="https://unpkg.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <link rel="dns-prefetch" href="https://cdn.bootcdn.net">
+    <link rel="dns-prefetch" href="https://unpkg.com">
+    
+    <!-- 样式与脚本 - 多CDN备用 -->
+    <link id="font-awesome-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    
+    <!-- 核心脚本 - 优先使用jsdelivr，备用其他CDN -->
+    <script id="vue-script"></script>
+    <script id="echarts-script"></script>
+    <script id="html2canvas-script"></script>
+    
+    <!-- 资源加载管理器 -->
+    <script>
+        (function() {
+            const CDN_FALLBACKS = {
+                vue: [
+                    'https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js',
+                    'https://cdn.bootcdn.net/ajax/libs/vue/3.3.4/vue.global.prod.js',
+                    'https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js'
+                ],
+                echarts: [
+                    'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js',
+                    'https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js',
+                    'https://unpkg.com/echarts@5.4.3/dist/echarts.min.js'
+                ],
+                html2canvas: [
+                    'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+                    'https://cdn.bootcdn.net/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
+                    'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js'
+                ],
+                fontAwesome: [
+                    'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css',
+                    'https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'
+                ]
+            };
+            
+            window.libStatus = {
+                vue: false,
+                echarts: false,
+                html2canvas: false,
+                fontAwesome: false
+            };
+            
+            window.libLoadPromises = {};
+            
+            function loadScript(libName, index = 0) {
+                return new Promise((resolve, reject) => {
+                    if (window.libStatus[libName]) {
+                        resolve();
+                        return;
+                    }
+                    
+                    const urls = CDN_FALLBACKS[libName];
+                    if (index >= urls.length) {
+                        console.error(`${libName}加载失败，所有CDN都不可用`);
+                        reject(new Error(`${libName}加载失败`));
+                        return;
+                    }
+                    
+                    const url = urls[index];
+                    const script = document.createElement('script');
+                    script.src = url;
+                    script.async = false;
+                    script.crossOrigin = 'anonymous';
+                    
+                    const timeout = setTimeout(() => {
+                        console.warn(`${libName}从${url}加载超时，尝试下一个CDN`);
+                        script.onerror = null;
+                        script.onload = null;
+                        loadScript(libName, index + 1).then(resolve).catch(reject);
+                    }, 10000);
+                    
+                    script.onload = () => {
+                        clearTimeout(timeout);
+                        window.libStatus[libName] = true;
+                        console.log(`${libName}从${url}加载成功`);
+                        resolve();
+                    };
+                    
+                    script.onerror = () => {
+                        clearTimeout(timeout);
+                        console.warn(`${libName}从${url}加载失败，尝试下一个CDN`);
+                        loadScript(libName, index + 1).then(resolve).catch(reject);
+                    };
+                    
+                    document.head.appendChild(script);
+                });
+            }
+            
+            function loadCSS(libName, index = 0) {
+                return new Promise((resolve, reject) => {
+                    if (window.libStatus[libName]) {
+                        resolve();
+                        return;
+                    }
+                    
+                    const urls = CDN_FALLBACKS[libName];
+                    if (index >= urls.length) {
+                        console.error(`${libName} CSS加载失败`);
+                        resolve(); // CSS不阻塞主功能
+                        return;
+                    }
+                    
+                    const url = urls[index];
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = url;
+                    
+                    const timeout = setTimeout(() => {
+                        console.warn(`${libName} CSS从${url}加载超时，尝试下一个`);
+                        link.onerror = null;
+                        link.onload = null;
+                        loadCSS(libName, index + 1).then(resolve);
+                    }, 5000);
+                    
+                    link.onload = () => {
+                        clearTimeout(timeout);
+                        window.libStatus[libName] = true;
+                        console.log(`${libName} CSS从${url}加载成功`);
+                        resolve();
+                    };
+                    
+                    link.onerror = () => {
+                        clearTimeout(timeout);
+                        console.warn(`${libName} CSS从${url}加载失败`);
+                        loadCSS(libName, index + 1).then(resolve);
+                    };
+                    
+                    const existingLink = document.getElementById('font-awesome-css');
+                    if (existingLink && existingLink.parentNode) {
+                        existingLink.parentNode.replaceChild(link, existingLink);
+                    } else {
+                        document.head.appendChild(link);
+                    }
+                });
+            }
+            
+            // 初始化加载
+            window.libLoadPromises.fontAwesome = loadCSS('fontAwesome');
+            window.libLoadPromises.vue = loadScript('vue');
+            window.libLoadPromises.echarts = loadScript('echarts');
+            window.libLoadPromises.html2canvas = loadScript('html2canvas');
+        })();
+    </script>
     <style>
         :root {
             --primary: #ff8a6f;
@@ -1018,7 +1160,7 @@ const questions = [
     {
     text: "做人生重要决定，你的习惯是？",
     options: [
-        { text: "纠结犹豫，很需要别人帮我拿主意、给支撑", scores: { anxiety: 1 } },
+        { text: "自我怀疑，很需要别人帮我拿主意、给支撑", scores: { anxiety: 1 } },
         { text: "独立决断，不喜欢被任何人干涉左右", scores: { avoidance: 1 } },
         { text: "会主动参考意见，理性权衡，也愿意和伴侣沟通对齐想法", scores: { guide: 1 } },
         { text: "自有判断，随心选择，没必要特意和谁商量磨合", scores: { secure: 1 } }
@@ -1028,7 +1170,7 @@ const questions = [
     text: "吵架后双方都有情绪，对方说“先冷静一下”，不想立刻沟通。你的反应是？",
     options: [
         { text: "正好不想聊，立刻撤退，等对方低头或各自冷静直到事情翻篇", scores: { avoidance: 1 } },
-        { text: "非常不安，很在乎这段关系，怕冷静着就散了，必须立刻说清楚", scores: { anxiety: 1 } },
+        { text: "心里委屈憋闷，怕冷静就散了，必须立刻说清楚", scores: { anxiety: 1 } },
         { text: "尊重冷静，但约定好时间再聊，不让关系一直僵着", scores: { guide: 1 } },
         { text: "接受冷静，不逼迫、不内耗，等双方平静再自然沟通", scores: { secure: 1 } }
     ]
@@ -1037,31 +1179,31 @@ const questions = [
     text: "最近一周，对方明显比以前冷淡、话变少了。你的第一反应是？",
     options: [
         { text: "互不打扰就好，你也保持距离，不追问、不靠近", scores: { avoidance: 1 } },
-        { text: "特别不安，很在意对方态度，反复猜是不是不爱了、是不是想疏远", scores: { anxiety: 1 } },
+        { text: "失落恼火，反复猜对方是不是不爱了、想疏远", scores: { anxiety: 1 } },
         { text: "温柔问一句“最近是不是累啦”，温和打开沟通", scores: { guide: 1 } },
         { text: "理解每个人都有状态起伏，不胡思乱想，正常相处", scores: { secure: 1 } }
     ]
 },
     { text: "你期待已久的周六约会，你已经准备好出门，对方突然说临时要加班，无法赴约，也没有提出改期。你通常的第一反应是？", options: [
-        { text: "心里会明显不安，很在意对方陪伴，忍不住猜测对方是不是不想见自己", scores: { anxiety: 1 } },
+        { text: "吃醋较劲，忍不住猜测对方是不是不想见自己", scores: { anxiety: 1 } },
         { text: "觉得突然被打断很不舒服，不想多交流，宁愿自己安排接下来的时间，也不想主动追问", scores: { avoidance: 1 } },
         { text: "有点失落但能理解，不会胡思乱想，也不会有压力，等对方有空再商量即可", scores: { secure: 1 } },
         { text: "理解工作突发状况，主动温和地提出改期，不让气氛变得尴尬或冷淡", scores: { guide: 1 } }
     ]},
     { text: "面对自身情绪起伏，你更像？", options: [
-        { text: "情绪容易被牵动，需要别人哄才能平复", scores: { anxiety: 1 } },
+        { text: "委屈憋闷，需要别人哄才能平复", scores: { anxiety: 1 } },
         { text: "习惯压抑隐藏，独自消化不向外示弱", scores: { avoidance: 1 } },
         { text: "会主动表达情绪、合理沟通，不让矛盾憋在心里", scores: { guide: 1 } },
         { text: "自愈能力强，情绪来去随缘，不必刻意表达或找人安抚", scores: { secure: 1 } }
     ]},
     { text: "当你和伴侣关系越来越亲密时，你会？", options: [
-        { text: "越来越依赖对方，害怕失去，总想靠得更近", scores: { anxiety: 1 } },
+        { text: "越来越依赖对方，心慌没底，总想靠得更近", scores: { anxiety: 1 } },
         { text: "会下意识想保持距离，怕太亲密失去自我空间", scores: { avoidance: 1 } },
         { text: "坦然靠近，也会主动沟通边界，让关系更稳定", scores: { guide: 1 } },
         { text: "自然接纳亲密，内心安稳，不紧绷也不回避", scores: { secure: 1 } }
     ]},
     { text: "恋爱里你最看重的核心是？", options: [
-        { text: "时刻陪伴、被偏爱、被惦记，缺一点就不安", scores: { anxiety: 1 } },
+        { text: "时刻陪伴、被偏爱、被惦记，缺一点就膈应生气", scores: { anxiety: 1 } },
         { text: "自由不被束缚，不用黏在一起、不用互相捆绑", scores: { avoidance: 1 } },
         { text: "愿意沟通、懂得包容，出现问题能主动一起解决", scores: { guide: 1 } },
         { text: "相处舒服、彼此信任，不用刻意经营也不用猜心", scores: { secure: 1 } }
@@ -1070,12 +1212,12 @@ const questions = [
         { text: "主动说出自己的失落与在意，好好沟通，一起约定往后的仪式感和相处方式", scores: { guide: 1 } },
         { text: "有点小遗憾，但能理解，不会放在心上纠结", scores: { secure: 1 } },
         { text: "本来就不看重这些形式，记不记得都无所谓", scores: { avoidance: 1 } },
-        { text: "暗自难过失落，忍不住胡思乱想自己是否不被重视", scores: { anxiety: 1 } }
+        { text: "紧绷小心翼翼，怀疑自己是否不被重视", scores: { anxiety: 1 } }
     ]},
     {
     text: "当你和对方认真聊未来规划，TA态度模糊、不愿多说，你会？",
     options: [
-        { text: "非常不安，害怕没有未来，忍不住反复追问", scores: { anxiety: 1 } },
+        { text: "自我怀疑，忍不住反复追问", scores: { anxiety: 1 } },
         { text: "不想逼对方，也不再提，顺其自然走一步看一步", scores: { avoidance: 1 } },
         { text: "耐心沟通彼此期待，理清节奏，共同规划方向", scores: { guide: 1 } },
         { text: "相信感情节奏不同，不着急，稳定相处就好", scores: { secure: 1 } }
@@ -1084,26 +1226,26 @@ const questions = [
    {
     text: "对方心情低落、明显不开心，你会？",
     options: [
-        { text: "跟着不安，怕自己做错，小心翼翼", scores: { anxiety: 1 } },
+        { text: "委屈憋闷，怕自己做错什么", scores: { anxiety: 1 } },
         { text: "不打扰，让TA自己静一静，不多问", scores: { avoidance: 1 } },
         { text: "温柔安抚，耐心鼓励，帮TA舒缓情绪", scores: { guide: 1 } },
         { text: "安静陪伴，给予空间，不施压不内耗", scores: { secure: 1 } }
     ]
 },
     { text: "发现彼此不合适，但你已经习惯了对方的存在，你的态度是？", options: [
-        { text: "舍不得放手，宁愿委屈自己也想勉强维系", scores: { anxiety: 1 } },
+        { text: "失落恼火，宁愿委屈自己也想勉强维系", scores: { anxiety: 1 } },
         { text: "慢慢抽离冷淡，不纠缠不解释，自然疏远", scores: { avoidance: 1 } },
         { text: "主动沟通磨合，尽力修复，实在不行再体面放下", scores: { guide: 1 } },
         { text: "顺其自然，合得来就处，合不来也坦然接受结果", scores: { secure: 1 } }
     ]},
     { text: "你看到对方和异性同事/朋友正常聊天、偶尔分享日常，没有暧昧内容。你的反应是？", options: [
         { text: "不想过问也不想管，各自有社交自由，不干涉不生气", scores: { avoidance: 1 } },
-        { text: "心里很不安、容易吃醋，很在意自己在对方心里的分量", scores: { anxiety: 1 } },
+        { text: "吃醋较劲，很在意自己在对方心里的分量", scores: { anxiety: 1 } },
         { text: "温和说出自己的感受，沟通彼此的边界，不指责也不冷战", scores: { guide: 1 } },
         { text: "相信对方有分寸，正常社交可以接受，不胡思乱想", scores: { secure: 1 } }
     ]},
     { text: "你认同恋爱要随时报备、秒回消息吗？", options: [
-        { text: "很认同，这些细节才能让我心里踏实", scores: { anxiety: 1 } },
+        { text: "很认同，这些细节才能让我不膈应生气", scores: { anxiety: 1 } },
         { text: "不认同，太过束缚，反感被事事约束", scores: { avoidance: 1 } },
         { text: "不刻板报备，但会主动和对方商量好彼此舒服的联系频率", scores: { guide: 1 } },
         { text: "不强求形式，有就聊没有也不纠结，随缘就好", scores: { secure: 1 } }
@@ -1112,12 +1254,12 @@ const questions = [
         { text: "尊重对方独处需求，完全不打扰不追问，安静等TA自己缓过来", scores: { secure: 1 } },
         { text: "正好乐得清静，不关心原因也不问候，直接做自己的事", scores: { avoidance: 1 } },
         { text: "温柔告诉TA：我尊重你独处，但我一直在，想说随时找我", scores: { guide: 1 } },
-        { text: "瞬间心慌很没底气，害怕对方厌烦、刻意疏远冷落自己", scores: { anxiety: 1 } }
+        { text: "瞬间心慌没底，怕对方厌烦、刻意疏远", scores: { anxiety: 1 } }
     ]},
    {
     text: "收拾时翻到对方保留的前任纪念品，你会？",
     options: [
-        { text: "心里难受，忍不住怀疑对方还念旧", scores: { anxiety: 1 } },
+        { text: "膈应生气，忍不住怀疑对方还念旧", scores: { anxiety: 1 } },
         { text: "假装没看见，不想提也不想引发矛盾", scores: { avoidance: 1 } },
         { text: "找机会温和沟通，坦诚聊彼此的态度", scores: { guide: 1 } },
         { text: "尊重对方过往，悄悄放回，不多过问", scores: { secure: 1 } }
@@ -1126,57 +1268,57 @@ const questions = [
    {
     text: "纪念日收到的礼物，完全不是你喜欢的风格，你会？",
     options: [
-        { text: "表面道谢，心里失落，觉得对方不够懂你", scores: { anxiety: 1 } },
+        { text: "表面道谢，心里失落恼火，觉得对方不够懂你", scores: { anxiety: 1 } },
         { text: "简单收下收好，不表露真实感受", scores: { avoidance: 1 } },
         { text: "感谢心意，温和沟通喜好，培养默契", scores: { guide: 1 } },
         { text: "珍惜心意，坦然收下，不扫兴不纠结", scores: { secure: 1 } }
     ]
 },
     { text: "和伴侣观念产生分歧，且对方轻微表现出生气，你会？", options: [
-        { text: "不敢坚持想法，习惯性迁就害怕闹矛盾", scores: { anxiety: 1 } },
+        { text: "紧绷小心翼翼，习惯性迁就怕闹矛盾", scores: { anxiety: 1 } },
         { text: "懒得争辩，沉默回避不愿正面冲突", scores: { avoidance: 1 } },
         { text: "积极主动表达观点，求同存异，好好沟通磨合相处方式", scores: { guide: 1 } },
         { text: "观点不同很正常，不必刻意说服也不用刻意磨合", scores: { secure: 1 } }
     ]
 },
     { text: "异地冷战只能隔着屏幕互不说话，你最怕什么？", options: [
-        { text: "最怕隔着距离慢慢疏远，关系无声变淡", scores: { anxiety: 1 } },
+        { text: "委屈憋闷，怕距离慢慢疏远关系", scores: { anxiety: 1 } },
         { text: "最怕被迫和好、被过度捆绑私人情绪和生活", scores: { avoidance: 1 } },
         { text: "不怕误会累积，我会主动打破沉默，缓和彼此关系", scores: { guide: 1 } },
         { text: "冷战只是暂时情绪，距离不会改变内心笃定", scores: { secure: 1 } }
     ]},
     { text: "想到长久走下去，你最大的顾虑是？", options: [
-        { text: "害怕中途被抛下，依赖越深越容易患得患失", scores: { anxiety: 1 } },
+        { text: "吃醋较劲，怕中途被抛下，越依赖越没底", scores: { anxiety: 1 } },
         { text: "害怕被感情捆绑，失去自我自由和空间", scores: { avoidance: 1 } },
         { text: "顾虑对方不愿敞开心沟通，矛盾越积越伤感情", scores: { guide: 1 } },
         { text: "没什么多余顾虑，一切讲究顺其自然", scores: { secure: 1 } }
     ]},
     { text: "你无意间发现对方故意隐瞒，明明出去玩乐却谎称在加班。你的第一反应是？", options: [
-        { text: "脑子一下子很乱，忍不住联想翻旧账，担心对方还有更多事瞒着自己", scores: { anxiety: 1 } },
+        { text: "自我怀疑，担心对方还有更多事瞒着自己", scores: { anxiety: 1 } },
         { text: "坦诚说出自己的发现和感受，认真沟通边界，约定往后小事不用刻意隐瞒", scores: { guide: 1 } },
         { text: "看破但不戳破，默默记在心里，悄悄降低一点信任，不再主动深究", scores: { avoidance: 1 } },
         { text: "心里难免不舒服，但愿意冷静下来，找时机平和问问对方隐瞒的原因", scores: { secure: 1 } }
     ]},
     { text: "在感情里，你能不能接受彼此拥有各自独立的社交圈子？", options: [
-        { text: "很难放下顾虑，容易敏感吃醋，总担心距离变远、感情变淡", scores: { anxiety: 1 } },
+        { text: "膈应生气，总担心距离变远感情变淡", scores: { anxiety: 1 } },
         { text: "很能接受，更希望保留各自生活边界，不必深度介入彼此社交", scores: { avoidance: 1 } },
         { text: "可以接受独立社交，但希望双方守住分寸，主动避嫌、坦诚相待", scores: { guide: 1 } },
         { text: "觉得很正常，各自有自己的朋友理所应当，内心信任不会多想", scores: { secure: 1 } }
     ]},
     { text: "你们已经冷战两天了，第三天对方不做解释，只给你发了一条搞笑短视频悄悄递台阶。你的第一反应是？", options: [
         { text: "随手看一眼划过，不回复不接话，等着事情自己翻篇，不主动破冰", scores: { avoidance: 1 } },
-        { text: "反复琢磨对方用意，纠结是不是示好，心里别扭不敢轻易主动接茬", scores: { anxiety: 1 } },
+        { text: "委屈憋闷，纠结对方是不是示好，不敢轻易接茬", scores: { anxiety: 1 } },
         { text: "秒懂TA在递台阶，立刻顺着话题聊开，顺便把这两天的事也一起摊开来好好聊聊，一次性彻底翻篇", scores: { guide: 1 } },
         { text: "看完会心一笑，回个可爱表情包接住这份好意，不急着深聊也不装没事，等见面了再自然和好", scores: { secure: 1 } }
     ]},
     { text: "异地恋长期不能见面，你内心最大的感受是？", options: [
-        { text: "很缺安全感，容易脑补多想，总担心感情慢慢变淡、患得患失", scores: { anxiety: 1 } },
+        { text: "失落恼火，总担心感情慢慢变淡", scores: { anxiety: 1 } },
         { text: "反倒觉得自在轻松，不用被日常相处捆绑，保有自己的空间", scores: { avoidance: 1 } },
         { text: "清楚距离会产生隔阂，会主动维系沟通，也认真规划线下见面", scores: { guide: 1 } },
         { text: "内心安稳笃定，感情靠本心维系，不会被距离轻易左右心态", scores: { secure: 1 } }
     ]},
     { text: "对方随口说了一句普通的话，你听完莫名心里别扭，却说不清具体哪里不妥。你的第一反应是？", options: [
-        { text: "心里一直憋着别扭，反复回想越想越难受，忍不住旁敲侧击追问对方「你刚才那句话是什么意思」", scores: { anxiety: 1 } },
+        { text: "紧绷小心翼翼，反复回想越想越难受，忍不住追问", scores: { anxiety: 1 } },
         { text: "懒得深究细微情绪，得过且过，很快转移注意力不纠结", scores: { avoidance: 1 } },
         { text: "主动接住话题，反问对方「你觉得哪里不一样？我也想听听你的观察」，把模糊感受变成具体对话", scores: { guide: 1 } },
         { text: "心里有点好奇但不会急着追根究底，等对方继续说，先观察再决定要不要回应", scores: { secure: 1 } }
@@ -1185,16 +1327,16 @@ const questions = [
         { text: "开心接住好意，顺势开启聊天，把最近落下的互动补回来", scores: { guide: 1 } },
         { text: "内心淡淡感动，简单道谢，不刻意拉长话题", scores: { secure: 1 } },
         { text: "内心稍有触动，但表面平静，不流露太多情绪起伏", scores: { avoidance: 1 } },
-        { text: "感动之余忍不住撒娇，想听对方哄你、在意你的情绪", scores: { anxiety: 1 } }
+        { text: "感动之余忍不住吃醋较劲，想听对方在意你", scores: { anxiety: 1 } }
     ]},
     { text: "你第一次跟对方父母吃饭见面，到了饭桌上长辈态度冷淡客气，全程话少。你的第一反应是？", options: [
         { text: "不太放在心上，觉得恋爱是两个人的事，长辈态度随缘不必刻意讨好", scores: { avoidance: 1 } },
         { text: "理解长辈拘谨陌生，主动和对方沟通，慢慢了解喜好，用心拉近彼此关系", scores: { guide: 1 } },
         { text: "有点不自在但心态从容，知道初次相处需要磨合，顺其自然慢慢熟悉", scores: { secure: 1 } },
-        { text: "心里特别焦虑不安，反复怀疑自己言行不够好，不被长辈喜欢认可", scores: { anxiety: 1 } }
+        { text: "心慌没底，反复怀疑自己言行不够好", scores: { anxiety: 1 } }
     ]},
     { text: "如果处于异地恋状态，你会不会频繁翻看对方社交动态来获取安全感？", options: [
-        { text: "会忍不住经常翻看，想从点滴动态里确认自己被放在心上", scores: { anxiety: 1 } },
+        { text: "紧绷小心翼翼，想从点滴动态里确认自己被放在心上", scores: { anxiety: 1 } },
         { text: "基本不会，不愿过度窥探，也不想介入对方私人社交生活", scores: { avoidance: 1 } },
         { text: "不会刻意刷动态试探，更倾向直接沟通来筑牢彼此信任", scores: { guide: 1 } },
         { text: "觉得没必要这样求证，内心安稳，不靠外界细节给自己定心", scores: { secure: 1 } }
@@ -1202,13 +1344,13 @@ const questions = [
     { text: "两人目前经济都偏紧张、手头不宽裕，对方没跟你商量，私下买了一件价格不低的私人物品。你的第一反应是？", options: [
         { text: "理解对方喜欢，但认真约定：以后贵的东西我们先商量", scores: { guide: 1 } },
         { text: "有点无奈，但不指责，等轻松时机再温和提一句建议", scores: { secure: 1 } },
-        { text: "心里不安别扭，又怕显得小气，只能默默憋在心里不敢提", scores: { anxiety: 1 } },
+        { text: "委屈憋闷，又怕显得小气，只能默默憋着", scores: { anxiety: 1 } },
         { text: "心里有隔阂但不拆穿，默默划清经济边界不再多干涉", scores: { avoidance: 1 } }
     ]},
     {
     text: "对方带你见好朋友，聚会时TA只顾和朋友聊天，忽略了你，你会？",
     options: [
-        { text: "心里失落不安，怀疑自己不够被重视", scores: { anxiety: 1 } },
+        { text: "自我怀疑，觉得自己不够被重视", scores: { anxiety: 1 } },
         { text: "自己安静待着，不介入、不靠近，也不生气", scores: { avoidance: 1 } },
         { text: "自然融入圈子，偶尔眼神互动，不闹情绪也不尴尬", scores: { guide: 1 } },
         { text: "理解朋友相聚难得，自己轻松自在，不介意", scores: { secure: 1 } }
@@ -1219,7 +1361,7 @@ const questions = [
     options: [
         { text: "心里触动，但不习惯表达，简单回应就好", scores: { avoidance: 1 } },
         { text: "立刻温柔回抱，主动表达心意，加深彼此的情感联结", scores: { guide: 1 } },
-        { text: "很感动但忍不住不安，担心这份温暖不能一直长久", scores: { anxiety: 1 } },
+        { text: "很感动但失落恼火，担心这份温暖不能长久", scores: { anxiety: 1 } },
         { text: "内心安稳温暖，坦然接受这份爱意，安静安心入睡", scores: { secure: 1 } }
     ]
 }
@@ -1569,47 +1711,146 @@ const scoreDimensions = [
             { key: 'guide', label: '引导型', icon: '✨', max: 30, color: '#FFA07A', definition: '主动注入结构，引导沟通，不强迫' }
         ];
 
-const { createApp, ref, computed, onMounted, nextTick } = Vue;
-
 (function() {
-    // iOS性能优化
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    // iOS性能优化和稳定性增强
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // 检测iPadOS
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     
-    // iOS特定优化
-    if (isIOS) {
-        // 防止橡皮筋滚动
+    console.log('Browser detection:', { isIOS, isSafari, userAgent: navigator.userAgent.substring(0, 100) });
+    
+    // iOS/Safari特定优化
+    if (isIOS || isSafari) {
+        // 优化：更安全的滚动处理 - 避免在Safari中可能导致问题的preventDefault
         let lastTouchY = 0;
+        let isScrolling = false;
+        
         document.addEventListener('touchstart', function(e) {
-            lastTouchY = e.touches[0].clientY;
+            if (e.touches && e.touches.length > 0) {
+                lastTouchY = e.touches[0].clientY;
+            }
+            isScrolling = false;
         }, { passive: true });
         
         document.addEventListener('touchmove', function(e) {
-            if (document.body.scrollTop === 0 && e.touches[0].clientY > lastTouchY) {
-                if (e.cancelable) e.preventDefault();
+            // 仅在特定情况下阻止默认行为，避免与Safari的手势冲突
+            if (isScrolling) return;
+            
+            try {
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const currentY = e.touches && e.touches[0] ? e.touches[0].clientY : lastTouchY;
+                const isScrollingUp = currentY > lastTouchY;
+                
+                // 仅在页面顶部且尝试向上滚动时才阻止
+                if (scrollTop <= 0 && isScrollingUp && e.cancelable) {
+                    // 安全地阻止，避免Safari警告
+                }
+                lastTouchY = currentY;
+            } catch (err) {
+                console.warn('Touch move error:', err);
             }
-        }, { passive: false });
+        }, { passive: true }); // 改为passive提高性能
         
-        // 禁用双击缩放
+        // 优化：避免强制禁用双击缩放，改为更友好的处理
         let lastTouchEnd = 0;
         document.addEventListener('touchend', function(e) {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
+            try {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    // 检查是否是可缩放元素
+                    const target = e.target;
+                    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+                        return; // 不要阻止输入框的双击
+                    }
+                }
+                lastTouchEnd = now;
+            } catch (err) {
+                console.warn('Touch end error:', err);
             }
-            lastTouchEnd = now;
-        }, { passive: false });
+        }, { passive: true });
     }
+    
+    // 网络连接稳定性增强 - 监听网络状态变化
+    if ('connection' in navigator) {
+        try {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (connection) {
+                connection.addEventListener('change', function() {
+                    console.log('Network connection changed:', connection.effectiveType);
+                });
+            }
+        } catch (e) {
+            console.warn('Network API not available');
+        }
+    }
+    
+    // 页面可见性变化处理 - Safari在后台可能暂停资源加载
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            console.log('Page became visible');
+            // 页面重新可见时，确保关键资源可用
+        }
+    });
+    
+    // 添加全局错误处理，捕获Safari特有的错误
+    window.addEventListener('error', function(e) {
+        console.error('Global error:', e.error || e.message);
+        // 可以在这里添加错误上报
+    });
+    
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('Unhandled promise rejection:', e.reason);
+        e.preventDefault(); // 防止控制台输出不必要的警告
+    });
     
     // 减少初始渲染优化
     if (window.requestIdleCallback) {
-        window.requestIdleCallback(() => {
-            // 延迟加载非关键资源
+        window.requestIdleCallback(function() {
+            console.log('Idle callback executed');
         });
     }
 })();
 
-createApp({
-    setup() {
+// 等待Vue加载完成后再初始化应用
+function initApp() {
+    // 检查Vue是否已加载
+    if (!window.Vue) {
+        if (window.libLoadPromises && window.libLoadPromises.vue) {
+            window.libLoadPromises.vue.then(initApp).catch(function() {
+                // 如果Vue加载失败，再次尝试或提示用户
+                console.error('Vue加载失败，无法启动应用');
+                // 显示加载失败提示
+                var appEl = document.getElementById('app');
+                if (appEl) {
+                    appEl.innerHTML = '<div style="padding:40px;text-align:center;color:#666;"><h3>加载遇到问题</h3><p>请刷新页面重试，或检查网络连接</p><button onclick="location.reload()" style="margin-top:20px;padding:10px 30px;">刷新页面</button></div>';
+                }
+            });
+        } else {
+            // 兜底方案：轮询检查Vue是否可用
+            var checkCount = 0;
+            var checkVue = setInterval(function() {
+                checkCount++;
+                if (window.Vue) {
+                    clearInterval(checkVue);
+                    initApp();
+                } else if (checkCount > 60) { // 等待30秒
+                    clearInterval(checkVue);
+                    console.error('Vue加载超时');
+                    var appEl = document.getElementById('app');
+                    if (appEl) {
+                        appEl.innerHTML = '<div style="padding:40px;text-align:center;color:#666;"><h3>加载遇到问题</h3><p>请刷新页面重试</p><button onclick="location.reload()" style="margin-top:20px;padding:10px 30px;">刷新页面</button></div>';
+                    }
+                }
+            }, 500);
+        }
+        return;
+    }
+
+    // Vue已加载，正常初始化应用
+    const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+    createApp({
+        setup() {
         const currentView = ref('home');
         const currentIndex = ref(0);
         const selectedIdx = ref(-1);
@@ -2002,60 +2243,77 @@ createApp({
             if (!finalScores.value) return;
             var chartDom = document.getElementById('radarChart');
             if (!chartDom) return;
+            
+            // 检查echarts是否已加载
+            if (typeof echarts === 'undefined') {
+                // 如果未加载，显示简单文本版本
+                var scores = finalScores.value;
+                chartDom.innerHTML = '<div style="padding:20px;color:#666;font-size:13px;line-height:2;"><div style="font-weight:bold;margin-bottom:10px;">你的恋爱人格维度</div><div><span style="display:inline-block;width:80px;">😰 焦虑倾向</span>：<b>' + scores.anxiety + '</b>分</div><div><span style="display:inline-block;width:80px;">🏃 回避倾向</span>：<b>' + scores.avoidance + '</b>分</div><div><span style="display:inline-block;width:80px;">🌿 安全型</span>：<b>' + scores.secure + '</b>分</div><div><span style="display:inline-block;width:80px;">✨ 引导型</span>：<b>' + scores.guide + '</b>分</div></div>';
+                
+                // 尝试等待echarts加载后重新绘制
+                if (window.libLoadPromises && window.libLoadPromises.echarts) {
+                    window.libLoadPromises.echarts.then(function() {
+                        drawRadar(); // 重新调用
+                    });
+                }
+                return;
+            }
+            
             try {
                 if (radarChartInstance) radarChartInstance.dispose();
                 radarChartInstance = echarts.init(chartDom);
-            const scores = finalScores.value;
-            var dimDefs = ['过度在意对方反应，通过反复确认缓解不安', '淡化重要性，转移注意力，物理撤退', '稳定接纳，自然表达需求，情绪平稳', '主动注入结构，引导沟通，不强迫'];
-            var dimScores = [scores.anxiety, scores.avoidance, scores.secure, scores.guide];
-            var dimMax = [30, 30, 30, 30];
-            var dimLabels = ['焦虑倾向', '回避倾向', '安全型', '引导型'];
-            radarChartInstance.setOption({
-                tooltip: {
-                    trigger: 'item',
-                    formatter: function(params) {
-                        if (params.componentType === 'series' && params.value) {
-                            var html = '<div style="font-weight:bold;margin-bottom:6px;">你的维度分数</div>';
-                            for (var i = 0; i < dimLabels.length; i++) {
-                                var pct = Math.round(dimScores[i] / dimMax[i] * 100);
-                                var level = pct >= 70 ? '高' : (pct >= 40 ? '中' : '低');
-                                html += '<div style="margin:4px 0;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:' + ['#F7C59F','#B5C9E2','#98D2C0','#FFA07A'][i] + ';"></span>' + dimLabels[i] + '：<b>' + dimScores[i] + '</b>分（' + level + '）</div>';
-                                html += '<div style="font-size:11px;color:#999;padding-left:14px;">' + dimDefs[i] + '</div>';
+                const scores = finalScores.value;
+                var dimDefs = ['过度在意对方反应，通过反复确认缓解不安', '淡化重要性，转移注意力，物理撤退', '稳定接纳，自然表达需求，情绪平稳', '主动注入结构，引导沟通，不强迫'];
+                var dimScores = [scores.anxiety, scores.avoidance, scores.secure, scores.guide];
+                var dimMax = [30, 30, 30, 30];
+                var dimLabels = ['焦虑倾向', '回避倾向', '安全型', '引导型'];
+                radarChartInstance.setOption({
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function(params) {
+                            if (params.componentType === 'series' && params.value) {
+                                var html = '<div style="font-weight:bold;margin-bottom:6px;">你的维度分数</div>';
+                                for (var i = 0; i < dimLabels.length; i++) {
+                                    var pct = Math.round(dimScores[i] / dimMax[i] * 100);
+                                    var level = pct >= 70 ? '高' : (pct >= 40 ? '中' : '低');
+                                    html += '<div style="margin:4px 0;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:' + ['#F7C59F','#B5C9E2','#98D2C0','#FFA07A'][i] + ';"></span>' + dimLabels[i] + '：<b>' + dimScores[i] + '</b>分（' + level + '）</div>';
+                                    html += '<div style="font-size:11px;color:#999;padding-left:14px;">' + dimDefs[i] + '</div>';
+                                }
+                                return html;
                             }
-                            return html;
-                        }
-                        return '';
+                            return '';
+                        },
+                        backgroundColor: 'rgba(255,255,255,0.96)',
+                        borderColor: '#f0e2da',
+                        borderWidth: 1,
+                        textStyle: { color: '#3b2a25', fontSize: 12 },
+                        padding: [10, 14]
                     },
-                    backgroundColor: 'rgba(255,255,255,0.96)',
-                    borderColor: '#f0e2da',
-                    borderWidth: 1,
-                    textStyle: { color: '#3b2a25', fontSize: 12 },
-                    padding: [10, 14]
-                },
-                radar: {
-                    indicator: [
-                        { name: '焦虑倾向', max: 30 },
-                        { name: '回避倾向', max: 30 },
-                        { name: '安全型', max: 30 },
-                        { name: '引导型', max: 30 }
-                    ],
-                    shape: 'circle',
-                    center: ['50%', '50%'],
-                    radius: '65%',
-                    name: { textStyle: { fontSize: 12, color: '#8B5A4E' } }
-                },
-                series: [{
-                    type: 'radar',
-                    data: [{ value: [scores.anxiety, scores.avoidance, scores.secure, scores.guide], name: '你的分数' }],
-                    areaStyle: { color: 'rgba(255,138,111,0.2)' },
-                    lineStyle: { color: '#FF8A6F', width: 2 },
-                    symbolSize: 6,
-                    symbol: 'circle',
-                    itemStyle: { color: '#E86A4F' },
-                    animationDuration: 1000
-                }]
-            });
+                    radar: {
+                        indicator: [
+                            { name: '焦虑倾向', max: 30 },
+                            { name: '回避倾向', max: 30 },
+                            { name: '安全型', max: 30 },
+                            { name: '引导型', max: 30 }
+                        ],
+                        shape: 'circle',
+                        center: ['50%', '50%'],
+                        radius: '65%',
+                        name: { textStyle: { fontSize: 12, color: '#8B5A4E' } }
+                    },
+                    series: [{
+                        type: 'radar',
+                        data: [{ value: [scores.anxiety, scores.avoidance, scores.secure, scores.guide], name: '你的分数' }],
+                        areaStyle: { color: 'rgba(255,138,111,0.2)' },
+                        lineStyle: { color: '#FF8A6F', width: 2 },
+                        symbolSize: 6,
+                        symbol: 'circle',
+                        itemStyle: { color: '#E86A4F' },
+                        animationDuration: 1000
+                    }]
+                });
             } catch (e) {
+                console.error('Radar chart error:', e);
                 chartDom.innerHTML = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;">雷达图加载失败</div>';
             }
         }
@@ -2083,39 +2341,55 @@ createApp({
             var radarDiv = document.getElementById('posterRadar');
             radarDiv.innerHTML = '';
             var posterRadar = null;
-            try {
-                posterRadar = echarts.init(radarDiv);
-                posterRadar.setOption({
-                    radar: {
-                        indicator: [
-                            { name: '焦虑倾向', max: 30 },
-                            { name: '回避倾向', max: 30 },
-                            { name: '安全型', max: 30 },
-                            { name: '引导型', max: 30 }
-                        ],
-                        shape: 'circle',
-                        splitNumber: 4,
-                        axisName: { color: '#888', fontSize: 11 },
-                        splitLine: { lineStyle: { color: '#f0e2da' } },
-                        splitArea: { show: false },
-                        axisLine: { lineStyle: { color: '#f0e2da' } }
-                    },
-                    series: [{
-                        type: 'radar',
-                        data: [{ value: [scores.anxiety, scores.avoidance, scores.secure, scores.guide] }],
-                        areaStyle: { opacity: 0.25, color: detail.color || '#E86A4F' },
-                        lineStyle: { color: detail.color || '#E86A4F', width: 2 },
-                        itemStyle: { color: detail.color || '#E86A4F' },
-                        symbol: 'circle',
-                        symbolSize: 6,
-                        animation: false
-                    }]
-                });
-            } catch (e) {
-                radarDiv.innerHTML = '<div style="padding:20px;color:#999;font-size:12px;">雷达图加载失败</div>';
+            
+            // 检查echarts是否可用
+            if (typeof echarts !== 'undefined') {
+                try {
+                    posterRadar = echarts.init(radarDiv);
+                    posterRadar.setOption({
+                        radar: {
+                            indicator: [
+                                { name: '焦虑倾向', max: 30 },
+                                { name: '回避倾向', max: 30 },
+                                { name: '安全型', max: 30 },
+                                { name: '引导型', max: 30 }
+                            ],
+                            shape: 'circle',
+                            splitNumber: 4,
+                            axisName: { color: '#888', fontSize: 11 },
+                            splitLine: { lineStyle: { color: '#f0e2da' } },
+                            splitArea: { show: false },
+                            axisLine: { lineStyle: { color: '#f0e2da' } }
+                        },
+                        series: [{
+                            type: 'radar',
+                            data: [{ value: [scores.anxiety, scores.avoidance, scores.secure, scores.guide] }],
+                            areaStyle: { opacity: 0.25, color: detail.color || '#E86A4F' },
+                            lineStyle: { color: detail.color || '#E86A4F', width: 2 },
+                            itemStyle: { color: detail.color || '#E86A4F' },
+                            symbol: 'circle',
+                            symbolSize: 6,
+                            animation: false
+                        }]
+                    });
+                } catch (e) {
+                    console.warn('Poster radar chart error:', e);
+                    radarDiv.innerHTML = '<div style="padding:20px;color:#999;font-size:12px;">雷达图加载失败</div>';
+                }
+            } else {
+                // 没有echarts，显示简单文本
+                radarDiv.innerHTML = '<div style="padding:15px;color:#666;font-size:12px;line-height:1.8;"><div>😰 焦虑：' + scores.anxiety + ' &nbsp; 🏃 回避：' + scores.avoidance + '</div><div>🌿 安全：' + scores.secure + ' &nbsp; ✨ 引导：' + scores.guide + '</div></div>';
             }
+            
             setTimeout(function() {
                 nextTick(function() {
+                    // 检查html2canvas是否可用
+                    if (typeof html2canvas === 'undefined') {
+                        showToast('海报功能暂不可用，请截图保存');
+                        if (posterRadar) posterRadar.dispose();
+                        return;
+                    }
+                    
                     html2canvas(container, { scale: 2, backgroundColor: '#fffbf5', useCORS: true }).then(function(canvas) {
                         if (posterRadar) posterRadar.dispose();
                         var imgData = canvas.toDataURL();
@@ -2138,7 +2412,8 @@ createApp({
                         } catch (e) {
                             downloadPosterFallback(imgData);
                         }
-                    }).catch(function() {
+                    }).catch(function(err) {
+                        console.error('html2canvas error:', err);
                         showToast('海报生成失败，请截图保存');
                         if (posterRadar) posterRadar.dispose();
                     });
@@ -2529,7 +2804,15 @@ createApp({
             </transition>
         </div>
     `
-}).mount('#app');
+    }).mount('#app');
+}
+
+// 启动应用
+document.addEventListener('DOMContentLoaded', initApp);
+// 如果DOM已加载，直接调用
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initApp();
+}
 </script>
 </body>
 </html>
