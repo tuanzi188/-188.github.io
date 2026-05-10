@@ -1437,13 +1437,13 @@ const questions = [
         { text: "相信感情节奏不同，不着急，稳定相处就好", scores: { secure: 1 } }
     ]
 },
-   {
-    text: "对方心情低落、明显不开心，你会？",
+ {
+    text: "约会时对方全程玩手机，几乎不跟你交流，你会？",
     options: [
-        { text: "惴惴不安，怕自己哪里做错了", scores: { anxiety: 1 } },
-        { text: "不打扰，让TA自己静一静，不多问", scores: { avoidance: 1 } },
-        { text: "温柔安抚，耐心鼓励，帮TA舒缓情绪", scores: { guide: 1 } },
-        { text: "安静陪伴，给予空间，不施压不内耗", scores: { secure: 1 } }
+        { text: "心里失落又生气，忍不住摆脸色，希望对方意识到", scores: { anxiety: 1 } },
+        { text: "安静玩自己的，不拆穿不指责，默默觉得不合适", scores: { avoidance: 1 } },
+        { text: "温柔提醒，拉回对方注意力，轻松沟通彼此的感受", scores: { guide: 1 } },
+        { text: "偶尔提醒，不较真，不因为小事影响约会心情", scores: { secure: 1 } }
     ]
 },
     { text: "发现彼此不合适，但你已经习惯了对方的存在，你的态度是？", options: [
@@ -1464,12 +1464,15 @@ const questions = [
         { text: "不刻板报备，但会主动和对方商量好彼此舒服的联系频率", scores: { guide: 1 } },
         { text: "不强求形式，有就聊没有也不纠结，随缘就好", scores: { secure: 1 } }
     ]},
-    { text: "没有任何争执前兆，对方突然说想一个人静静，让你暂时别打扰TA。你的第一反应是？", options: [
-        { text: "尊重对方独处需求，完全不打扰不追问，安静等TA自己缓过来", scores: { secure: 1 } },
-        { text: "正好乐得清静，不关心原因也不问候，直接做自己的事", scores: { avoidance: 1 } },
-        { text: "温柔告诉TA：我尊重你独处，但我一直在，想说随时找我", scores: { guide: 1 } },
-        { text: "瞬间心慌没底，怕对方厌烦、刻意疏远", scores: { anxiety: 1 } }
-    ]},
+   {
+    text: "对方要求你删除所有异性朋友的联系方式，说'有我就够了'。",
+    options: [
+        { text: "虽然不舒服，但怕失去对方，照做了", scores: { anxiety: 1 } },
+        { text: "直接拒绝，觉得被控制，甚至考虑分手", scores: { avoidance: 1 } },
+        { text: "认真沟通：理解你的不安，但社交是我的需求，我们一起找平衡点", scores: { guide: 1 } },
+        { text: "温和但坚定拒绝，不因对方焦虑而牺牲自己的边界", scores: { secure: 1 } }
+    ]
+},
    {
     text: "收拾时翻到对方保留的前任纪念品，你会？",
     options: [
@@ -1502,7 +1505,7 @@ const questions = [
         { text: "冷战只是暂时情绪，距离不会改变内心笃定", scores: { secure: 1 } }
     ]},
     { text: "想到长久走下去，你最大的顾虑是？", options: [
-        { text: "诚惶诚恐，怕中途被抛下，越依赖越没底", scores: { anxiety: 1 } },
+        { text: "诚惶诚恐，怕对方不够爱自己，越依赖越没底", scores: { anxiety: 1 } },
         { text: "害怕被感情捆绑，失去自我自由和空间", scores: { avoidance: 1 } },
         { text: "顾虑对方不愿敞开心沟通，矛盾越积越伤感情", scores: { guide: 1 } },
         { text: "没什么多余顾虑，一切讲究顺其自然", scores: { secure: 1 } }
@@ -1550,7 +1553,7 @@ const questions = [
         { text: "心慌没底，反复怀疑自己言行不够好", scores: { anxiety: 1 } }
     ]},
     { text: "如果处于异地恋状态，你会不会频繁翻看对方社交动态来获取安全感？", options: [
-        { text: "紧绷小心翼翼，想从点滴动态里确认自己被放在心上", scores: { anxiety: 1 } },
+        { text: "经常翻看，想从点滴动态里确认自己被放在心上", scores: { anxiety: 1 } },
         { text: "基本不会，不愿过度窥探，也不想介入对方私人社交生活", scores: { avoidance: 1 } },
         { text: "不会刻意刷动态试探，更倾向直接沟通来筑牢彼此信任", scores: { guide: 1 } },
         { text: "觉得没必要这样求证，内心安稳，不靠外界细节给自己定心", scores: { secure: 1 } }
