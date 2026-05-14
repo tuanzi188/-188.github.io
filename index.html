@@ -1383,6 +1383,11 @@ function generatePersonalizedInterpretation(scores) {
     const { sorted, isDominant, healthyRatio, primary, secondary, range, dominance } = p;
     const a = scores.anxiety || 0, v = scores.avoidance || 0, s = scores.secure || 0, g = scores.guide || 0;
 
+    // ===== 第0层：恐惧型混合特质（焦虑和回避都很高）=====
+    if (a >= 8 && v >= 8) {
+        return `你具有「恐惧型混合特质」💔——既渴望亲密又害怕受伤，在"想抓住"和"想逃跑"之间反复拉扯。你对爱的感知比任何人都深刻，但也更容易在关系中感到不安。这种矛盾不是你的错，只是你的心需要更多时间和安全感才能完全敞开。`;
+    }
+
     // ===== 第一层：双高健康组合 =====
     if (primary.key === 'secure' && secondary.key === 'guide' && secondary.score >= 8) {
         return `你是罕见的「安全引导型」✨——内心有稳稳的锚，又有带动关系的能力。你不是在"找"安全感，而是自带安全感。这种组合让你既能享受亲密，又不迷失自我，是关系中的"温柔领导者"。`;
@@ -2788,7 +2793,74 @@ function initApp() {
             const tiedFullNames = tiedDims.map(d => dimToFullName[d]);
             const baseDetail = typeDetails[tiedDims[0]] || typeDetails.secure;
             const combinedName = tiedFullNames.join(' + ');
-            const multiCoreDetail = {
+            
+            // 检查是否同时包含焦虑和回避
+            const hasAnxietyAndAvoidance = tiedDims.includes('anxiety') && tiedDims.includes('avoidance');
+            
+            const multiCoreDetail = hasAnxietyAndAvoidance ? {
+                name: `焦虑+回避 恐惧型双核`,
+                emoji: '💔',
+                desc: `你既渴望亲密又害怕受伤，在"想抓住"和"想逃跑"之间反复拉扯。你对爱的感知比任何人都深刻，但也更容易在关系中感到不安。这种矛盾不是你的错，只是你的心需要更多时间和安全感才能完全敞开。`,
+                color: '#D9A7B0',
+                positiveView: `你对感情的深度感知力是非常珍贵的礼物——当你感到安全时，你能给出最深刻、最真诚的爱。`,
+                traits: [
+                    `在亲密和疏远之间反复摇摆`,
+                    `内心渴望连接但害怕受伤`,
+                    `情绪波动较大，忽冷忽热`,
+                    `对关系既期待又恐惧`
+                ],
+                strengths: [
+                    `对感情有深刻的感知力`,
+                    `在关系中愿意深度投入（当感到安全时）`,
+                    `对伴侣的需求有很强的同理心`,
+                    `一旦建立信任，会非常忠诚`
+                ],
+                growth: [
+                    `接纳自己的矛盾情绪，不要自我批判`,
+                    `寻求专业心理咨询帮助理解依恋模式`,
+                    `在关系中设定清晰的边界`,
+                    `练习在不安全感出现时自我安抚`
+                ],
+                compatibility: {
+                    best: {
+                        title: `🌟 最佳适配：安全型恋人`,
+                        why: `对方的稳定像「安全屋」一样，让你慢慢放下戒备，知道「这次不一样，不会受伤」`,
+                        scenario: `你想推开对方时，TA不会走，而是耐心等你愿意回来，这种确定感慢慢治愈你`
+                    },
+                    complementary: {
+                        title: `💫 互补适配：引导型恋人`,
+                        why: `对方能帮你「拆解」内心的矛盾，一步一步带你走进更健康的关系模式`,
+                        warning: `⚠️ 但别把所有改变的压力都丢给对方，你也要愿意尝试`
+                    },
+                    challenge: {
+                        title: `⚡️ 注意挑战：单一特质过强的人`,
+                        why: `要么是对方加重你的不安，要么是你俩互相逃避，最后都很累`,
+                        tip: `如果真的在一起，建议一起做「深度沟通练习」，用文字代替情绪`
+                    }
+                },
+                idealPartner: `能给你持续稳定回应的安全型恋人`,
+                scenarioAdvice: [
+                    {
+                        scene: `冷战场景`,
+                        reaction: `既想主动和好又怕被拒绝，内心反复拉扯，情绪波动很大`,
+                        tip: `给自己写一封「情绪日记」，把矛盾的感受写下来，再决定是否行动`
+                    },
+                    {
+                        scene: `对方加班晚归`,
+                        reaction: `一会儿觉得理解，一会儿又觉得被忽视，在两种情绪间反复切换`,
+                        tip: `和伴侣约定固定的「安心信号」，比如睡前一句晚安，帮你稳定情绪基线`
+                    },
+                    {
+                        scene: `送礼不合适`,
+                        reaction: `想表达真实感受又怕破坏关系，内心纠结不知道该坦诚还是忍耐`,
+                        tip: `从小事开始练习坦诚，比如分享你喜欢的咖啡口味，逐步建立表达信心`
+                    }
+                ],
+                genderAdvice: {
+                    male: `作为焦虑+回避的男生，你内心的矛盾并不罕见。建议先接纳自己的不安全感，找一个有耐心、情绪稳定的女生。不要害怕展现脆弱，真正爱你的人会接纳你的全部。`,
+                    female: `作为焦虑+回避的女生，你既渴望爱又害怕受伤的心情值得被理解。建议找一个能给你持续稳定回应的男生。考虑寻求专业支持，学会自我安抚，你会拥有更健康的关系。`
+                }
+            } : {
                 name: `${combinedName} 双核型`,
                 emoji: tiedDims.length === 2 ? '⚡' : '🌟',
                 desc: `你同时具备 ${combinedName} 的特质，就像一台双引擎飞机，动力更强但也需要更多协调。你的恋爱风格不是单一维度，而是多个维度的精彩组合。`,
@@ -3791,15 +3863,24 @@ function initApp() {
             try {
                 const personalityResult = unifiedPersonalityType(item.scores);
                 if (personalityResult.subtype === 'multi-core') {
+                    const tiedDims = personalityResult.tiedDimensions;
+                    // 检查是否同时包含焦虑和回避
+                    const hasAnxietyAndAvoidance = tiedDims.includes('anxiety') && tiedDims.includes('avoidance');
+                    if (hasAnxietyAndAvoidance) {
+                        return {
+                            emoji: '💔',
+                            name: `焦虑+回避 恐惧型双核`
+                        };
+                    }
                     const dimToFullName = {
                         secure: '安全型',
                         anxiety: '焦虑型',
                         avoidance: '回避型',
                         guide: '引导型'
                     };
-                    const tiedFullNames = personalityResult.tiedDimensions.map(d => dimToFullName[d]);
+                    const tiedFullNames = tiedDims.map(d => dimToFullName[d]);
                     return {
-                        emoji: personalityResult.tiedDimensions.length === 2 ? '⚡' : '🌟',
+                        emoji: tiedDims.length === 2 ? '⚡' : '🌟',
                         name: `${tiedFullNames.join(' + ')} 双核型`
                     };
                 }
