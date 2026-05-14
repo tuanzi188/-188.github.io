@@ -1808,7 +1808,7 @@ const questions = [
     {
     text: '你兴致勃勃分享一件开心事，对方反应平平且没有解释，你会？',
     options: [
-        { text: '心情低落，觉得对方根本不在意你', scores: { anxiety: 1 } },
+        { text: '心里又失落又生气，很介意对方敷衍冷淡的态度', scores: { anxiety: 1 } },
         { text: '瞬间没兴致，默默收住情绪，不再多说', scores: { avoidance: 1 } },
         { text: '能理解他状态一般，不会往心里多想', scores: { secure: 1 } },
         { text: '温和说出感受，希望他下次能多回应你', scores: { guide: 1 } }
@@ -1819,7 +1819,7 @@ const questions = [
     text: "吵架后双方都有情绪，对方说“先冷静一下”，不想立刻沟通。你的反应是？",
     options: [
         { text: "正好不想聊，立刻撤退，等对方低头或各自冷静直到事情翻篇", scores: { avoidance: 1 } },
-        { text: "心里委屈憋闷，怕冷静就散了，必须立刻说清楚", scores: { anxiety: 1 } },
+        { text: "又气又别扭，认为是拿冷战逃避，心里很介意被晾在一边", scores: { anxiety: 1 } },
         { text: "尊重冷静，但约定好时间再聊，不让关系一直僵着", scores: { guide: 1 } },
         { text: "接受冷静，不逼迫、不内耗，等双方平静再自然沟通", scores: { secure: 1 } }
     ]
@@ -1834,7 +1834,7 @@ const questions = [
     ]
 },
     { text: "你期待已久的周六约会，对方突然说临时要加班，无法赴约，也没有提出改期。你通常的第一反应是？", options: [
-        { text: "闷闷不乐，忍不住猜测对方是不是不想见自己", scores: { anxiety: 1 } },
+        { text: "又失落又恼火，介意对方连基本的歉意和改期都没有", scores: { anxiety: 1 } },
         { text: "觉得突然被打断很不舒服，不想多交流，宁愿自己安排接下来的时间，也不想主动追问", scores: { avoidance: 1 } },
         { text: "有点失落但能理解，不会胡思乱想，也不会有压力，等对方有空再商量即可", scores: { secure: 1 } },
         { text: "理解工作突发状况，主动温和地提出改期，不让气氛变得尴尬或冷淡", scores: { guide: 1 } }
@@ -1861,12 +1861,12 @@ const questions = [
         { text: "主动说出自己的失落与在意，好好沟通，一起约定往后的仪式感和相处方式", scores: { guide: 1 } },
         { text: "有点小遗憾，但能理解，不会放在心上纠结", scores: { secure: 1 } },
         { text: "本来就不看重这些形式，记不记得都无所谓", scores: { avoidance: 1 } },
-        { text: "紧绷小心翼翼，怀疑自己是否不被重视", scores: { anxiety: 1 } }
+        { text: "心里很生气介意，觉得自己根本不被放在心上", scores: { anxiety: 1 } }
     ]},
     {
     text: "当你和对方认真聊未来规划，TA态度模糊、不愿多说，你会？",
     options: [
-        { text: "自我怀疑，忍不住反复追问", scores: { anxiety: 1 } },
+        { text: "心里很不满，反感刻意回避，忍不住纠结对方真实想法", scores: { anxiety: 1 } },
         { text: "不想逼对方，也不再提，顺其自然走一步看一步", scores: { avoidance: 1 } },
         { text: "耐心沟通彼此期待，理清节奏，共同规划方向", scores: { guide: 1 } },
         { text: "相信感情节奏不同，不着急，稳定相处就好", scores: { secure: 1 } }
@@ -1882,7 +1882,7 @@ const questions = [
     ]
 },
     { text: "发现彼此不合适，但你已经习惯了对方的存在，你的态度是？", options: [
-        { text: "恋恋不舍，宁愿委屈自己也想勉强维系", scores: { anxiety: 1 } },
+        { text: "舍不得轻易放下，心里纠结难受，很难果断抽身", scores: { anxiety: 1 } },
         { text: "慢慢抽离冷淡，不纠缠不解释，自然疏远", scores: { avoidance: 1 } },
         { text: "主动沟通磨合，尽力修复，实在不行再体面放下", scores: { guide: 1 } },
         { text: "顺其自然，合得来就处，合不来也坦然接受结果", scores: { secure: 1 } }
@@ -1902,7 +1902,7 @@ const questions = [
    {
     text: "对方要求你删除所有异性朋友的联系方式，说'有我就够了'。",
     options: [
-        { text: "虽然不舒服，但怕失去对方，照做了", scores: { anxiety: 1 } },
+        { text: "反感被强势控制，又怕争执伤感情，内心左右为难", scores: { anxiety: 1 } },
         { text: "直接拒绝，觉得被控制，甚至考虑分手", scores: { avoidance: 1 } },
         { text: "认真沟通：理解你的不安，但社交是我的需求，我们一起找平衡点", scores: { guide: 1 } },
         { text: "温和但坚定拒绝，不因对方焦虑而牺牲自己的边界", scores: { secure: 1 } }
@@ -1920,14 +1920,14 @@ const questions = [
    {
     text: "纪念日收到的礼物，完全不是你喜欢的风格，你会？",
     options: [
-        { text: "表面道谢，心里失落恼火，觉得对方不够懂你", scores: { anxiety: 1 } },
+        { text: "心里失落不满，认为对方不上心、不懂自己", scores: { anxiety: 1 } },
         { text: "简单收下收好，不表露真实感受", scores: { avoidance: 1 } },
         { text: "感谢心意，温和沟通喜好，培养默契", scores: { guide: 1 } },
         { text: "珍惜心意，坦然收下，不扫兴不纠结", scores: { secure: 1 } }
     ]
 },
     { text: "和伴侣观念产生分歧，且对方轻微表现出生气，你会？", options: [
-        { text: "紧绷小心翼翼，习惯性迁就怕闹矛盾", scores: { anxiety: 1 } },
+        { text: "心里又气又别扭，反感对方摆脸色，又怕矛盾闹僵", scores: { anxiety: 1 } },
         { text: "懒得争辩，沉默回避不愿正面冲突", scores: { avoidance: 1 } },
         { text: "积极主动表达观点，求同存异，好好沟通磨合相处方式", scores: { guide: 1 } },
         { text: "观点不同很正常，不必刻意说服也不用刻意磨合", scores: { secure: 1 } }
@@ -1936,7 +1936,7 @@ const questions = [
     { text: "异地冷战只能隔着屏幕互不说话，你最怕什么？", options: [
         { text: "忧心忡忡，怕距离慢慢疏远关系", scores: { anxiety: 1 } },
         { text: "最怕被迫和好、被过度捆绑私人情绪和生活", scores: { avoidance: 1 } },
-        { text: "不怕误会累积，我会主动打破沉默，缓和彼此关系", scores: { guide: 1 } },
+        { text: "担心误会累积，但我会主动打破沉默，缓和彼此关系", scores: { guide: 1 } },
         { text: "冷战只是暂时情绪，距离不会改变内心笃定", scores: { secure: 1 } }
     ]},
     { text: "想到长久走下去，你最大的顾虑是？", options: [
@@ -1946,38 +1946,38 @@ const questions = [
         { text: "没什么多余顾虑，一切讲究顺其自然", scores: { secure: 1 } }
     ]},
     { text: "你无意间发现对方故意隐瞒，明明出去玩乐却谎称在加班。你的第一反应是？", options: [
-        { text: "患得患失，担心对方还有更多事瞒着自己", scores: { anxiety: 1 } },
+        { text: "又气又失望，反感被欺骗，忍不住担心还有别的隐瞒", scores: { anxiety: 1 } },
         { text: "坦诚说出自己的发现和感受，认真沟通边界，约定往后小事不用刻意隐瞒", scores: { guide: 1 } },
         { text: "看破但不戳破，默默记在心里，悄悄降低一点信任，不再主动深究", scores: { avoidance: 1 } },
         { text: "心里难免不舒服，但愿意冷静下来，找时机平和问问对方隐瞒的原因", scores: { secure: 1 } }
     ]},
     { text: "在感情里，你能不能接受彼此拥有各自独立的社交圈子？", options: [
-        { text: "膈应生气，总担心距离变远感情变淡", scores: { anxiety: 1 } },
+        { text: "会吃醋不安，担心距离拉开后感情慢慢降温", scores: { anxiety: 1 } },
         { text: "很能接受，更希望保留各自生活边界，不必深度介入彼此社交", scores: { avoidance: 1 } },
         { text: "可以接受独立社交，但希望双方守住分寸，主动避嫌、坦诚相待", scores: { guide: 1 } },
         { text: "觉得很正常，各自有自己的朋友理所应当，内心信任不会多想", scores: { secure: 1 } }
     ]},
     { text: "你们已经冷战两天了，第三天对方不做解释，只给你发了一条搞笑短视频悄悄递台阶。你的第一反应是？", options: [
-        { text: "随手看一眼划过，不回复不接话，等着事情自己翻篇，不主动破冰", scores: { avoidance: 1 } },
-        { text: "七上八下，纠结对方是不是示好，不敢轻易接茬", scores: { anxiety: 1 } },
+        { text: "随手看一眼划过，不回复不接话，等着事情自己翻篇", scores: { avoidance: 1 } },
+        { text: "心里还在生气，介意对方不正式道歉，不愿轻易顺着台阶妥协", scores: { anxiety: 1 } },
         { text: "秒懂TA在递台阶，立刻顺着话题聊开，顺便把这两天的事也一起摊开来好好聊聊，一次性彻底翻篇", scores: { guide: 1 } },
         { text: "看完自然一笑，随手回个表情，该干嘛干嘛，和好的事随缘不急", scores: { secure: 1 } }
     ]},
     { text: "异地恋长期不能见面，你内心最大的感受是？", options: [
-        { text: "提心吊胆，总担心感情慢慢变淡", scores: { anxiety: 1 } },
+        { text: "容易不安多想，总怕长久不见感情慢慢冷淡", scores: { anxiety: 1 } },
         { text: "反倒觉得自在轻松，不用被日常相处捆绑，保有自己的空间", scores: { avoidance: 1 } },
         { text: "清楚距离会产生隔阂，会主动维系沟通，也认真规划线下见面", scores: { guide: 1 } },
         { text: "内心安稳笃定，感情靠本心维系，不会被距离轻易左右心态", scores: { secure: 1 } }
     ]},
     { text: "对方随口说了一句普通的话，你听完莫名心里别扭，却说不清具体哪里不妥。你的第一反应是？", options: [
-        { text: "疑神疑鬼，反复回想越想越难受，忍不住追问", scores: { anxiety: 1 } },
+        { text: "心里越琢磨越别扭，容易胡思乱想、钻牛角尖", scores: { anxiety: 1 } },
         { text: "懒得深究细微情绪，得过且过，很快转移注意力不纠结", scores: { avoidance: 1 } },
-        { text: "主动接住话题，反问对方「你觉得哪里不一样？我也想听听你的观察」，把模糊感受变成具体对话", scores: { guide: 1 } },
-        { text: "心里有点好奇但不会急着追根究底，等对方继续说，先观察再决定要不要回应", scores: { secure: 1 } }
+        { text: "主动接住话题，想和对方说清楚这件事", scores: { guide: 1 } },
+        { text: "知道只是情绪小波动，不深究、不内耗，顺其自然", scores: { secure: 1 } }
     ]},
     { text: "对方已经连续一周加班到很晚，两人几乎没有交流。某天终于准时下班，特意带回了你最爱吃的蛋糕。你的第一反应是？", options: [
         { text: "开心接住好意，顺势开启聊天，把最近落下的互动补回来", scores: { guide: 1 } },
-        { text: "内心淡淡感动，简单道谢，不刻意拉长话题", scores: { secure: 1 } },
+        { text: "坦然收下这份心意，心里感念对方有心意", scores: { secure: 1 } },
         { text: "内心稍有触动，但表面平静，不流露太多情绪起伏", scores: { avoidance: 1 } },
         { text: "感动之余仍患得患失，想听对方说在意你", scores: { anxiety: 1 } }
     ]},
@@ -2000,13 +2000,13 @@ const questions = [
     { text: "婚后两人目前经济都偏紧张、手头不宽裕，对方没跟你商量，私下买了一件价格不低的私人物品。你的第一反应是？", options: [
         { text: "理解对方喜欢，但认真约定：以后贵的东西我们先商量", scores: { guide: 1 } },
         { text: "表达个人感受，说完便不再多想", scores: { secure: 1 } },
-        { text: "忍不住反复念叨，指责他不懂节制。", scores: { anxiety: 1 } },
+        { text: "又气又无奈，介意遇事不商量、不尊重彼此共识", scores: { anxiety: 1 } },
         { text: "心里有隔阂但不拆穿，默默划清经济边界不再多干涉", scores: { avoidance: 1 } }
     ]},
     {
     text: "对方带你见好朋友，聚会时TA只顾和朋友聊天，忽略了你，你会？",
     options: [
-        { text: "自我怀疑，生气对方做法，觉得自己不够被重视", scores: { anxiety: 1 } },
+        { text: "心里生气失落，介意当众被忽略、不被照顾情绪", scores: { anxiety: 1 } },
         { text: "自己安静待着，不介入、不靠近，也不生气", scores: { avoidance: 1 } },
         { text: "自然融入圈子，偶尔眼神互动，不闹情绪也不尴尬", scores: { guide: 1 } },
         { text: "理解朋友相聚难得，自己轻松自在，不介意", scores: { secure: 1 } }
