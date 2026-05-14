@@ -541,21 +541,6 @@
             padding: 4px 10px;
             border-radius: 20px;
         }
-        
-        .reaction-tag {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-        
-        .option .reaction-tag {
-            margin-top: 6px;
-            font-size: 11px;
-            padding: 4px 10px;
-        }
         .option-prefix {
             font-weight: bold;
             background: #fff0e6;
@@ -578,16 +563,6 @@
         }
         .option-text { flex: 1; font-size: 16px; color: #4a2e26; line-height: 1.4; }
         
-        /* 压力测试选项特殊布局 */
-        .option {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .option .option-text {
-            margin-bottom: 6px;
-        }
-
         .btn-group { display: flex; margin-top: 24px; }
         .btn-group > * + * { margin-left: 12px; }
         button {
@@ -1479,10 +1454,10 @@ const stressQuestions = [
         scenario: '你无意中发现对方手机里有和前任的聊天记录，内容正常但频率不低，对方从未提起过。',
         weight: 2,
         options: [
-            { text: '立刻质问，要求解释清楚，心里开始怀疑这段感情', scores: { anxiety: 2 }, reaction: '对抗' },
-            { text: '假装没看到，但心里记下，暗中观察不再信任', scores: { avoidance: 2 }, reaction: '冻结' },
-            { text: '等情绪平复后，坦诚表达感受，询问原因并约定边界', scores: { guide: 2 }, reaction: '解决' },
-            { text: '相信对方有分寸，不急于追问，等合适时机自然聊起', scores: { secure: 2 }, reaction: '接纳' }
+            { text: '立刻质问，要求解释清楚，心里开始怀疑这段感情', scores: { anxiety: 2 } , reaction: '对抗' },
+            { text: '假装没看到，但心里记下，暗中观察不再信任', scores: { avoidance: 2 } , reaction: '冻结' },
+            { text: '等情绪平复后，坦诚表达感受，询问原因并约定边界', scores: { guide: 2 } , reaction: '解决' },
+            { text: '相信对方有分寸，不急于追问，等合适时机自然聊起', scores: { secure: 2 } , reaction: '接纳' }
         ]
     },
     {
@@ -1490,10 +1465,10 @@ const stressQuestions = [
         scenario: '催收电话打到你手机上，你才发现对方背着你欠了一大笔网贷，TA之前还一直说"钱够用"。',
         weight: 2,
         options: [
-            { text: '崩溃质问，觉得天塌了，反复问TA到底瞒了多少', scores: { anxiety: 2 }, reaction: '恐慌' },
-            { text: '非常失望，立刻在心里划清经济边界，考虑是否还要继续', scores: { avoidance: 2 }, reaction: '后撤' },
-            { text: '冷静下来一起算清债务，制定还款计划，明确以后财务透明的底线', scores: { guide: 2 }, reaction: '治理' },
-            { text: '虽然震惊但愿意先了解原因，不问罪名只问怎么解决', scores: { secure: 2 }, reaction: '等待' }
+            { text: '崩溃质问，觉得天塌了，反复问TA到底瞒了多少', scores: { anxiety: 2 } , reaction: '恐慌' },
+            { text: '非常失望，立刻在心里划清经济边界，考虑是否还要继续', scores: { avoidance: 2 } , reaction: '后撤' },
+            { text: '冷静下来一起算清债务，制定还款计划，明确以后财务透明的底线', scores: { guide: 2 } , reaction: '治理' },
+            { text: '虽然震惊但愿意先了解原因，不问罪名只问怎么解决', scores: { secure: 2 } , reaction: '等待' }
         ]
     },
     {
@@ -1501,10 +1476,10 @@ const stressQuestions = [
         scenario: 'TA最近频繁和某个人聊微信，手机还总对着你倒扣着，聊天记录一滑就删。',
         weight: 2,
         options: [
-            { text: '崩溃质问，要求看手机，不给看就分手', scores: { anxiety: 2 }, reaction: '崩溃' },
-            { text: '假装没发现，但内心已经准备好随时离开', scores: { avoidance: 2 }, reaction: '逃离' },
-            { text: '直接说「我注意到你最近有些不一样，我们聊聊吧」', scores: { guide: 2 }, reaction: '破局' },
-            { text: '选择相信，给TA空间，等TA愿意说时自然会说', scores: { secure: 2 }, reaction: '自洽' }
+            { text: '崩溃质问，要求看手机，不给看就分手', scores: { anxiety: 2 } , reaction: '崩溃' },
+            { text: '假装没发现，但内心已经准备好随时离开', scores: { avoidance: 2 } , reaction: '逃离' },
+            { text: '直接说「我注意到你最近有些不一样，我们聊聊吧」', scores: { guide: 2 } , reaction: '破局' },
+            { text: '选择相信，给TA空间，等TA愿意说时自然会说', scores: { secure: 2 } , reaction: '自洽' }
         ]
     },
     {
@@ -1512,10 +1487,10 @@ const stressQuestions = [
         scenario: '第一次去对方家，TA父母当众挑剔你的家庭背景和工作，说"我们家孩子值得更好的"，TA全程低头不语。',
         weight: 2,
         options: [
-            { text: '强忍委屈赔笑脸，事后反复问TA"你是不是也觉得我配不上你"', scores: { anxiety: 2 }, reaction: '顺从' },
-            { text: '当场冷脸，之后拒绝再去TA家，也不再和TA父母有任何接触', scores: { avoidance: 2 }, reaction: '对抗冷' },
-            { text: '礼貌回应后提前离场，事后和TA严肃沟通「你的态度比他们的意见更重要」', scores: { guide: 2 }, reaction: '协商' },
-            { text: '心里不舒服但理解TA的为难，告诉TA「下次你需要站在我这边」', scores: { secure: 2 }, reaction: '坚守' }
+            { text: '强忍委屈赔笑脸，事后反复问TA"你是不是也觉得我配不上你"', scores: { anxiety: 2 } , reaction: '顺从' },
+            { text: '当场冷脸，之后拒绝再去TA家，也不再和TA父母有任何接触', scores: { avoidance: 2 } , reaction: '对抗冷' },
+            { text: '礼貌回应后提前离场，事后和TA严肃沟通「你的态度比他们的意见更重要」', scores: { guide: 2 } , reaction: '协商' },
+            { text: '心里不舒服但理解TA的为难，告诉TA「下次你需要站在我这边」', scores: { secure: 2 } , reaction: '坚守' }
         ]
     },
     {
@@ -1523,32 +1498,33 @@ const stressQuestions = [
         scenario: '对方总趁你洗澡/睡觉时翻你手机，还说是「因为爱你才想了解你」。',
         weight: 2,
         options: [
-            { text: '又生气又害怕，觉得自己做什么都不对', scores: { anxiety: 2 }, reaction: '逼迫' },
-            { text: '直接设置密码，不再让TA碰你手机', scores: { avoidance: 2 }, reaction: '隔离' },
-            { text: '认真谈一次「什么是隐私」，约定尊重彼此的边界', scores: { guide: 2 }, reaction: '推进' },
-            { text: '告诉TA「我没什么可隐瞒的，但这种行为让我不舒服」', scores: { secure: 2 }, reaction: '平衡' }
+            { text: '又生气又害怕，觉得自己做什么都不对', scores: { anxiety: 2 } , reaction: '追击' },
+            { text: '直接设置密码，不再让TA碰你手机', scores: { avoidance: 2 } , reaction: '隔离' },
+            { text: '认真谈一次「什么是隐私」，约定尊重彼此的边界', scores: { guide: 2 } , reaction: '推进' },
+            { text: '告诉TA「我没什么可隐瞒的，但这种行为让我不舒服」', scores: { secure: 2 } , reaction: '共担' }
         ]
     },
     {
         id: 'intimacy_1', category: '情感落差',
-        scenario: '你生病发烧到39度，对方只是微信说了「多喝热水」，然后继续打游戏。',
+        scenario: '你生病发烧到38度，对方只是微信说了「多喝热水」，然后继续打游戏。',
         weight: 2,
         options: [
-            { text: '不停地给TA发消息，希望TA能关心你', scores: { anxiety: 2 }, reaction: '追击' },
-            { text: '心一下子凉了，什么也不想说了', scores: { avoidance: 2 }, reaction: '抽离' },
-            { text: '直接说「我现在很难受，我希望你能多陪陪我」', scores: { guide: 2 }, reaction: '索取' },
-            { text: '先照顾好自己，等病好了再聊这件事带给你的感受', scores: { secure: 2 }, reaction: '共担' }
+            { text: '不停地给TA发消息，希望TA能关心你', scores: { anxiety: 2 } , reaction: '逼迫' },
+            { text: '心一下子凉了，什么也不想说了', scores: { avoidance: 2 } , reaction: '抽离' },
+            { text: '直接说「我现在很难受，我希望你能多陪陪我」', scores: { guide: 2 } , reaction: '索取' },
+            { text: '先照顾好自己，等病好了再聊这件事带给你的感受', scores: { secure: 2 } , reaction: '平衡' }
         ]
     },
     {
-        id: 'intimacy_2', category: '情感落差',
-        scenario: '你们深夜在路上遇到陌生男子纠缠，对方第一反应是松开你的手往后躲，没有护在你前面。',
+        id: 'conflict_5',
+        category: '冲突处理',
+        scenario: '你们在公共场所和别人发生争执，对方却站在一边，没有帮你说一句话。你的第一反应是？',
         weight: 2,
         options: [
-            { text: '事后反复回想那个画面，追问TA"你当时是不是根本不在乎我"', scores: { anxiety: 2 }, reaction: '崩溃' },
-            { text: '什么也没说但心凉透了，之后一起出门都会下意识保持距离', scores: { avoidance: 2 }, reaction: '冻结' },
-            { text: '安全后直接告诉TA「刚才那一下，我很失望，我们需要聊聊」', scores: { guide: 2 }, reaction: '解决' },
-            { text: '理解TA可能也吓到了，但决定观察下次类似情况TA会不会改变', scores: { secure: 2 }, reaction: '接纳' }
+            { text: '事后越想越委屈，忍不住质问TA：你为什么不帮我？', scores: { anxiety: 2 } },
+            { text: '当时没说什么，但心里很失望，之后遇事再也不指望TA', scores: { avoidance: 2 } },
+            { text: '事后认真和TA聊，说清你对“站在同一阵线”的期待', scores: { guide: 2 } },
+            { text: '当场先把事情解决，事后平静表达自己的失落，不指责', scores: { secure: 2 } }
         ]
     },
     {
@@ -1556,10 +1532,10 @@ const stressQuestions = [
         scenario: 'TA在朋友聚会上当众开了一个你觉得很冒犯的玩笑（涉及你的外貌/家人），你脸色变了，TA却说「你怎么这么开不起玩笑」。',
         weight: 2,
         options: [
-            { text: '当场忍住不发作，回家后追问TA"你心里是不是真的这么想"', scores: { anxiety: 2 }, reaction: '追击' },
-            { text: '笑一下翻篇但心里很膈应，以后聚会不再和TA朋友同去', scores: { avoidance: 2 }, reaction: '逃离' },
-            { text: '当场说"这个玩笑不太好笑"，事后和TA认真聊「有些底线不能碰」', scores: { guide: 2 }, reaction: '治理' },
-            { text: '私下告诉TA「那句话让我不舒服」，但不过度解读，看TA以后是否注意', scores: { secure: 2 }, reaction: '等待' }
+            { text: '当场忍住不发作，回家后追问TA"你心里是不是真的这么想"', scores: { anxiety: 2 } , reaction: '恐慌' },
+            { text: '笑一下翻篇但心里很膈应，以后聚会不再和TA去，甚至考虑分手', scores: { avoidance: 2 } , reaction: '后撤' },
+            { text: '当场说"这个玩笑不太好笑"，事后和TA认真聊「有些底线不能碰」', scores: { guide: 2 } , reaction: '治理' },
+            { text: '私下告诉TA「那句话让我不舒服」，但不过度解读，看TA以后是否注意', scores: { secure: 2 } , reaction: '等待' }
         ]
     },
     {
@@ -1568,21 +1544,22 @@ const stressQuestions = [
         scenario: '你们计划买房，但对方突然说家里要用钱，首付要推迟。',
         weight: 2,
         options: [
-            { text: '很焦虑，开始担心TA是不是不想结婚了', scores: { anxiety: 2 }, reaction: '恐慌' },
-            { text: '心里很失望，但什么也不说，开始认真考虑分开', scores: { avoidance: 2 }, reaction: '后撤' },
-            { text: '一起商量「那我们重新制定一个计划」', scores: { guide: 2 }, reaction: '破局' },
-            { text: '理解对方，一起面对问题，家人才是最重要的', scores: { secure: 2 }, reaction: '共担' }
+            { text: '很焦虑，开始担心TA是不是不想结婚了', scores: { anxiety: 2 } , reaction: '崩溃' },
+            { text: '心里很失望，但什么也不说，开始认真考虑分开', scores: { avoidance: 2 } , reaction: '逃离' },
+            { text: '一起商量「那我们重新制定一个计划」', scores: { guide: 2 } , reaction: '破局' },
+            { text: '理解对方，一起面对问题，家人才是最重要的', scores: { secure: 2 } , reaction: '自洽' }
         ]
     },
     {
-        id: 'external_2', category: '外部压力',
-        scenario: '因为工作调动，你们要异地至少1年，对方说「要不我们先分开吧」。',
+        id: 'external_2',
+        category: '外部压力',
+        scenario: '对方突然失业，状态低迷，和你说「我现在什么都给不了你，不想耽误你」。你的第一反应是？',
         weight: 2,
         options: [
-            { text: '完全不能接受，苦苦哀求TA不要离开', scores: { anxiety: 2 }, reaction: '顺从' },
-            { text: '答应对方，然后立刻开始疏远', scores: { avoidance: 2 }, reaction: '隔离' },
-            { text: '提议「我们可以试试，给彼此3个月时间」', scores: { guide: 2 }, reaction: '协商' },
-            { text: '尊重对方的选择，但也表达自己的感受', scores: { secure: 2 }, reaction: '坚守' }
+            { text: '心里一下慌了，忍不住反复确认：你是不是不想要我了？', scores: { anxiety: 2 } },
+            { text: '嘴上说着没关系，心里却悄悄降低期待，不再规划未来', scores: { avoidance: 2 } },
+            { text: '先陪TA吃顿饭、聊聊天，等TA缓过来再聊工作的事', scores: { guide: 2 } },
+            { text: '先好好安抚对方情绪，告诉TA我愿意一直陪着你', scores: { secure: 2 } }
         ]
     },
     {
@@ -1590,10 +1567,10 @@ const stressQuestions = [
         scenario: '你想结婚，但对方总说「再等等」「我还没准备好」。',
         weight: 2,
         options: [
-            { text: '开始怀疑TA是不是真的想和你在一起', scores: { anxiety: 2 }, reaction: '恐慌' },
-            { text: '觉得被耽误了，开始物色其他选择', scores: { avoidance: 2 }, reaction: '逃离' },
-            { text: '认真聊聊「结婚对你意味着什么，我们的差距在哪里」', scores: { guide: 2 }, reaction: '推进' },
-            { text: '给彼此一点时间，理解结婚需要勇气', scores: { secure: 2 }, reaction: '等待' }
+            { text: '开始怀疑TA是不是真的想和你在一起', scores: { anxiety: 2 } , reaction: '追击' },
+            { text: '觉得被耽误了，开始物色其他选择', scores: { avoidance: 2 } , reaction: '隔离' },
+            { text: '认真聊聊「结婚对你意味着什么，我们的差距在哪里」', scores: { guide: 2 } , reaction: '推进' },
+            { text: '给彼此一点时间，理解结婚需要勇气', scores: { secure: 2 } , reaction: '共担' }
         ]
     },
     {
@@ -1601,10 +1578,10 @@ const stressQuestions = [
         scenario: '第一次去对方家吃饭，TA父母对你很冷淡，TA也没帮你说话。',
         weight: 2,
         options: [
-            { text: '回家后很委屈，觉得TA不够爱你', scores: { anxiety: 2 }, reaction: '崩溃' },
-            { text: '什么也不说，但心里开始打退堂鼓', scores: { avoidance: 2 }, reaction: '抽离' },
-            { text: '事后告诉TA「我今天有些不舒服」，一起想办法解决', scores: { guide: 2 }, reaction: '解决' },
-            { text: '理解TA夹在中间也为难，下次做得更好就可以了', scores: { secure: 2 }, reaction: '共担' }
+            { text: '回家后很委屈，觉得TA不够爱你', scores: { anxiety: 2 } , reaction: '逼迫' },
+            { text: '什么也不说，但心里开始打退堂鼓', scores: { avoidance: 2 } , reaction: '抽离' },
+            { text: '事后告诉TA「我今天有些不舒服」，一起想办法解决', scores: { guide: 2 } , reaction: '索取' },
+            { text: '理解TA夹在中间也为难，下次做得更好就可以了', scores: { secure: 2 } , reaction: '平衡' }
         ]
     },
     {
@@ -1612,89 +1589,123 @@ const stressQuestions = [
         scenario: '你们开始同居，但生活习惯差异很大，TA总嫌你这嫌你那。',
         weight: 2,
         options: [
-            { text: '每天都很焦虑，觉得自己什么都做不好', scores: { anxiety: 2 }, reaction: '恐慌' },
-            { text: '后悔同居，想搬出去冷静一下', scores: { avoidance: 2 }, reaction: '冻结' },
-            { text: '一起制定「同居公约」，明确分工', scores: { guide: 2 }, reaction: '治理' },
-            { text: '找个时间好好聊聊彼此的底线', scores: { secure: 2 }, reaction: '平衡' }
+            { text: '每天都很焦虑，觉得自己什么都做不好', scores: { anxiety: 2 } , reaction: '对抗' },
+            { text: '后悔同居，想搬出去冷静一下', scores: { avoidance: 2 } , reaction: '冻结' },
+            { text: '一起制定「同居公约」，明确分工', scores: { guide: 2 } , reaction: '解决' },
+            { text: '找个时间好好聊聊彼此的底线', scores: { secure: 2 } , reaction: '接纳' }
         ]
     },
     {
-        id: 'conflict_1', category: '冲突处理',
-        scenario: '你们大吵一架，TA已经整整一周没理你了。',
+        id: 'conflict_1',
+        category: '冲突处理',
+        scenario: '争吵时对方情绪上头，说话很重、完全不顾及你的感受。',
         weight: 2,
         options: [
-            { text: '不停给TA发消息道歉，害怕失去TA', scores: { anxiety: 2 }, reaction: '追击' },
-            { text: '也不理TA，谁先理谁谁就输了', scores: { avoidance: 2 }, reaction: '对抗冷' },
-            { text: '认真写一封信或发长文，表达自己的感受和想法', scores: { guide: 2 }, reaction: '破局' },
-            { text: '给彼此一点冷静时间，但也告诉TA「我等你」', scores: { secure: 2 }, reaction: '等待' }
+            { text: '又气又委屈，赌气和他较真，但心里又很不安，害怕影响彼此感情', scores: { anxiety: 2 }, reaction: '恐慌' },
+            { text: '不想争执争辩，默默沉默忍下来，心里慢慢开始失望扣分', scores: { avoidance: 2 }, reaction: '后撤' },
+            { text: '等双方情绪平复，认真和对方约定吵架不伤人的底线', scores: { guide: 2 }, reaction: '治理' },
+            { text: '当下先不硬碰硬，稳住自己情绪，不往心里过度内耗', scores: { secure: 2 }, reaction: '等待' }
         ]
     },
     {
         id: 'conflict_2', category: '冲突处理',
         scenario: '吵架时对方总翻旧账「你上次也这样」「你从来都不改」。',
         weight: 2,
-        options: [
-            { text: '觉得很委屈，你明明已经改了很多', scores: { anxiety: 2 }, reaction: '崩溃' },
-            { text: '更生气，翻更多旧账回去', scores: { avoidance: 2 }, reaction: '对抗' },
-            { text: '说「我们今天只聊这件事，其他的以后再说」', scores: { guide: 2 }, reaction: '解决' },
-            { text: '等TA情绪稳定了，再好好沟通', scores: { secure: 2 }, reaction: '平衡' }
-        ]
+        options: [ { text: '心里又委屈又难受，很怕被全盘否定，情绪一下子就崩了', scores: { anxiety: 2 }, reaction: '崩溃' },
+        { text: '不想继续争辩拉扯，干脆沉默不想说话，只想尽快结束争吵', scores: { avoidance: 2 }, reaction: '逃离' },
+        { text: '温和打断，跟对方约定：只聊当下这件事，不扯过往旧账', scores: { guide: 2 }, reaction: '破局' },
+        { text: '先不跟着情绪对抗，等对方平复下来再好好理性沟通', scores: { secure: 2 }, reaction: '自洽' }
+    ]
     }
 ];
 
-// ==================== 压力测试动态文案规则 ====================
+// ==================== 压力测试动态文案规则（v2）====================
+//   priority: 越大越优先匹配，命中即终止
+//   统一倍率：>1.3 显著放大 | >0.9 基本持平/增强
+//   相对阈值：用个人四维均值 avg 替代固定 >5/>8/>10
 const stressDynamicInterpretations = [
     {
         id: 'rule_8',
-        condition: (daily, stress) => daily.anxiety > 5 && daily.avoidance > 5 && 
-                                  stress.anxiety > daily.anxiety * 1.5 && 
-                                  stress.avoidance > daily.avoidance * 1.5,
+        priority: 10,
+        condition: (daily, stress, avg) =>
+            daily.anxiety > avg * 0.7 && daily.avoidance > avg * 0.7 &&
+            stress.anxiety > daily.anxiety * 1.3 &&
+            stress.avoidance > daily.avoidance * 1.3,
         title: "「全面失控」型",
         text: "你在压力下会同时启动焦虑和回避——心里急得要死，表面却冷漠得要死。这种矛盾会让伴侣很困惑：「TA到底在不在乎？」——你在乎，太在乎了，只是你不知道该怎么表达。"
     },
     {
-        id: 'rule_1',
-        condition: (daily, stress) => daily.secure > 10 && stress.anxiety > daily.anxiety * 2,
-        title: "平静湖面下的暗涌",
-        text: "你平时给人很稳的印象，但压力下会突然变得敏感多疑。伴侣可能会困惑：「TA平时不这样啊？」——这不是伪装，是你的应激保护机制启动了。"
-    },
-    {
         id: 'rule_4',
-        condition: (daily, stress) => daily.anxiety > 8 && stress.anxiety > daily.anxiety * 1.5,
+        priority: 8,
+        condition: (daily, stress, avg) =>
+            daily.anxiety > avg * 0.7 &&
+            stress.anxiety > daily.anxiety * 1.3,
         title: "压力下的「情绪放大器」",
         text: "你的焦虑在压力下会指数级放大。平时的小不安会变成大恐慌。建议提前和伴侣约定「安全词」，当你开始过度反应时，TA可以温柔提醒。"
     },
     {
         id: 'rule_2',
-        condition: (daily, stress) => daily.avoidance > 8 && stress.avoidance > daily.avoidance * 1.5,
+        priority: 7,
+        condition: (daily, stress, avg) =>
+            daily.avoidance > avg * 0.7 &&
+            stress.avoidance > daily.avoidance * 1.3,
         title: "压力下的「断联专家」",
         text: "你越难受，越会消失。这不是不爱，是你的生存本能。但伴侣会解读为冷暴力。你需要提前告诉对方：「我消失时，不是在惩罚你，是在恢复自己。」"
     },
     {
-        id: 'rule_6',
-        condition: (daily, stress) => daily.secure > 10 && stress.guide > daily.guide * 1.5,
-        title: "「指挥官模式」启动",
-        text: "平时温和的你，压力下会变成「行动派」——立刻解决问题，制定方案。这种能力让人安心，但要注意：不是所有人都想在危机中被「带领」，有些人只想被「拥抱」。"
+        id: 'rule_guide',
+        priority: 6,
+        condition: (daily, stress, avg) =>
+            daily.guide > avg * 0.7 &&
+            stress.guide > daily.guide * 1.1,
+        title: "压力下更强主导",
+        text: "你在压力下不但不退缩，反而更主动。这种「危机指挥官」能力让人安心，但要注意：不是所有人都想在危机中被「带领」，有些人只想被「拥抱」。"
     },
     {
-        id: 'rule_3',
-        condition: (daily, stress) => daily.guide > 8 && stress.guide > daily.guide * 0.8,
-        title: "危机中的「定海神针」",
-        text: "压力越大你越清醒，这是罕见的能力。但要注意——不是所有人都想在危机中被「带领」，有些人只想被「拥抱」。"
+        id: 'rule_1',
+        priority: 5,
+        condition: (daily, stress, avg) =>
+            daily.secure > avg * 1.0 &&
+            stress.anxiety > daily.anxiety * 1.3,
+        title: "平静湖面下的暗涌",
+        text: "你平时给人很稳的印象，但压力下会突然变得敏感多疑。伴侣可能会困惑：「TA平时不这样啊？」——这不是伪装，是你的应激保护机制启动了。"
     },
     {
         id: 'rule_5',
-        condition: (daily, stress) => daily.secure > 10 && stress.secure > daily.secure * 0.8,
+        priority: 4,
+        condition: (daily, stress, avg) =>
+            daily.secure > avg * 0.7 &&
+            stress.secure > daily.secure * 0.9,
         title: "「稳如泰山」型",
         text: "无论日常还是压力，你都能保持稳定的情绪输出。这是极其稀缺的品质。你的伴侣很幸运，但别忘了——你也需要被照顾。"
     },
     {
         id: 'rule_7',
-        condition: (daily, stress) => true,
+        priority: 1,
+        condition: () => true,
         title: "「内外一致」型",
         text: "你在日常和压力下的表现相对一致，这说明你对自己很接纳。无论表现如何，这都是真实的你——继续保持这份真实就好。"
     }
 ];
+
+// ==================== 压力场景描述映射 ====================
+const stressWeakScenarioDescriptions = {
+    '信任危机': '在涉及忠诚、隐瞒和边界试探的场景中，你的安全感容易受到冲击，需要更多的确定性',
+    '边界冲突': '当自我空间受到挤压时，你的防御机制容易被激活，需要设定清晰的边界信号',
+    '情感落差': '在期待与回应不对等的情境中，你的情绪波动较大，需要管理即时期待',
+    '冲突处理': '面对正面冲突时，你的原始反应模式容易出现，需要多一些情绪缓冲',
+    '外部压力': '当外界因素（家庭、经济、社交）介入关系时，你的应对资源容易分散，需要聚焦两人关系',
+    '关系升级': '在涉及未来规划、承诺的压力场景中，你的安全感容易波动，需要提前沟通想法'
+};
+
+const stressStrongScenarioDescriptions = {
+    '信任危机': '在涉及忠诚、隐瞒和边界试探的场景中，你能保持相对稳定的状态，可以信任自己的判断',
+    '边界冲突': '当自我空间受到挤压时，你的应对能力相对稳定，可以冷静处理边界问题',
+    '情感落差': '在期待与回应不对等的情境中，你的情绪波动较小，可以拉长观察周期',
+    '冲突处理': '面对正面冲突时，你的反应模式相对稳定，可以先稳住自己再沟通',
+    '外部压力': '当外界因素（家庭、经济、社交）介入关系时，你的应对能力相对稳定，可以聚焦两人关系',
+    '关系升级': '在涉及未来规划、承诺的压力场景中，你的状态相对稳定，可以给彼此多一些时间'
+};
 
 // ==================== 压力测试核心算法 ====================
 function calculateStressPattern(answers, dailyScores) {
@@ -1727,11 +1738,17 @@ function calculateStressPattern(answers, dailyScores) {
         }
     });
     
-    // 计算压力放大系数
+    // 计算压力放大倍数（直接用总分对比，更直观）
+    const questionCount = answers.length || 1;
     const amplification = {};
     Object.keys(scores).forEach(key => {
-        const daily = dailyScores?.[key] || 5;
-        amplification[key] = ((scores[key] - daily) / (daily || 1));
+        const daily = dailyScores?.[key] || 1;
+        const stressTotal = scores[key];
+        const dailyTotal = daily;
+        // 计算真实倍数：如果日常是1，压力是4 → ×4.0
+        amplification[key] = dailyTotal > 0 
+            ? stressTotal / dailyTotal 
+            : (stressTotal > 0 ? 1 : 0);
     });
     
     // 识别最弱/最强场景
@@ -2548,7 +2565,7 @@ function initApp() {
         const stressDailyScores = ref(null);
         const stressShowPrompt = ref(false);
         let stressTimer = null;
-        
+
         let radarChartInstance = null;
         let radarObserver = null;
         let toastTimer = null;
@@ -2820,20 +2837,21 @@ function initApp() {
             if (idx >= 0) {
                 stressSelectedCategories.value.splice(idx, 1);
             } else {
-                if (stressSelectedCategories.value.length < 4) {
-                    stressSelectedCategories.value.push(cat);
-                }
+                stressSelectedCategories.value.push(cat);
             }
         };
         
         // 开始压力测试
         const startStressTest = () => {
-            if (!finalScores.value) {
-                showToast('请先完成日常测试');
-                stressShowPrompt.value = true;
+            if (stressSelectedCategories.value.length < 3) {
+                showToast('请最少选择 3 个压力场景');
                 return;
             }
-            stressDailyScores.value = { ...finalScores.value };
+            if (!finalScores.value) {
+                showToast('未检测到日常测试数据，压力测试将无法对比日常表现');
+            } else {
+                stressDailyScores.value = { ...finalScores.value };
+            }
             stressView.value = 'quiz';
             stressCurrentIndex.value = 0;
             stressSelectedIdx.value = -1;
@@ -2865,61 +2883,104 @@ function initApp() {
                 generateStressResult();
             }
         };
+
+        // 压力测试上一题
+        const prevStressQuestion = () => {
+            if (stressCurrentIndex.value === 0) return;
+            
+            // 移除当前题的答案
+            if (stressAnswers.value.length > 0) {
+                stressAnswers.value.pop();
+            }
+            
+            stressCurrentIndex.value--;
+            
+            // 恢复上一题的选项
+            if (stressAnswers.value.length > 0) {
+                const prevAnswer = stressAnswers.value[stressCurrentIndex.value];
+                if (prevAnswer) {
+                    stressSelectedIdx.value = prevAnswer.optionIndex;
+                }
+            } else {
+                stressSelectedIdx.value = -1;
+            }
+        };
         
         // 生成压力测试结果
         const generateStressResult = () => {
             isLoading.value = true;
             
             setTimeout(() => {
-                const pattern = calculateStressPattern(stressAnswers.value, stressDailyScores.value);
-                let interpretation = null;
-                
-                // 匹配动态文案
-                for (const rule of stressDynamicInterpretations) {
-                    if (rule.condition(stressDailyScores.value, pattern.scores)) {
-                        interpretation = { title: rule.title, text: rule.text };
-                        break;
+                try {
+                    const dailyScores = stressDailyScores.value || { anxiety: 5, avoidance: 5, secure: 5, guide: 5 };
+                    const pattern = calculateStressPattern(stressAnswers.value, stressDailyScores.value);
+                    let interpretation = null;
+                    
+                    // 匹配动态文案（按优先级从高到低，命中即终止）
+                    const sortedRules = [...stressDynamicInterpretations].sort((a, b) => (b.priority || 1) - (a.priority || 1));
+                    const avg = (dailyScores.anxiety + dailyScores.avoidance + dailyScores.secure + dailyScores.guide) / 4;
+                    for (const rule of sortedRules) {
+                        if (rule.condition(dailyScores, pattern.scores, avg)) {
+                            interpretation = { title: rule.title, text: rule.text };
+                            break;
+                        }
                     }
+                    
+                    stressResult.value = {
+                        ...pattern,
+                        interpretation
+                    };
+                    stressFinalScores.value = pattern.scores;
+                    stressView.value = 'result';
+                    
+                    // 保存到历史记录
+                    saveStressHistory();
+                } catch (e) {
+                    console.error('压力测试生成失败:', e);
+                    showToast('报告生成异常，请重试');
                 }
-                
-                stressResult.value = {
-                    ...pattern,
-                    interpretation
-                };
-                stressFinalScores.value = pattern.scores;
-                stressView.value = 'result';
                 isLoading.value = false;
-                
-                // 保存到历史记录
-                saveStressHistory();
             }, 1500);
         };
         
         // 保存压力测试历史
         const saveStressHistory = () => {
-            const record = {
-                id: 'stress_' + Date.now(),
-                timestamp: Date.now(),
-                type: 'stress',
-                dailyScores: { ...stressDailyScores.value },
-                stressScores: { ...stressFinalScores.value },
-                amplification: { ...stressResult.value.amplification },
-                reactionCounts: { ...stressResult.value.reactions },
-                weakScenarios: [...(stressResult.value.weakScenarios || [])],
-                strongScenarios: [...(stressResult.value.strongScenarios || [])],
-                selectedCategories: [...stressSelectedCategories.value],
-                interpretation: stressResult.value.interpretation ? { ...stressResult.value.interpretation } : null,
-                answers: [...stressAnswers.value]
-            };
-            
-            history.value.unshift(record);
-            safeStorageSet(STORAGE_KEYS.history, history.value);
+            try {
+                const record = {
+                    id: 'stress_' + Date.now(),
+                    timestamp: Date.now(),
+                    type: 'stress',
+                    dailyScores: stressDailyScores.value ? { ...stressDailyScores.value } : null,
+                    stressScores: stressFinalScores.value ? { ...stressFinalScores.value } : null,
+                    amplification: stressResult.value && stressResult.value.amplification ? { ...stressResult.value.amplification } : null,
+                    weakScenarios: [...(stressResult.value && stressResult.value.weakScenarios || [])],
+                    strongScenarios: [...(stressResult.value && stressResult.value.strongScenarios || [])],
+                    selectedCategories: [...stressSelectedCategories.value],
+                    interpretation: stressResult.value && stressResult.value.interpretation ? { ...stressResult.value.interpretation } : null,
+                    answers: [...stressAnswers.value]
+                };
+                
+                history.value.unshift(record);
+                safeStorageSet(STORAGE_KEYS.history, history.value);
+            } catch (e) {
+                console.error('保存压力测试历史失败:', e);
+            }
         };
         
         // 开始压力测试页面
         const startStressTestPage = () => {
-            stressView.value = 'select';
+            // 检查是否完成日常测试
+            if (!finalScores.value || !finalScores.value.secure) {
+                stressShowPrompt.value = true;
+            } else {
+                stressView.value = 'select';
+                stressShowPrompt.value = false;
+            }
+        };
+        
+        const goToDailyTest = () => {
             stressShowPrompt.value = false;
+            startTest();
         };
 
         // 重置压力测试
@@ -2933,8 +2994,8 @@ function initApp() {
             stressResult.value = null;
             stressDailyScores.value = null;
         };
-        
-        // 获取反应类型的颜色
+
+        // 获取反应类型的颜色（内部使用）
         const getReactionColor = (reaction) => {
             const anxietyReactions = ['对抗', '追击', '崩溃', '恐慌', '逼迫', '顺从'];
             const avoidanceReactions = ['冻结', '逃离', '隔离', '抽离', '后撤', '对抗冷'];
@@ -3372,12 +3433,44 @@ function initApp() {
             if (radarChartInstance) radarChartInstance.dispose();
         }
 
+        function goHome() {
+            currentView.value = 'home';
+        }
+
+        function goToStressTest() {
+            if (finalScores.value) {
+                stressDailyScores.value = { ...finalScores.value };
+            }
+            currentView.value = 'home';
+            stressView.value = 'select';
+        }
+
         function clearHistory() {
             history.value = [];
             [STORAGE_KEYS.TEST_HISTORY, STORAGE_KEYS.LOVE_TEST_HISTORY, STORAGE_KEYS.LOVE_TEST_RESULT].forEach(key => {
                 try { localStorage.removeItem(key); } catch(e) { /* ignore */ }
             });
             showToast('历史记录已清空');
+        }
+
+        // 压力结果展示辅助函数
+        function getChangeLabel(mult) {
+            if (mult > 1.1) return '×' + mult.toFixed(1);
+            if (mult < 0.9) return '×' + mult.toFixed(1);
+            return '×1.0';
+        }
+        function getMultiplierLabel(mult) {
+            return '×' + mult.toFixed(1);
+        }
+        function getChangeColor(mult, dimColor) {
+            if (mult >= 1.2) return '#ee5a5a';
+            if (mult <= 0.8) return '#98d2c0';
+            if (Math.abs(mult - 1) < 0.1) return '#52c41a';
+            return dimColor || '#999';
+        }
+        function getDimScoreStyle(mult) {
+            if (Math.abs(mult - 1) < 0.1) return 'border:2px solid #52c41a; border-radius:6px;';
+            return '';
         }
 
         onMounted(function() {
@@ -3412,17 +3505,18 @@ function initApp() {
                     currentView, currentIndex, selectedIdx, questions, bonusQuestion, currentQuestion, isBonusQuestion, totalSteps,
                     answers, finalScores, resultType,
                     gender, showDetail, detailTab, toastMsg, history, dailyTip, floatingHearts, scoreDimensions,
-                    genderAdviceText, testDuration, formatScore, secondaryType, labelResult, bonusResult, trackingHistoryId, isHistoryView, formatDuration, getScoreLevel, getHeaderStyle, getMbtiSectionStyle, formatBlindspot,
+                    genderAdviceText, testDuration, formatScore, formatNumber, secondaryType, labelResult, bonusResult, trackingHistoryId, isHistoryView, formatDuration, getScoreLevel, getHeaderStyle, getMbtiSectionStyle, formatBlindspot,
                     estimatedTimeLeft, isLoading, personalizedInterpretation, tensionAnalysis, showAbandonConfirm,
-                    startTest, confirmGender, goBack, selectOption, nextQuestion, retest, shareResult,
+                    startTest, confirmGender, goBack, selectOption, nextQuestion, retest, goHome, goToStressTest, shareResult,
                     generatePoster, typeDetails, formatDate, loadHistoryById, deleteHistoryById, clearHistory, abandonTest, confirmAbandon, cancelAbandon,
                     
                     // 压力测试
                     stressView, stressSelectedCategories, stressCurrentIndex, stressSelectedIdx, stressAnswers, 
-                    stressFinalScores, stressResult, stressDailyScores, stressShowPrompt,
+                    stressFinalScores, stressResult, stressDailyScores,
                     stressCategories, stressCurrentQuestions,
-                    toggleStressCategory, startStressTest, selectStressOption, nextStressQuestion,
-                    resetStressTest, getReactionColor, startStressTestPage
+                    toggleStressCategory, startStressTest, selectStressOption, nextStressQuestion, prevStressQuestion,
+                    resetStressTest, startStressTestPage, stressShowPrompt, goToDailyTest, goToStressTest,
+                    getChangeLabel, getMultiplierLabel, getChangeColor, getDimScoreStyle, stressWeakScenarioDescriptions, stressStrongScenarioDescriptions
                 };
     },
     template: `
@@ -3436,7 +3530,7 @@ function initApp() {
 
             <!-- 放弃确认对话框 -->
             <transition name="fade">
-                <div v-if="showAbandonConfirm" class="loading-overlay" style="background: rgba(0,0,0,0.5);">
+                <div v-if="showAbandonConfirm" class="loading-overlay" style="background: rgba(0,0,0,0.5); padding-top: 8vh;">
                     <div class="card" style="max-width:320px; margin:20px; animation: popIn 0.2s ease-out;">
                         <div style="text-align:center; padding:10px 0 20px;">
                             <div style="font-size:48px; margin-bottom:10px;">💔</div>
@@ -3451,6 +3545,24 @@ function initApp() {
                 </div>
             </transition>
 
+            <!-- 日常测试提醒对话框 -->
+            <transition name="fade">
+                <div v-if="stressShowPrompt" class="loading-overlay" style="background: rgba(0,0,0,0.5); padding-top: 8vh;">
+                    <div class="card" style="max-width:340px; margin:20px; animation: popIn 0.2s ease-out;">
+                        <div style="text-align:center; padding:10px 0 20px;">
+                            <div style="font-size:56px; margin-bottom:12px;">💡</div>
+                            <h3 style="margin:0 0 8px; color:#5b4c44;">先完成日常测试哦~</h3>
+                            <p style="color:#888; font-size:14px; line-height:1.6; margin:0 0 12px;">压力测试需要结合日常测试的结果，才能为你生成更精准的「日常 vs 压力」对比报告！</p>
+                            <p style="color:#666; font-size:13px; background:#fff5f0; border-radius:10px; padding:12px; margin:0;">完成日常测试只需 3 分钟，很快哒 🥰</p>
+                        </div>
+                        <div class="btn-group">
+                            <button class="secondary" @click="stressShowPrompt = false"><i class="fa fa-close"></i> 稍后再说</button>
+                            <button style="background: linear-gradient(135deg, var(--primary), #ff6b6b);" @click="goToDailyTest"><i class="fa fa-rocket"></i> 立即开始</button>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
             <!-- ==================== 压力测试视图 ==================== -->
             <!-- 压力测试场景选择 -->
             <template v-if="stressView === 'select'">
@@ -3460,8 +3572,8 @@ function initApp() {
                 </div>
                 <div class="card">
                     <div style="margin-bottom:16px;">
-                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:8px;">选择场景分类（可多选）</div>
-                        <div style="color:#999; font-size:13px;">选择你感兴趣的场景，了解你在压力下的反应模式</div>
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:8px;">选择场景分类（最少选 3 个）</div>
+                        <div style="color:#999; font-size:13px;">选择 3 个或更多你感兴趣的压力场景，获得更全面的分析</div>
                     </div>
                     
                     <div v-for="(cat, catIdx) in stressCategories" :key="catIdx" 
@@ -3471,15 +3583,10 @@ function initApp() {
                         <div class="stress-cat-count">{{ cat.questions.length }}道题</div>
                     </div>
                     
-                    <div v-if="stressShowPrompt" style="background:#fff5f0; padding:12px; border-radius:12px; margin:16px 0; font-size:13px; color:#5b4c44;">
-                        <div style="font-weight:600; margin-bottom:6px;">💡 提示</div>
-                        <div>建议先完成日常测试，压力测试会对比你在日常与压力下的表现差异~</div>
-                    </div>
-                    
                     <div class="btn-group" style="margin-top:20px;">
                         <button @click="stressView='home'" class="secondary" style="flex:1; margin-right:12px;"><i class="fa fa-arrow-left"></i> 返回</button>
-                        <button @click="startStressTest" :disabled="stressSelectedCategories.length === 0" style="flex:1; background: linear-gradient(135deg, #3b2a25, #5e3a30);">
-                            开始测试
+                        <button @click="startStressTest" :disabled="stressSelectedCategories.length < 3" style="flex:1; background: linear-gradient(135deg, #3b2a25, #5e3a30);">
+                            开始测试 ({{ stressSelectedCategories.length }}/3+)
                         </button>
                     </div>
                 </div>
@@ -3501,17 +3608,20 @@ function initApp() {
                     <div class="options-container">
                         <div v-for="(opt, optIdx) in stressCurrentQuestions[stressCurrentIndex].options" 
                              :key="optIdx" 
-                             class="option" 
+                             class="option-item" 
                              :class="{selected: stressSelectedIdx === optIdx}"
                              @click="selectStressOption(optIdx)">
-                            <span class="option-text">{{ opt.text }}</span>
-                            <span class="reaction-tag" :style="{background: getReactionColor(opt.reaction), color:'#3b2a25'}">→ {{ opt.reaction }}</span>
+                            <div class="option-prefix">{{ String.fromCharCode(65 + optIdx) }}</div>
+                            <div class="option-text">{{ opt.text }}</div>
                         </div>
                     </div>
                     
-                    <div class="btn-group">
-                        <button @click="resetStressTest" class="secondary"><i class="fa fa-home"></i> 返回首页</button>
-                        <button @click="nextStressQuestion" :disabled="stressSelectedIdx === -1">
+                    <div class="btn-group" style="gap:10px;">
+                        <button @click="resetStressTest" class="secondary" style="flex:0 0 auto;"><i class="fa fa-home"></i> 返回首页</button>
+                        <button @click="prevStressQuestion" class="secondary" :disabled="stressCurrentIndex === 0" style="flex:1;">
+                            <i class="fa fa-arrow-left"></i> 上一题
+                        </button>
+                        <button @click="nextStressQuestion" :disabled="stressSelectedIdx === -1" style="flex:1;">
                             {{ stressCurrentIndex < stressCurrentQuestions.length - 1 ? '下一题' : '生成报告' }}
                             <i class="fa fa-arrow-right"></i>
                         </button>
@@ -3534,72 +3644,91 @@ function initApp() {
                         <div class="positive-view-text">{{ stressResult.interpretation.text }}</div>
                     </div>
                     
-                    <!-- 日常 vs 压力对比 -->
-                    <div style="margin-top:16px;">
+                    <!-- 日常 vs 压力对比（简化单条带对比标记） -->
+                    <div v-if="stressDailyScores" style="margin-top:16px;">
                         <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">📊 日常 vs 压力对比</div>
                         
-                        <div v-for="dim in scoreDimensions" :key="dim.key" class="score-item">
+                        <div v-for="dim in scoreDimensions" :key="dim.key" class="score-item" :style="getDimScoreStyle(stressResult.amplification[dim.key])">
                             <div class="dim-name">{{ dim.icon }} {{ dim.label }}</div>
                             <div style="flex:1;">
-                                <div style="display:flex; justify-content: space-between; margin-bottom:4px;">
-                                    <span style="font-size:12px; color:#666;">日常：{{ formatNumber(stressDailyScores[dim.key]) }}分</span>
-                                    <span style="font-size:12px; color:#666;">压力：{{ formatNumber(stressResult.scores[dim.key]) }}分</span>
+                                <div style="display:flex; justify-content: space-between; margin-bottom:6px;">
+                                    <span style="font-size:12px; color:#666;">日常 <b>{{ formatNumber(stressDailyScores[dim.key]) }}</b>分</span>
+                                    <span v-if="stressResult.amplification" :style="{fontSize:'12px', fontWeight:'600', color: getChangeColor(stressResult.amplification[dim.key], dim.color)}">
+                                        {{ getChangeLabel(stressResult.amplification[dim.key]) }}
+                                    </span>
+                                    <span style="font-size:12px; color:#666;">压力 <b>{{ formatNumber(stressResult.scores[dim.key]) }}</b>分</span>
                                 </div>
-                                <div style="display:flex; gap:6px;">
-                                    <div style="flex:1; background:#f0e2da; border-radius:6px; overflow:hidden; height:8px;">
-                                        <div :style="{width: (stressDailyScores[dim.key] / dim.max * 100) + '%', background: dim.color, height: '100%', opacity:0.6}"></div>
+                                <div style="background:#f0e2da; border-radius:6px; overflow:hidden; height:12px; position:relative;">
+                                    <!-- 日常基线 -->
+                                    <div :style="{position:'absolute', left:0, top:0, bottom:0, width: (stressDailyScores[dim.key] / dim.max * 100) + '%', background: dim.color, opacity:0.35, borderRadius:'6px'}"></div>
+                                    <!-- 压力对比标记 -->
+                                    <div :style="{position:'absolute', left:0, top:0, bottom:0, width: (stressResult.scores[dim.key] / dim.max * 100) + '%', background: dim.color, borderRadius:'6px', display:'flex', alignItems:'center', justifyContent:'flex-end', paddingRight:'2px'}">
+                                        <span v-if="Math.abs(stressResult.amplification[dim.key] - 1) > 0.05" style="font-size:8px; color:#fff; line-height:1;">
+                                            {{ stressResult.amplification[dim.key] > 1 ? '↑' : '↓' }}
+                                        </span>
                                     </div>
-                                    <div style="flex:1; background:#f0e2da; border-radius:6px; overflow:hidden; height:8px;">
-                                        <div :style="{width: (stressResult.scores[dim.key] / dim.max * 100) + '%', background: dim.color, height: '100%'}"></div>
+                                </div>
+                                <div v-if="stressResult.scores[dim.key] === 0 && dim.key === 'secure'" style="font-size:11px; margin-top:4px; color:#999;">
+                                    💡 压力下安全得分为0，不代表你完全没有安全感——这反映的是你在压力情境中较少采用「安全型」的应对模式，是情境反应而非人格缺陷
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 压力放大倍数（标签+解释，无冗余） -->
+                    <div v-if="stressResult && stressResult.amplification" style="margin-top:16px;">
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">🔥 压力放大倍数</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            <div v-for="dim in scoreDimensions" :key="dim.key" 
+                                 :style="{display:'flex', alignItems:'center', gap:'8px', padding:'12px 16px', background:'#faf5f2', borderRadius:'12px', flex:'1 1 calc(50% - 8px)', minWidth:'160px', borderLeft:'3px solid ' + dim.color}">
+                                <span style="font-size:20px;">{{ dim.icon }}</span>
+                                <div style="flex:1;">
+                                    <div style="font-size:12px; color:#888; margin-bottom:2px;">{{ dim.label }}</div>
+                                    <div :style="{fontSize: '16px', fontWeight:'700', color: getChangeColor(stressResult.amplification[dim.key], dim.color)}">
+                                        放大 {{ getMultiplierLabel(stressResult.amplification[dim.key]) }}
                                     </div>
                                 </div>
-                                <div v-if="stressResult.amplification" style="font-size:11px; margin-top:4px; color: stressResult.amplification[dim.key] >= 0.3 ? '#ee5a5a' : (stressResult.amplification[dim.key] <= -0.2 ? '#98d2c0' : '#999');">
-                                    {{ stressResult.amplification[dim.key] >= 0.3 ? '📈 ' : (stressResult.amplification[dim.key] <= -0.2 ? '📉 ' : '') }}
-                                    变化幅度：{{ (stressResult.amplification[dim.key] * 100).toFixed(0) }}%
-                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- 压力放大系数 -->
-                    <div style="margin-top:16px;">
-                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">🔥 压力放大系数</div>
-                        <div v-for="dim in scoreDimensions" :key="dim.key" style="margin-bottom:8px;">
-                            <div style="display:flex; justify-content: space-between; font-size:13px;">
-                                <span>{{ dim.icon }} {{ dim.label }}</span>
-                                <span :style="{color: stressResult.amplification[dim.key] >= 0.3 ? '#ee5a5a' : (stressResult.amplification[dim.key] <= -0.2 ? '#98d2c0' : '#666')}">
-                                    {{ stressResult.amplification[dim.key] >= 0.3 ? '📈 ' : (stressResult.amplification[dim.key] <= -0.2 ? '📉 ' : '') }}
-                                    {{ (stressResult.amplification[dim.key] * 100).toFixed(0) }}%
-                                </span>
-                            </div>
-                            <div style="background:#f0e2da; border-radius:6px; overflow:hidden; height:8px; margin-top:4px;">
-                                <div :style="{width: (Math.min(Math.max(stressResult.amplification[dim.key] + 0.5, 0), 1) * 100) + '%', 
-                                             background: stressResult.amplification[dim.key] >= 0.3 ? '#ff6b6b' : (stressResult.amplification[dim.key] <= -0.2 ? '#98d2c0' : dim.color), 
-                                             height: '100%', transition:'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)'}"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 反应类型统计 -->
-                    <div v-if="stressResult && stressResult.reactions" style="margin-top:16px;">
-                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">⚡ 你的反应光谱</div>
-                        <div style="display:flex; flex-wrap: wrap; gap:8px;">
-                            <span v-for="(count, reaction) in stressResult.reactions" :key="reaction" 
-                                  class="reaction-tag" 
-                                  :style="{background: getReactionColor(reaction), color:'#3b2a25', padding:'8px 14px;'}">
-                                {{ reaction }} × {{ count }}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <!-- 场景预警 -->
+                    <!-- 压力薄弱/优势场景 -->
                     <div v-if="stressResult && stressResult.weakScenarios && stressResult.weakScenarios.length" style="margin-top:16px;">
-                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">⚠️ 需要注意的场景</div>
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">⚠️ 压力薄弱场景</div>
                         <div style="background:#fff5f0; padding:12px; border-radius:12px;">
-                            <div v-for="(ws, idx) in stressResult.weakScenarios" :key="idx" style="margin:4px 0; color:#5b4c44; font-size:13px;">
-                                <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ff6b6b; margin-right:8px;"></span>
-                                {{ ws }}
+                            <div v-for="(ws, idx) in stressResult.weakScenarios" :key="'w'+idx" style="margin:6px 0; color:#5b4c44; font-size:13px; line-height:1.6;">
+                                <div style="display:flex; gap:8px;">
+                                    <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ff6b6b; margin-top:6px; flex-shrink:0;"></span>
+                                    <div>
+                                        <div style="font-weight:600;">{{ ws }}</div>
+                                        <div style="font-size:12px; color:#888; margin-top:2px;">{{ stressWeakScenarioDescriptions[ws] || '在这个场景下，你的压力应对模式可能被激活，需要多一些觉察' }}</div>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                        
+                        <div v-if="stressResult.strongScenarios && stressResult.strongScenarios.length" style="margin-top:12px;">
+                            <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">💪 压力优势场景</div>
+                            <div style="background:#f0faf5; padding:12px; border-radius:12px;">
+                                <div v-for="(ss, idx) in stressResult.strongScenarios" :key="'s'+idx" style="margin:6px 0; color:#5b4c44; font-size:13px; line-height:1.6;">
+                                    <div style="display:flex; gap:8px;">
+                                        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#52c41a; margin-top:6px; flex-shrink:0;"></span>
+                                        <div>
+                                            <div style="font-weight:600;">{{ ss }}</div>
+                                            <div style="font-size:12px; color:#888; margin-top:2px;">{{ stressStrongScenarioDescriptions[ss] || '在这个场景下，你的应对模式相对稳定，可以信任自己的判断' }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 行动建议 -->
+                    <div v-if="stressResult && stressResult.interpretation" style="margin-top:16px;">
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">🎯 行动建议</div>
+                        <div style="background:linear-gradient(135deg, #fff5f0, #fff9f7); padding:14px; border-radius:12px; font-size:13px; line-height:1.8; color:#5b4c44;">
+                            <div>1. 了解自己的压力模式是改变的第一步——当你知道自己在压力下会「焦虑放大」或「回避断联」，就能提前预判并调用更健康的应对策略</div>
+                            <div style="margin-top:6px;">2. 和伴侣分享你的测试结果，让TA了解你在压力下的真实反应模式——亲密关系的韧性来自于「我看见你，我理解你」</div>
                         </div>
                     </div>
                     
@@ -3891,6 +4020,10 @@ function initApp() {
                         <button @click="shareResult"><i class="fa fa-share-alt"></i> 分享</button>
                         <button @click="generatePoster"><i class="fa fa-image"></i> 海报</button>
                         <button class="secondary" @click="retest"><i class="fa fa-refresh"></i> 重测</button>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:12px;">
+                        <button @click="goHome" class="secondary" style="flex:1"><i class="fa fa-home"></i> 返回首页</button>
+                        <button @click="goToStressTest" style="flex:1; background: linear-gradient(135deg, #3b2a25, #5e3a30); color:#fff;"><i class="fa fa-bolt"></i> 去压力测试</button>
                     </div>
                 </div>
             </template>
