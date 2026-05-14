@@ -1490,13 +1490,13 @@ const stressQuestions = [
     },
     {
         id: 'trust_2', category: '信任危机',
-        scenario: '对方说周末要加班，但你从共同朋友那里得知TA其实去参加了有异性的聚会。',
+        scenario: '催收电话打到你手机上，你才发现对方背着你欠了一大笔网贷，TA之前还一直说"钱够用"。',
         weight: 2,
         options: [
-            { text: '立刻视频/电话要求证明，感到被欺骗的愤怒', scores: { anxiety: 2 }, reaction: '恐慌' },
-            { text: '什么都不说，但心里开始疏远，考虑这段关系是否值得', scores: { avoidance: 2 }, reaction: '后撤' },
-            { text: '找个时间问TA周末具体做了什么，看TA是否会说实话', scores: { guide: 2 }, reaction: '治理' },
-            { text: '不立刻质问，但心里有数，等TA主动提起', scores: { secure: 2 }, reaction: '等待' }
+            { text: '崩溃质问，觉得天塌了，反复问TA到底瞒了多少', scores: { anxiety: 2 }, reaction: '恐慌' },
+            { text: '非常失望，立刻在心里划清经济边界，考虑是否还要继续', scores: { avoidance: 2 }, reaction: '后撤' },
+            { text: '冷静下来一起算清债务，制定还款计划，明确以后财务透明的底线', scores: { guide: 2 }, reaction: '治理' },
+            { text: '虽然震惊但愿意先了解原因，不问罪名只问怎么解决', scores: { secure: 2 }, reaction: '等待' }
         ]
     },
     {
@@ -1512,13 +1512,13 @@ const stressQuestions = [
     },
     {
         id: 'boundary_1', category: '边界冲突',
-        scenario: '你们在一起后，对方要求你删除微信里所有的异性好友，说「我就是没有安全感」。',
+        scenario: '第一次去对方家，TA父母当众挑剔你的家庭背景和工作，说"我们家孩子值得更好的"，TA全程低头不语。',
         weight: 2,
         options: [
-            { text: '一边删一边委屈，觉得对方不爱自己了', scores: { anxiety: 2 }, reaction: '顺从' },
-            { text: '觉得不可理喻，直接拒绝，冷战到底', scores: { avoidance: 2 }, reaction: '对抗冷' },
-            { text: '提议「我们可以交换看彼此的聊天记录，但不要删好友」', scores: { guide: 2 }, reaction: '协商' },
-            { text: '温和但坚定地说「我理解你，但这是我的底线」', scores: { secure: 2 }, reaction: '坚守' }
+            { text: '强忍委屈赔笑脸，事后反复问TA"你是不是也觉得我配不上你"', scores: { anxiety: 2 }, reaction: '顺从' },
+            { text: '当场冷脸，之后拒绝再去TA家，也不再和TA父母有任何接触', scores: { avoidance: 2 }, reaction: '对抗冷' },
+            { text: '礼貌回应后提前离场，事后和TA严肃沟通「你的态度比他们的意见更重要」', scores: { guide: 2 }, reaction: '协商' },
+            { text: '心里不舒服但理解TA的为难，告诉TA「下次你需要站在我这边」', scores: { secure: 2 }, reaction: '坚守' }
         ]
     },
     {
@@ -1545,44 +1545,46 @@ const stressQuestions = [
     },
     {
         id: 'intimacy_2', category: '情感落差',
-        scenario: '你们的一周年纪念日，对方完全忘了，你提醒TA后，TA只说了「哦，那我补个红包」。',
+        scenario: '你们深夜在路上遇到陌生男子纠缠，对方第一反应是松开你的手往后躲，没有护在你前面。',
         weight: 2,
         options: [
-            { text: '委屈得大哭，觉得TA不爱你了', scores: { anxiety: 2 }, reaction: '崩溃' },
-            { text: '什么也不说，但整个星期都不想理TA', scores: { avoidance: 2 }, reaction: '冻结' },
-            { text: '认真告诉TA「我在意的不是红包，是你是否记得」', scores: { guide: 2 }, reaction: '解决' },
-            { text: '理解TA可能最近忙，找个周末一起补过', scores: { secure: 2 }, reaction: '接纳' }
+            { text: '事后反复回想那个画面，追问TA"你当时是不是根本不在乎我"', scores: { anxiety: 2 }, reaction: '崩溃' },
+            { text: '什么也没说但心凉透了，之后一起出门都会下意识保持距离', scores: { avoidance: 2 }, reaction: '冻结' },
+            { text: '安全后直接告诉TA「刚才那一下，我很失望，我们需要聊聊」', scores: { guide: 2 }, reaction: '解决' },
+            { text: '理解TA可能也吓到了，但决定观察下次类似情况TA会不会改变', scores: { secure: 2 }, reaction: '接纳' }
         ]
     },
     {
         id: 'intimacy_3', category: '情感落差',
-        scenario: '刚在一起时TA很热情，现在却越来越冷淡，连消息都回得很慢。',
+        scenario: 'TA在朋友聚会上当众开了一个你觉得很冒犯的玩笑（涉及你的外貌/家人），你脸色变了，TA却说「你怎么这么开不起玩笑」。',
         weight: 2,
         options: [
-            { text: '反复问TA「你是不是不爱我了」，直到得到答案', scores: { anxiety: 2 }, reaction: '追击' },
-            { text: '也对TA冷淡，心里开始找下家', scores: { avoidance: 2 }, reaction: '逃离' },
-            { text: '找个时间认真聊聊「我们的关系怎么了」', scores: { guide: 2 }, reaction: '治理' },
-            { text: '相信感情都会归于平淡，给彼此一点空间', scores: { secure: 2 }, reaction: '等待' }
+            { text: '当场忍住不发作，回家后追问TA"你心里是不是真的这么想"', scores: { anxiety: 2 }, reaction: '追击' },
+            { text: '笑一下翻篇但心里很膈应，以后聚会不再和TA朋友同去', scores: { avoidance: 2 }, reaction: '逃离' },
+            { text: '当场说"这个玩笑不太好笑"，事后和TA认真聊「有些底线不能碰」', scores: { guide: 2 }, reaction: '治理' },
+            { text: '私下告诉TA「那句话让我不舒服」，但不过度解读，看TA以后是否注意', scores: { secure: 2 }, reaction: '等待' }
         ]
     },
     {
-        id: 'external_1', category: '外部压力',
-        scenario: '你们计划买房，但对方突然说家里要用钱，首付要推迟。',
-        weight: 2,
-        options: [
-            { text: '很焦虑，开始担心TA是不是不想结婚了', scores: { anxiety: 2 }, reaction: '恐慌' },
-            { text: '心里很失望，但什么也不说，开始认真考虑分开', scores: { avoidance: 2 }, reaction: '后撤' },
-            { text: '一起商量「那我们重新制定一个计划」', scores: { guide: 2 }, reaction: '破局' },
-            { text: '理解对方，一起面对问题，家人才是最重要的', scores: { secure: 2 }, reaction: '共担' }
-        ]
-    },
+        {
+    id: 'external_1',
+    category: '外部压力',
+    scenario: '你们计划买房，但对方突然说家里要用钱，首付要推迟。',
+    weight: 2,
+    options: [
+        { text: '特别焦虑不安，忍不住怀疑对方是不是不想和你结婚', scores: { anxiety: 2 } },
+        { text: '心里很失落，默默降低期待，悄悄为自己打算', scores: { avoidance: 2 } },
+        { text: '冷静沟通，一起商量调整计划，重新安排进度', scores: { guide: 2 } },
+        { text: '坦然接受事实，信任对方，慢慢推进就好', scores: { secure: 2 } }
+    ]
+},
     {
         id: 'external_2', category: '外部压力',
         scenario: '因为工作调动，你们要异地至少1年，对方说「要不我们先分开吧」。',
         weight: 2,
         options: [
             { text: '完全不能接受，苦苦哀求TA不要离开', scores: { anxiety: 2 }, reaction: '顺从' },
-            { text: '说好，然后立刻开始疏远', scores: { avoidance: 2 }, reaction: '隔离' },
+            { text: '答应对方，然后立刻开始疏远', scores: { avoidance: 2 }, reaction: '隔离' },
             { text: '提议「我们可以试试，给彼此3个月时间」', scores: { guide: 2 }, reaction: '协商' },
             { text: '尊重对方的选择，但也表达自己的感受', scores: { secure: 2 }, reaction: '坚守' }
         ]
@@ -1791,14 +1793,15 @@ function pollVueLoad() {
 // ==================== 题目数据 ====================
 const questions = [
     {
-    text: "做人生重要决定，你的习惯是？",
+    text: '你兴致勃勃分享一件开心事，对方反应平平且没有解释，你会？',
     options: [
-        { text: "犹豫不定，很需要别人帮我拿主意、给支撑", scores: { anxiety: 1 } },
-        { text: "独立决断，不喜欢被任何人干涉左右", scores: { avoidance: 1 } },
-        { text: "会主动参考意见，理性权衡，也愿意和伴侣沟通对齐想法", scores: { guide: 1 } },
-        { text: "自有判断，随心选择，没必要特意和谁商量磨合", scores: { secure: 1 } }
+        { text: '心情低落，觉得对方根本不在意你', scores: { anxiety: 1 } },
+        { text: '瞬间没兴致，默默收住情绪，不再多说', scores: { avoidance: 1 } },
+        { text: '能理解他状态一般，不会往心里多想', scores: { secure: 1 } },
+        { text: '温和说出感受，希望他下次能多回应你', scores: { guide: 1 } }
     ]
 },
+
     {
     text: "吵架后双方都有情绪，对方说“先冷静一下”，不想立刻沟通。你的反应是？",
     options: [
@@ -1817,7 +1820,7 @@ const questions = [
         { text: "理解每个人都有状态起伏，不胡思乱想，正常相处", scores: { secure: 1 } }
     ]
 },
-    { text: "你期待已久的周六约会，你已经准备好出门，对方突然说临时要加班，无法赴约，也没有提出改期。你通常的第一反应是？", options: [
+    { text: "你期待已久的周六约会，对方突然说临时要加班，无法赴约，也没有提出改期。你通常的第一反应是？", options: [
         { text: "闷闷不乐，忍不住猜测对方是不是不想见自己", scores: { anxiety: 1 } },
         { text: "觉得突然被打断很不舒服，不想多交流，宁愿自己安排接下来的时间，也不想主动追问", scores: { avoidance: 1 } },
         { text: "有点失落但能理解，不会胡思乱想，也不会有压力，等对方有空再商量即可", scores: { secure: 1 } },
@@ -1981,10 +1984,10 @@ const questions = [
         { text: "不会刻意刷动态试探，更倾向直接沟通来筑牢彼此信任", scores: { guide: 1 } },
         { text: "觉得没必要这样求证，内心安稳，不靠外界细节给自己定心", scores: { secure: 1 } }
     ]},
-    { text: "两人目前经济都偏紧张、手头不宽裕，对方没跟你商量，私下买了一件价格不低的私人物品。你的第一反应是？", options: [
+    { text: "婚后两人目前经济都偏紧张、手头不宽裕，对方没跟你商量，私下买了一件价格不低的私人物品。你的第一反应是？", options: [
         { text: "理解对方喜欢，但认真约定：以后贵的东西我们先商量", scores: { guide: 1 } },
         { text: "表达个人感受，说完便不再多想", scores: { secure: 1 } },
-        { text: "委屈憋闷，又怕显得小气，只能默默憋着", scores: { anxiety: 1 } },
+        { text: "忍不住反复念叨，指责他不懂节制。", scores: { anxiety: 1 } },
         { text: "心里有隔阂但不拆穿，默默划清经济边界不再多干涉", scores: { avoidance: 1 } }
     ]},
     {
@@ -2013,7 +2016,7 @@ const bonusQuestion = {
     options: [
         { text: "情绪稳定，不忽冷忽热，让我能安心做自己，不用猜", value: "A" },
         { text: "主动表达在乎，秒回消息，让我时刻感觉到被爱着、被需要", value: "B" },
-        { text: "有自己的生活，不粘人，给我足够的空间，互不干涉", value: "C" },
+        { text: "有自己的生活节奏，不过度依赖，尊重彼此的空间，", value: "C" },
         { text: "能带着关系往前走，有问题不逃避，愿意一起规划未来", value: "D" }
     ]
 };
