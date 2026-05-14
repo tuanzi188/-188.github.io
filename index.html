@@ -14,7 +14,8 @@
     <meta property="og:description" content="30道情景题测出你的恋爱人格类型">
     <meta property="og:type" content="website">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob:; img-src 'self' data: https: http: blob:; font-src 'self' https: http: data:; connect-src 'self' https: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:;">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: data: blob:; img-src 'self' data: https: blob:; font-src 'self' https: data:; connect-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; form-action 'none'; base-uri 'self'; frame-ancestors 'self'">
     <title>恋爱人格测试 - 30道情景题</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdn.bootcdn.net">
@@ -82,17 +83,23 @@
                     const url = urls[index];
                     const script = document.createElement('script');
                     script.src = url;
-                    script.async = false;
                     script.crossOrigin = 'anonymous';
                     
+                    let resolved = false;
+                    
                     const timeout = setTimeout(() => {
+                        if (resolved) return;
                         console.warn(`${libName}从${url}加载超时，尝试下一个CDN`);
+                        resolved = true;
                         script.onerror = null;
                         script.onload = null;
+                        if (script.parentNode) script.parentNode.removeChild(script);
                         loadScript(libName, index + 1).then(resolve).catch(reject);
                     }, 10000);
                     
                     script.onload = () => {
+                        if (resolved) return;
+                        resolved = true;
                         clearTimeout(timeout);
                         window.libStatus[libName] = true;
                         console.log(`${libName}从${url}加载成功`);
@@ -100,8 +107,20 @@
                     };
                     
                     script.onerror = () => {
+                        if (resolved) return;
+                        resolved = true;
                         clearTimeout(timeout);
                         console.warn(`${libName}从${url}加载失败，尝试下一个CDN`);
+                        if (script.parentNode) script.parentNode.removeChild(script);
+                        loadScript(libName, index + 1).then(resolve).catch(reject);
+                    };
+                    
+                    script.onabort = function() {
+                        if (resolved) return;
+                        resolved = true;
+                        clearTimeout(timeout);
+                        console.warn(`${libName}从${url}加载被中断`);
+                        if (script.parentNode) script.parentNode.removeChild(script);
                         loadScript(libName, index + 1).then(resolve).catch(reject);
                     };
                     
@@ -110,7 +129,7 @@
             }
             
             function loadCSS(libName, index = 0) {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve) => {
                     if (window.libStatus[libName]) {
                         resolve();
                         return;
@@ -118,7 +137,7 @@
                     
                     const urls = CDN_FALLBACKS[libName];
                     if (index >= urls.length) {
-                        console.error(`${libName} CSS加载失败`);
+                        console.error(`${libName} CSS加载失败，所有CDN都不可用`);
                         resolve(); // CSS不阻塞主功能
                         return;
                     }
@@ -127,15 +146,21 @@
                     const link = document.createElement('link');
                     link.rel = 'stylesheet';
                     link.href = url;
+                    if (index > 0) link.id = libName + '-fallback-' + index;
+                    
+                    let resolved = false;
                     
                     const timeout = setTimeout(() => {
+                        if (resolved) return;
+                        resolved = true;
                         console.warn(`${libName} CSS从${url}加载超时，尝试下一个`);
-                        link.onerror = null;
-                        link.onload = null;
+                        if (link.parentNode) link.parentNode.removeChild(link);
                         loadCSS(libName, index + 1).then(resolve);
                     }, 5000);
                     
                     link.onload = () => {
+                        if (resolved) return;
+                        resolved = true;
                         clearTimeout(timeout);
                         window.libStatus[libName] = true;
                         console.log(`${libName} CSS从${url}加载成功`);
@@ -143,17 +168,15 @@
                     };
                     
                     link.onerror = () => {
+                        if (resolved) return;
+                        resolved = true;
                         clearTimeout(timeout);
-                        console.warn(`${libName} CSS从${url}加载失败`);
+                        console.warn(`${libName} CSS从${url}加载失败，尝试下一个`);
+                        if (link.parentNode) link.parentNode.removeChild(link);
                         loadCSS(libName, index + 1).then(resolve);
                     };
                     
-                    const existingLink = document.getElementById('font-awesome-css');
-                    if (existingLink && existingLink.parentNode) {
-                        existingLink.parentNode.replaceChild(link, existingLink);
-                    } else {
-                        document.head.appendChild(link);
-                    }
+                    document.head.appendChild(link);
                 });
             }
             
@@ -162,6 +185,35 @@
             window.libLoadPromises.vue = loadScript('vue');
             window.libLoadPromises.echarts = loadScript('echarts');
             window.libLoadPromises.html2canvas = loadScript('html2canvas');
+            
+            // CDN全部失败后的重试机制 - 延迟5秒后重试整个链路
+            var cdnRetryTimer = setTimeout(function retryFailedLibs() {
+                var hasRetried = false;
+                [['vue', 'vue'], ['echarts', 'echarts'], ['html2canvas', 'html2canvas']].forEach(function(pair) {
+                    var name = pair[0];
+                    if (!window.libStatus[name]) {
+                        hasRetried = true;
+                        console.log('重试加载: ' + name);
+                        window.libLoadPromises[name] = loadScript(name).catch(function() {
+                            console.warn(name + ' 重试仍然失败，等待下次重试');
+                        });
+                    }
+                });
+                if (!window.libStatus.fontAwesome) {
+                    hasRetried = true;
+                    window.libLoadPromises.fontAwesome = loadCSS('fontAwesome');
+                }
+                if (hasRetried) {
+                    // 如果还有失败，继续重试（最多3次，每次间隔递增）
+                    var retryCount = (window._cdnRetryCount || 0) + 1;
+                    window._cdnRetryCount = retryCount;
+                    if (retryCount < 3) {
+                        setTimeout(retryFailedLibs, 10000 * retryCount);
+                    } else {
+                        console.warn('CDN资源经过多次重试仍然失败');
+                    }
+                }
+            }, 5000);
         })();
     </script>
     <style>
@@ -448,6 +500,65 @@
             50% { -webkit-transform: scale(1.01); }
             100% { -webkit-transform: scale(1); }
         }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @-webkit-keyframes popIn {
+            0% { -webkit-transform: scale(0.8); opacity: 0; }
+            50% { -webkit-transform: scale(1.05); }
+            100% { -webkit-transform: scale(1); opacity: 1; }
+        }
+        
+        /* ==================== 压力测试样式 ==================== */
+        .stress-cat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border: 2px solid #f0e2da;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fff;
+        }
+        .stress-cat-item:hover {
+            border-color: #5e3a30;
+            background: #fff9f7;
+        }
+        .stress-cat-item.selected {
+            border-color: #5e3a30;
+            background: linear-gradient(135deg, #fff5f0, #fff9f7);
+        }
+        .stress-cat-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #5b4c44;
+        }
+        .stress-cat-count {
+            font-size: 12px;
+            color: #999;
+            background: #f0e2da;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        
+        .reaction-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .option .reaction-tag {
+            margin-top: 6px;
+            font-size: 11px;
+            padding: 4px 10px;
+        }
         .option-prefix {
             font-weight: bold;
             background: #fff0e6;
@@ -469,6 +580,16 @@
             -webkit-transform: scale(1.1);
         }
         .option-text { flex: 1; font-size: 16px; color: #4a2e26; line-height: 1.4; }
+        
+        /* 压力测试选项特殊布局 */
+        .option {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .option .option-text {
+            margin-bottom: 6px;
+        }
 
         .btn-group { display: flex; margin-top: 24px; }
         .btn-group > * + * { margin-left: 12px; }
@@ -1154,7 +1275,6 @@
 <body>
 <div id="app"></div>
 
-<script src="https://cdn.bootcdn.net/ajax/libs/vue/3.3.4/vue.global.prod.js"></script>
 <script>
 // ==================== 常量定义 ====================
 const STORAGE_KEYS = {
@@ -1214,7 +1334,23 @@ function safeStorageSet(key, value) {
     try {
         localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
         return true;
-    } catch {
+    } catch (e) {
+        if (e.name === 'QuotaExceededError' || e.code === 22) {
+            console.warn('localStorage配额已满，尝试清理旧数据');
+            try {
+                var keepKeys = [STORAGE_KEYS.TEST_HISTORY, STORAGE_KEYS.LOVE_TEST_RESULT, STORAGE_KEYS.LOVE_TEST_HISTORY, STORAGE_KEYS.BONUS_ANSWER];
+                for (var i = localStorage.length - 1; i >= 0; i--) {
+                    var existingKey = localStorage.key(i);
+                    if (existingKey && keepKeys.indexOf(existingKey) === -1) {
+                        localStorage.removeItem(existingKey);
+                    }
+                }
+                localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+                return true;
+            } catch (e2) {
+                console.error('清理后仍然无法写入localStorage:', e2);
+            }
+        }
         return false;
     }
 }
@@ -1337,6 +1473,289 @@ function generateTensionAnalysis(scores) {
     }
 
     return tensions;
+}
+
+// ==================== 压力测试题库 ====================
+const stressQuestions = [
+    {
+        id: 'trust_1', category: '信任危机',
+        scenario: '你无意中发现对方手机里有和前任的聊天记录，内容正常但频率不低，对方从未提起过。',
+        weight: 2,
+        options: [
+            { text: '立刻质问，要求解释清楚，心里开始怀疑这段感情', scores: { anxiety: 2 }, reaction: '对抗' },
+            { text: '假装没看到，但心里记下，暗中观察不再信任', scores: { avoidance: 2 }, reaction: '冻结' },
+            { text: '等情绪平复后，坦诚表达感受，询问原因并约定边界', scores: { guide: 2 }, reaction: '解决' },
+            { text: '相信对方有分寸，不急于追问，等合适时机自然聊起', scores: { secure: 2 }, reaction: '接纳' }
+        ]
+    },
+    {
+        id: 'trust_2', category: '信任危机',
+        scenario: '对方说周末要加班，但你从共同朋友那里得知TA其实去参加了有异性的聚会。',
+        weight: 2,
+        options: [
+            { text: '立刻视频/电话要求证明，感到被欺骗的愤怒', scores: { anxiety: 2 }, reaction: '恐慌' },
+            { text: '什么都不说，但心里开始疏远，考虑这段关系是否值得', scores: { avoidance: 2 }, reaction: '后撤' },
+            { text: '找个时间问TA周末具体做了什么，看TA是否会说实话', scores: { guide: 2 }, reaction: '治理' },
+            { text: '不立刻质问，但心里有数，等TA主动提起', scores: { secure: 2 }, reaction: '等待' }
+        ]
+    },
+    {
+        id: 'trust_3', category: '信任危机',
+        scenario: 'TA最近频繁和某个人聊微信，手机还总对着你倒扣着，聊天记录一滑就删。',
+        weight: 2,
+        options: [
+            { text: '崩溃质问，要求看手机，不给看就分手', scores: { anxiety: 2 }, reaction: '崩溃' },
+            { text: '假装没发现，但内心已经准备好随时离开', scores: { avoidance: 2 }, reaction: '逃离' },
+            { text: '直接说「我注意到你最近有些不一样，我们聊聊吧」', scores: { guide: 2 }, reaction: '破局' },
+            { text: '选择相信，给TA空间，等TA愿意说时自然会说', scores: { secure: 2 }, reaction: '自洽' }
+        ]
+    },
+    {
+        id: 'boundary_1', category: '边界冲突',
+        scenario: '你们在一起后，对方要求你删除微信里所有的异性好友，说「我就是没有安全感」。',
+        weight: 2,
+        options: [
+            { text: '一边删一边委屈，觉得对方不爱自己了', scores: { anxiety: 2 }, reaction: '顺从' },
+            { text: '觉得不可理喻，直接拒绝，冷战到底', scores: { avoidance: 2 }, reaction: '对抗冷' },
+            { text: '提议「我们可以交换看彼此的聊天记录，但不要删好友」', scores: { guide: 2 }, reaction: '协商' },
+            { text: '温和但坚定地说「我理解你，但这是我的底线」', scores: { secure: 2 }, reaction: '坚守' }
+        ]
+    },
+    {
+        id: 'boundary_2', category: '边界冲突',
+        scenario: '对方总趁你洗澡/睡觉时翻你手机，还说是「因为爱你才想了解你」。',
+        weight: 2,
+        options: [
+            { text: '又生气又害怕，觉得自己做什么都不对', scores: { anxiety: 2 }, reaction: '逼迫' },
+            { text: '直接设置密码，不再让TA碰你手机', scores: { avoidance: 2 }, reaction: '隔离' },
+            { text: '认真谈一次「什么是隐私」，约定尊重彼此的边界', scores: { guide: 2 }, reaction: '推进' },
+            { text: '告诉TA「我没什么可隐瞒的，但这种行为让我不舒服」', scores: { secure: 2 }, reaction: '平衡' }
+        ]
+    },
+    {
+        id: 'intimacy_1', category: '情感落差',
+        scenario: '你生病发烧到39度，对方只是微信说了「多喝热水」，然后继续打游戏。',
+        weight: 2,
+        options: [
+            { text: '不停地给TA发消息，希望TA能关心你', scores: { anxiety: 2 }, reaction: '追击' },
+            { text: '心一下子凉了，什么也不想说了', scores: { avoidance: 2 }, reaction: '抽离' },
+            { text: '直接说「我现在很难受，我希望你能多陪陪我」', scores: { guide: 2 }, reaction: '索取' },
+            { text: '先照顾好自己，等病好了再聊这件事带给你的感受', scores: { secure: 2 }, reaction: '共担' }
+        ]
+    },
+    {
+        id: 'intimacy_2', category: '情感落差',
+        scenario: '你们的一周年纪念日，对方完全忘了，你提醒TA后，TA只说了「哦，那我补个红包」。',
+        weight: 2,
+        options: [
+            { text: '委屈得大哭，觉得TA不爱你了', scores: { anxiety: 2 }, reaction: '崩溃' },
+            { text: '什么也不说，但整个星期都不想理TA', scores: { avoidance: 2 }, reaction: '冻结' },
+            { text: '认真告诉TA「我在意的不是红包，是你是否记得」', scores: { guide: 2 }, reaction: '解决' },
+            { text: '理解TA可能最近忙，找个周末一起补过', scores: { secure: 2 }, reaction: '接纳' }
+        ]
+    },
+    {
+        id: 'intimacy_3', category: '情感落差',
+        scenario: '刚在一起时TA很热情，现在却越来越冷淡，连消息都回得很慢。',
+        weight: 2,
+        options: [
+            { text: '反复问TA「你是不是不爱我了」，直到得到答案', scores: { anxiety: 2 }, reaction: '追击' },
+            { text: '也对TA冷淡，心里开始找下家', scores: { avoidance: 2 }, reaction: '逃离' },
+            { text: '找个时间认真聊聊「我们的关系怎么了」', scores: { guide: 2 }, reaction: '治理' },
+            { text: '相信感情都会归于平淡，给彼此一点空间', scores: { secure: 2 }, reaction: '等待' }
+        ]
+    },
+    {
+        id: 'external_1', category: '外部压力',
+        scenario: '你们计划买房，但对方突然说家里要用钱，首付要推迟。',
+        weight: 2,
+        options: [
+            { text: '很焦虑，开始担心TA是不是不想结婚了', scores: { anxiety: 2 }, reaction: '恐慌' },
+            { text: '心里很失望，但什么也不说，开始认真考虑分开', scores: { avoidance: 2 }, reaction: '后撤' },
+            { text: '一起商量「那我们重新制定一个计划」', scores: { guide: 2 }, reaction: '破局' },
+            { text: '理解对方，一起面对问题，家人才是最重要的', scores: { secure: 2 }, reaction: '共担' }
+        ]
+    },
+    {
+        id: 'external_2', category: '外部压力',
+        scenario: '因为工作调动，你们要异地至少1年，对方说「要不我们先分开吧」。',
+        weight: 2,
+        options: [
+            { text: '完全不能接受，苦苦哀求TA不要离开', scores: { anxiety: 2 }, reaction: '顺从' },
+            { text: '说好，然后立刻开始疏远', scores: { avoidance: 2 }, reaction: '隔离' },
+            { text: '提议「我们可以试试，给彼此3个月时间」', scores: { guide: 2 }, reaction: '协商' },
+            { text: '尊重对方的选择，但也表达自己的感受', scores: { secure: 2 }, reaction: '坚守' }
+        ]
+    },
+    {
+        id: 'commitment_1', category: '关系升级',
+        scenario: '你想结婚，但对方总说「再等等」「我还没准备好」。',
+        weight: 2,
+        options: [
+            { text: '开始怀疑TA是不是真的想和你在一起', scores: { anxiety: 2 }, reaction: '恐慌' },
+            { text: '觉得被耽误了，开始物色其他选择', scores: { avoidance: 2 }, reaction: '逃离' },
+            { text: '认真聊聊「结婚对你意味着什么，我们的差距在哪里」', scores: { guide: 2 }, reaction: '推进' },
+            { text: '给彼此一点时间，理解结婚需要勇气', scores: { secure: 2 }, reaction: '等待' }
+        ]
+    },
+    {
+        id: 'commitment_2', category: '关系升级',
+        scenario: '第一次去对方家吃饭，TA父母对你很冷淡，TA也没帮你说话。',
+        weight: 2,
+        options: [
+            { text: '回家后很委屈，觉得TA不够爱你', scores: { anxiety: 2 }, reaction: '崩溃' },
+            { text: '什么也不说，但心里开始打退堂鼓', scores: { avoidance: 2 }, reaction: '抽离' },
+            { text: '事后告诉TA「我今天有些不舒服」，一起想办法解决', scores: { guide: 2 }, reaction: '解决' },
+            { text: '理解TA夹在中间也为难，下次做得更好就可以了', scores: { secure: 2 }, reaction: '共担' }
+        ]
+    },
+    {
+        id: 'commitment_3', category: '关系升级',
+        scenario: '你们开始同居，但生活习惯差异很大，TA总嫌你这嫌你那。',
+        weight: 2,
+        options: [
+            { text: '每天都很焦虑，觉得自己什么都做不好', scores: { anxiety: 2 }, reaction: '恐慌' },
+            { text: '后悔同居，想搬出去冷静一下', scores: { avoidance: 2 }, reaction: '冻结' },
+            { text: '一起制定「同居公约」，明确分工', scores: { guide: 2 }, reaction: '治理' },
+            { text: '找个时间好好聊聊彼此的底线', scores: { secure: 2 }, reaction: '平衡' }
+        ]
+    },
+    {
+        id: 'conflict_1', category: '冲突处理',
+        scenario: '你们大吵一架，TA已经整整一周没理你了。',
+        weight: 2,
+        options: [
+            { text: '不停给TA发消息道歉，害怕失去TA', scores: { anxiety: 2 }, reaction: '追击' },
+            { text: '也不理TA，谁先理谁谁就输了', scores: { avoidance: 2 }, reaction: '对抗冷' },
+            { text: '认真写一封信或发长文，表达自己的感受和想法', scores: { guide: 2 }, reaction: '破局' },
+            { text: '给彼此一点冷静时间，但也告诉TA「我等你」', scores: { secure: 2 }, reaction: '等待' }
+        ]
+    },
+    {
+        id: 'conflict_2', category: '冲突处理',
+        scenario: '吵架时对方总翻旧账「你上次也这样」「你从来都不改」。',
+        weight: 2,
+        options: [
+            { text: '觉得很委屈，你明明已经改了很多', scores: { anxiety: 2 }, reaction: '崩溃' },
+            { text: '更生气，翻更多旧账回去', scores: { avoidance: 2 }, reaction: '对抗' },
+            { text: '说「我们今天只聊这件事，其他的以后再说」', scores: { guide: 2 }, reaction: '解决' },
+            { text: '等TA情绪稳定了，再好好沟通', scores: { secure: 2 }, reaction: '平衡' }
+        ]
+    }
+];
+
+// ==================== 压力测试动态文案规则 ====================
+const stressDynamicInterpretations = [
+    {
+        id: 'rule_8',
+        condition: (daily, stress) => daily.anxiety > 5 && daily.avoidance > 5 && 
+                                  stress.anxiety > daily.anxiety * 1.5 && 
+                                  stress.avoidance > daily.avoidance * 1.5,
+        title: "「全面失控」型",
+        text: "你在压力下会同时启动焦虑和回避——心里急得要死，表面却冷漠得要死。这种矛盾会让伴侣很困惑：「TA到底在不在乎？」——你在乎，太在乎了，只是你不知道该怎么表达。"
+    },
+    {
+        id: 'rule_1',
+        condition: (daily, stress) => daily.secure > 10 && stress.anxiety > daily.anxiety * 2,
+        title: "平静湖面下的暗涌",
+        text: "你平时给人很稳的印象，但压力下会突然变得敏感多疑。伴侣可能会困惑：「TA平时不这样啊？」——这不是伪装，是你的应激保护机制启动了。"
+    },
+    {
+        id: 'rule_4',
+        condition: (daily, stress) => daily.anxiety > 8 && stress.anxiety > daily.anxiety * 1.5,
+        title: "压力下的「情绪放大器」",
+        text: "你的焦虑在压力下会指数级放大。平时的小不安会变成大恐慌。建议提前和伴侣约定「安全词」，当你开始过度反应时，TA可以温柔提醒。"
+    },
+    {
+        id: 'rule_2',
+        condition: (daily, stress) => daily.avoidance > 8 && stress.avoidance > daily.avoidance * 1.5,
+        title: "压力下的「断联专家」",
+        text: "你越难受，越会消失。这不是不爱，是你的生存本能。但伴侣会解读为冷暴力。你需要提前告诉对方：「我消失时，不是在惩罚你，是在恢复自己。」"
+    },
+    {
+        id: 'rule_6',
+        condition: (daily, stress) => daily.secure > 10 && stress.guide > daily.guide * 1.5,
+        title: "「指挥官模式」启动",
+        text: "平时温和的你，压力下会变成「行动派」——立刻解决问题，制定方案。这种能力让人安心，但要注意：不是所有人都想在危机中被「带领」，有些人只想被「拥抱」。"
+    },
+    {
+        id: 'rule_3',
+        condition: (daily, stress) => daily.guide > 8 && stress.guide > daily.guide * 0.8,
+        title: "危机中的「定海神针」",
+        text: "压力越大你越清醒，这是罕见的能力。但要注意——不是所有人都想在危机中被「带领」，有些人只想被「拥抱」。"
+    },
+    {
+        id: 'rule_5',
+        condition: (daily, stress) => daily.secure > 10 && stress.secure > daily.secure * 0.8,
+        title: "「稳如泰山」型",
+        text: "无论日常还是压力，你都能保持稳定的情绪输出。这是极其稀缺的品质。你的伴侣很幸运，但别忘了——你也需要被照顾。"
+    },
+    {
+        id: 'rule_7',
+        condition: (daily, stress) => true,
+        title: "「内外一致」型",
+        text: "你在日常和压力下的表现相对一致，这说明你对自己很接纳。无论表现如何，这都是真实的你——继续保持这份真实就好。"
+    }
+];
+
+// ==================== 压力测试核心算法 ====================
+function calculateStressPattern(answers, dailyScores) {
+    const scores = { anxiety: 0, avoidance: 0, secure: 0, guide: 0 };
+    const reactions = {};
+    const scoresByCategory = {};
+    
+    answers.forEach((ans, idx) => {
+        const question = ans.question || stressQuestions[idx];
+        
+        // 计算分数（权重×2）
+        Object.entries(ans.scores).forEach(([key, val]) => {
+            scores[key] += val * 2;
+        });
+        
+        // 统计反应类型
+        if (ans.reaction) {
+            reactions[ans.reaction] = (reactions[ans.reaction] || 0) + 1;
+        }
+        
+        // 按类别统计
+        if (question && question.category) {
+            if (!scoresByCategory[question.category]) {
+                scoresByCategory[question.category] = { total: 0, secure: 0, count: 0 };
+            }
+            scoresByCategory[question.category].count++;
+            Object.entries(ans.scores).forEach(([key, val]) => {
+                scoresByCategory[question.category][key] = (scoresByCategory[question.category][key] || 0) + val;
+            });
+        }
+    });
+    
+    // 计算压力放大系数
+    const amplification = {};
+    Object.keys(scores).forEach(key => {
+        const daily = dailyScores?.[key] || 5;
+        amplification[key] = ((scores[key] - daily) / (daily || 1));
+    });
+    
+    // 识别最弱/最强场景
+    const sortedCategories = Object.entries(scoresByCategory)
+        .map(([cat, data]) => ({
+            category: cat,
+            secureScore: data.secure || 0,
+            count: data.count
+        }))
+        .sort((a, b) => a.secureScore - b.secureScore);
+    
+    const weakScenarios = sortedCategories.slice(0, 2).map(s => s.category);
+    const strongScenarios = sortedCategories.slice(-2).map(s => s.category);
+    
+    return { 
+        scores, 
+        reactions, 
+        amplification, 
+        weakScenarios, 
+        strongScenarios,
+        scoresByCategory
+    };
 }
 
 // ==================== 题目数据 ====================
@@ -1546,12 +1965,16 @@ const questions = [
         { text: "内心稍有触动，但表面平静，不流露太多情绪起伏", scores: { avoidance: 1 } },
         { text: "感动之余仍患得患失，想听对方说在意你", scores: { anxiety: 1 } }
     ]},
-    { text: "你第一次跟对方父母吃饭见面，到了饭桌上长辈态度冷淡客气，全程话少。你的第一反应是？", options: [
-        { text: "不太放在心上，觉得恋爱是两个人的事，长辈态度随缘不必刻意讨好", scores: { avoidance: 1 } },
-        { text: "理解长辈拘谨陌生，主动和对方沟通，慢慢了解喜好，用心拉近彼此关系", scores: { guide: 1 } },
-        { text: "有点不自在但心态从容，知道初次相处需要磨合，顺其自然慢慢熟悉", scores: { secure: 1 } },
-        { text: "心慌没底，反复怀疑自己言行不够好", scores: { anxiety: 1 } }
-    ]},
+   {
+    
+    text: '你忙碌了一天，回到家最想做的事是？',
+    options: [
+        { text: '立刻找对方分享今天的所有小事', scores: { anxiety: 1 } },
+        { text: '想自己安静待一会儿，缓一缓再说话', scores: { avoidance: 1 } },
+        { text: '轻松休息，有心情就聊，没心情就陪在身边', scores: { secure: 1 } },
+        { text: '先关心对方，再慢慢分享自己的一天', scores: { guide: 1 } }
+    ]
+},
     { text: "如果处于异地恋状态，你会不会频繁翻看对方社交动态来获取安全感？", options: [
         { text: "经常翻看，想从点滴动态里确认自己被放在心上", scores: { anxiety: 1 } },
         { text: "基本不会，不愿过度窥探，也不想介入对方私人社交生活", scores: { avoidance: 1 } },
@@ -1987,13 +2410,23 @@ const scoreDimensions = [
         }, { passive: true });
     }
     
-    // 网络连接稳定性增强 - 监听网络状态变化
+    // 网络连接稳定性增强 - 监听网络状态变化，网络恢复时重试未加载资源
     if ('connection' in navigator) {
         try {
             const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
             if (connection) {
                 connection.addEventListener('change', function() {
-                    console.log('Network connection changed:', connection.effectiveType);
+                    if (connection.effectiveType === '4g' || connection.effectiveType === 'wifi') {
+                        console.log('Network improved, checking failed resources');
+                        ['vue', 'echarts', 'html2canvas'].forEach(function(name) {
+                            if (!window.libStatus[name] && window.libLoadPromises[name]) {
+                                console.log('Retrying ' + name + ' after network improvement');
+                                window.libLoadPromises[name] = window.libLoadPromises[name].catch(function() {
+                                    return loadScript(name);
+                                });
+                            }
+                        });
+                    }
                 });
             }
         } catch (e) {
@@ -2004,20 +2437,30 @@ const scoreDimensions = [
     // 页面可见性变化处理 - Safari在后台可能暂停资源加载
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible') {
-            console.log('Page became visible');
-            // 页面重新可见时，确保关键资源可用
+            if (!window._appStarted && !_appInitGuard && window.Vue) {
+                initApp();
+            }
         }
     });
     
     // 添加全局错误处理，捕获Safari特有的错误
     window.addEventListener('error', function(e) {
         console.error('Global error:', e.error || e.message);
-        // 可以在这里添加错误上报
+        var appEl = document.getElementById('app');
+        if (appEl && appEl.children.length === 0 && !window._appStarted) {
+            appEl.innerHTML = '<div style="padding:40px;text-align:center;color:#666;font-family:sans-serif;"><h3 style="font-size:18px;margin-bottom:12px;">页面加载异常</h3><p style="font-size:14px;color:#999;margin-bottom:20px;">请尝试刷新页面</p><button onclick="location.reload()" style="padding:12px 36px;border:none;border-radius:24px;background:#ff8a6f;color:#fff;font-size:15px;cursor:pointer;">刷新页面</button></div>';
+        }
     });
     
     window.addEventListener('unhandledrejection', function(e) {
         console.error('Unhandled promise rejection:', e.reason);
         e.preventDefault(); // 防止控制台输出不必要的警告
+        if (e.reason && e.reason.message && e.reason.message.indexOf('load') !== -1) {
+            var appEl = document.getElementById('app');
+            if (appEl && appEl.children.length === 0) {
+                appEl.innerHTML = '<div style="padding:40px;text-align:center;color:#666;font-family:sans-serif;"><h3 style="font-size:18px;margin-bottom:12px;">资源加载异常</h3><p style="font-size:14px;color:#999;margin-bottom:20px;">请检查网络连接后刷新页面</p><button onclick="location.reload()" style="padding:12px 36px;border:none;border-radius:24px;background:#ff8a6f;color:#fff;font-size:15px;cursor:pointer;">刷新页面</button></div>';
+            }
+        }
     });
     
     // 减少初始渲染优化
@@ -2029,11 +2472,17 @@ const scoreDimensions = [
 })();
 
 // 等待Vue加载完成后再初始化应用
+var _appInitGuard = false;
 function initApp() {
+    if (_appInitGuard) return;
+    
     // 检查Vue是否已加载
     if (!window.Vue) {
         if (window.libLoadPromises && window.libLoadPromises.vue) {
-            window.libLoadPromises.vue.then(initApp).catch(function() {
+            window.libLoadPromises.vue.then(function() {
+                if (!_appInitGuard) initApp();
+            }).catch(function() {
+                if (_appInitGuard) return;
                 // 如果Vue加载失败，再次尝试或提示用户
                 console.error('Vue加载失败，无法启动应用');
                 // 显示加载失败提示
@@ -2047,11 +2496,12 @@ function initApp() {
             var checkCount = 0;
             var checkVue = setInterval(function() {
                 checkCount++;
-                if (window.Vue) {
+                if (window.Vue && !_appInitGuard) {
                     clearInterval(checkVue);
                     initApp();
                 } else if (checkCount > 60) { // 等待30秒
                     clearInterval(checkVue);
+                    if (_appInitGuard) return;
                     console.error('Vue加载超时');
                     var appEl = document.getElementById('app');
                     if (appEl) {
@@ -2062,6 +2512,8 @@ function initApp() {
         }
         return;
     }
+
+    _appInitGuard = true;
 
     // Vue已加载，正常初始化应用
     const { createApp, ref, computed, onMounted, nextTick, onUnmounted } = Vue;
@@ -2084,7 +2536,22 @@ function initApp() {
         const startTestTime = ref(0);
         const testDuration = ref(0);
         const isLoading = ref(false);
+        const showAbandonConfirm = ref(false);
+        
+        // ==================== 压力测试状态 ====================
+        const stressView = ref('home'); // home / select / quiz / result
+        const stressSelectedCategories = ref([]);
+        const stressCurrentIndex = ref(0);
+        const stressSelectedIdx = ref(-1);
+        const stressAnswers = ref([]);
+        const stressFinalScores = ref(null);
+        const stressResult = ref(null);
+        const stressDailyScores = ref(null);
+        const stressShowPrompt = ref(false);
+        let stressTimer = null;
+        
         let radarChartInstance = null;
+        let radarObserver = null;
         let toastTimer = null;
 
         const dailyTip = computed(() => getDailyTip());
@@ -2328,7 +2795,159 @@ function initApp() {
             document.documentElement.scrollTop = 0;
         }
 
+        // ==================== 压力测试函数 ====================
+        
+        // 获取可选择的场景分类
+        const stressCategories = computed(() => {
+            const cats = [...new Set(stressQuestions.map(q => q.category))];
+            return cats.map(cat => ({
+                name: cat,
+                questions: stressQuestions.filter(q => q.category === cat),
+                selected: stressSelectedCategories.value.includes(cat)
+            }));
+        });
+        
+        // 获取当前压力测试题序列
+        const stressCurrentQuestions = computed(() => {
+            if (stressSelectedCategories.value.length === 0) return [];
+            return stressQuestions.filter(q => 
+                stressSelectedCategories.value.includes(q.category)
+            );
+        });
+        
+        // 切换场景分类选择
+        const toggleStressCategory = (cat) => {
+            const idx = stressSelectedCategories.value.indexOf(cat);
+            if (idx >= 0) {
+                stressSelectedCategories.value.splice(idx, 1);
+            } else {
+                if (stressSelectedCategories.value.length < 4) {
+                    stressSelectedCategories.value.push(cat);
+                }
+            }
+        };
+        
+        // 开始压力测试
+        const startStressTest = () => {
+            if (!finalScores.value) {
+                showToast('请先完成日常测试');
+                stressShowPrompt.value = true;
+                return;
+            }
+            stressDailyScores.value = { ...finalScores.value };
+            stressView.value = 'quiz';
+            stressCurrentIndex.value = 0;
+            stressSelectedIdx.value = -1;
+            stressAnswers.value = [];
+        };
+        
+        // 压力测试选择选项
+        const selectStressOption = (idx) => {
+            stressSelectedIdx.value = idx;
+        };
+        
+        // 压力测试下一题
+        const nextStressQuestion = () => {
+            if (stressSelectedIdx.value === -1) return;
+            
+            const question = stressCurrentQuestions.value[stressCurrentIndex.value];
+            stressAnswers.value.push({
+                questionId: question.id,
+                question: question,
+                scores: question.options[stressSelectedIdx.value].scores,
+                reaction: question.options[stressSelectedIdx.value].reaction,
+                optionIndex: stressSelectedIdx.value
+            });
+            
+            if (stressCurrentIndex.value < stressCurrentQuestions.value.length - 1) {
+                stressCurrentIndex.value++;
+                stressSelectedIdx.value = -1;
+            } else {
+                generateStressResult();
+            }
+        };
+        
+        // 生成压力测试结果
+        const generateStressResult = () => {
+            isLoading.value = true;
+            
+            setTimeout(() => {
+                const pattern = calculateStressPattern(stressAnswers.value, stressDailyScores.value);
+                let interpretation = null;
+                
+                // 匹配动态文案
+                for (const rule of stressDynamicInterpretations) {
+                    if (rule.condition(stressDailyScores.value, pattern.scores)) {
+                        interpretation = { title: rule.title, text: rule.text };
+                        break;
+                    }
+                }
+                
+                stressResult.value = {
+                    ...pattern,
+                    interpretation
+                };
+                stressFinalScores.value = pattern.scores;
+                stressView.value = 'result';
+                isLoading.value = false;
+                
+                // 保存到历史记录
+                saveStressHistory();
+            }, 1500);
+        };
+        
+        // 保存压力测试历史
+        const saveStressHistory = () => {
+            const record = {
+                id: 'stress_' + Date.now(),
+                timestamp: Date.now(),
+                type: 'stress',
+                dailyScores: { ...stressDailyScores.value },
+                stressScores: { ...stressFinalScores.value },
+                amplification: { ...stressResult.value.amplification },
+                reactionCounts: { ...stressResult.value.reactions },
+                weakScenarios: [...(stressResult.value.weakScenarios || [])],
+                strongScenarios: [...(stressResult.value.strongScenarios || [])],
+                selectedCategories: [...stressSelectedCategories.value],
+                interpretation: stressResult.value.interpretation ? { ...stressResult.value.interpretation } : null,
+                answers: [...stressAnswers.value]
+            };
+            
+            history.value.unshift(record);
+            safeStorageSet(STORAGE_KEYS.history, history.value);
+        };
+        
+        // 开始压力测试页面
+        const startStressTestPage = () => {
+            stressView.value = 'select';
+            stressShowPrompt.value = false;
+        };
 
+        // 重置压力测试
+        const resetStressTest = () => {
+            stressView.value = 'home';
+            stressSelectedCategories.value = [];
+            stressCurrentIndex.value = 0;
+            stressSelectedIdx.value = -1;
+            stressAnswers.value = [];
+            stressFinalScores.value = null;
+            stressResult.value = null;
+            stressDailyScores.value = null;
+        };
+        
+        // 获取反应类型的颜色
+        const getReactionColor = (reaction) => {
+            const anxietyReactions = ['对抗', '追击', '崩溃', '恐慌', '逼迫', '顺从'];
+            const avoidanceReactions = ['冻结', '逃离', '隔离', '抽离', '后撤', '对抗冷'];
+            const guideReactions = ['解决', '协商', '治理', '推进', '破局', '索取'];
+            const secureReactions = ['接纳', '坚守', '自洽', '共担', '平衡', '等待'];
+            
+            if (anxietyReactions.includes(reaction)) return '#F7C59F';
+            if (avoidanceReactions.includes(reaction)) return '#B5C9E2';
+            if (guideReactions.includes(reaction)) return '#FFA07A';
+            if (secureReactions.includes(reaction)) return '#98D2C0';
+            return '#ddd';
+        };
 
         function goBack() {
             if (currentIndex.value > 0) {
@@ -2473,13 +3092,13 @@ function initApp() {
                 if (!chartDom) return;
                 
                 if ('IntersectionObserver' in window) {
-                    const observer = new IntersectionObserver(entries => {
+                    radarObserver = new IntersectionObserver(entries => {
                         if (entries[0].isIntersecting) {
                             drawRadar();
-                            observer.disconnect();
+                            if (radarObserver) { radarObserver.disconnect(); radarObserver = null; }
                         }
                     }, { threshold: 0.3 });
-                    observer.observe(chartDom);
+                    radarObserver.observe(chartDom);
                 } else {
                     drawRadar();
                 }
@@ -2502,14 +3121,18 @@ function initApp() {
                 
                 // 尝试等待echarts加载后重新绘制
                 if (window.libLoadPromises && window.libLoadPromises.echarts) {
-                    window.libLoadPromises.echarts.then(drawRadar);
+                    window.libLoadPromises.echarts.then(function() {
+                        if (!document.getElementById('radarChart')) return;
+                        drawRadar();
+                    });
                 }
                 return;
             }
             
             try {
-                if (radarChartInstance) {
+                if (radarChartInstance && radarChartInstance.dispose) {
                     try { radarChartInstance.dispose(); } catch(e) { /* ignore */ }
+                    radarChartInstance = null;
                 }
                 radarChartInstance = echarts.init(chartDom);
                 const scores = finalScores.value;
@@ -2565,27 +3188,41 @@ function initApp() {
             const container = document.getElementById('posterContainer');
             if (!container) return;
             const detail = typeDetails[resultType.value];
+            if (!detail) {
+                showToast('海报数据不完整，请重试');
+                return;
+            }
             const scores = finalScores.value;
-            document.getElementById('posterEmoji').textContent = detail.emoji;
-            document.getElementById('posterTypeName').textContent = detail.name;
+            if (!scores) {
+                showToast('测试数据丢失，请重新测试');
+                return;
+            }
+            var posterEmoji = document.getElementById('posterEmoji');
+            var posterName = document.getElementById('posterTypeName');
+            var posterDesc = document.getElementById('posterDesc');
+            var posterScores = document.getElementById('posterScores');
+            var radarDiv = document.getElementById('posterRadar');
+            if (!posterEmoji || !posterName || !radarDiv) return;
+            
+            posterEmoji.textContent = detail.emoji || '';
+            posterName.textContent = detail.name || '';
             const labelInfo = labelResult.value;
-            if (labelInfo) {
-                const labelLine = `<div style="text-align:center; margin:4px 0;">
-                    <span style="display:inline-block; padding:2px 12px; border-radius:14px; font-size:13px; font-weight:800; letter-spacing:1px; background:${labelInfo.color || 'linear-gradient(135deg,#98D2C0,#F7C59F,#B5C9E2,#FFA07A)'}; color:#fff;">${labelInfo.code}</span>
-                    <span style="font-size:11px; color:#bbb; margin-left:6px;">${labelInfo.labelEn}</span>
-                </div>`;
-                const typeEl = document.getElementById('posterTypeName');
-                if (typeEl && typeEl.parentNode) {
-                    const labelDiv = document.createElement('div');
+            if (labelInfo && posterName.parentNode) {
+                var nextEl = posterName.nextSibling;
+                if (!nextEl || !nextEl.classList || !nextEl.classList.contains('poster-label-line')) {
+                    const labelLine = '<div class="poster-label-line" style="text-align:center; margin:4px 0;">' +
+                        '<span style="display:inline-block; padding:2px 12px; border-radius:14px; font-size:13px; font-weight:800; letter-spacing:1px; background:' + (labelInfo.color || 'linear-gradient(135deg,#98D2C0,#F7C59F,#B5C9E2,#FFA07A)') + '; color:#fff;">' + (labelInfo.code || '') + '</span>' +
+                        '<span style="font-size:11px; color:#bbb; margin-left:6px;">' + (labelInfo.labelEn || '') + '</span>' +
+                    '</div>';
+                    var labelDiv = document.createElement('div');
                     labelDiv.innerHTML = labelLine;
-                    typeEl.parentNode.insertBefore(labelDiv.firstChild, typeEl.nextSibling);
+                    posterName.parentNode.insertBefore(labelDiv.firstChild, posterName.nextSibling);
                 }
             }
-            document.getElementById('posterDesc').textContent = detail.desc;
-            document.getElementById('posterScores').innerHTML = 
-                scoreDimensions.map(d => `${d.icon} ${d.label.replace('倾向', '').replace('型', '')}: ${formatNumber(scores[d.key])}`).join(' &nbsp; ');
+            if (posterDesc) posterDesc.textContent = detail.desc || '';
+            if (posterScores) posterScores.innerHTML = 
+                scoreDimensions.map(function(d) { return (d.icon || '') + ' ' + ((d.label || '').replace('倾向', '').replace('型', '')) + ': ' + formatNumber(scores[d.key] || 0); }).join(' &nbsp; ');
             
-            const radarDiv = document.getElementById('posterRadar');
             radarDiv.innerHTML = '';
             let posterRadar = null;
             
@@ -2630,12 +3267,12 @@ function initApp() {
                     // 检查html2canvas是否可用
                     if (typeof html2canvas === 'undefined') {
                         showToast('海报功能暂不可用，请截图保存');
-                        posterRadar?.dispose?.();
+                        if (posterRadar) { try { posterRadar.dispose(); } catch(e) {} posterRadar = null; }
                         return;
                     }
                     
                     html2canvas(container, { scale: 2, backgroundColor: '#fffbf5', useCORS: true }).then(canvas => {
-                        posterRadar?.dispose?.();
+                        if (posterRadar) { try { posterRadar.dispose(); } catch(e) {} posterRadar = null; }
                         const imgData = canvas.toDataURL();
                         try {
                             const win = window.open();
@@ -2666,7 +3303,7 @@ function initApp() {
                     }).catch(err => {
                         console.error('html2canvas error:', err);
                         showToast('海报生成失败，请截图保存');
-                        if (posterRadar) posterRadar.dispose();
+                        if (posterRadar) { try { posterRadar.dispose(); } catch(e) {} posterRadar = null; }
                     });
                 });
             }, 300);
@@ -2693,6 +3330,31 @@ function initApp() {
             } else {
                 showToast('点击右上角分享或复制链接给朋友~');
             }
+        }
+
+        function abandonTest() {
+            showAbandonConfirm.value = true;
+        }
+
+        function confirmAbandon() {
+            showAbandonConfirm.value = false;
+            currentView.value = 'home';
+            answers.value = [];
+            currentIndex.value = 0;
+            selectedIdx.value = -1;
+            finalScores.value = null;
+            resultType.value = '';
+            gender.value = '';
+            showDetail.value = false;
+            detailTab.value = 'traits';
+            startTestTime.value = 0;
+            testDuration.value = 0;
+            trackingHistoryId.value = null;
+            if (radarChartInstance) radarChartInstance.dispose();
+        }
+
+        function cancelAbandon() {
+            showAbandonConfirm.value = false;
         }
 
         function retest() {
@@ -2735,11 +3397,15 @@ function initApp() {
                 clearTimeout(toastTimer);
                 toastTimer = null;
             }
-            if (radarChartInstance) {
+            if (radarChartInstance && radarChartInstance.dispose) {
                 try {
                     radarChartInstance.dispose();
                 } catch(e) { /* ignore */ }
                 radarChartInstance = null;
+            }
+            if (radarObserver) {
+                try { radarObserver.disconnect(); } catch(e) { /* ignore */ }
+                radarObserver = null;
             }
         });
 
@@ -2748,9 +3414,16 @@ function initApp() {
                     answers, finalScores, resultType,
                     gender, showDetail, detailTab, toastMsg, history, dailyTip, floatingHearts, scoreDimensions,
                     genderAdviceText, testDuration, formatScore, secondaryType, labelResult, bonusResult, trackingHistoryId, isHistoryView, formatDuration, getScoreLevel, getHeaderStyle, getMbtiSectionStyle, formatBlindspot,
-                    estimatedTimeLeft, isLoading, personalizedInterpretation, tensionAnalysis,
+                    estimatedTimeLeft, isLoading, personalizedInterpretation, tensionAnalysis, showAbandonConfirm,
                     startTest, confirmGender, goBack, selectOption, nextQuestion, retest, shareResult,
-                    generatePoster, typeDetails, formatDate, loadHistoryById, deleteHistoryById, clearHistory
+                    generatePoster, typeDetails, formatDate, loadHistoryById, deleteHistoryById, clearHistory, abandonTest, confirmAbandon, cancelAbandon,
+                    
+                    // 压力测试
+                    stressView, stressSelectedCategories, stressCurrentIndex, stressSelectedIdx, stressAnswers, 
+                    stressFinalScores, stressResult, stressDailyScores, stressShowPrompt,
+                    stressCategories, stressCurrentQuestions,
+                    toggleStressCategory, startStressTest, selectStressOption, nextStressQuestion,
+                    resetStressTest, getReactionColor, startStressTestPage
                 };
     },
     template: `
@@ -2761,7 +3434,187 @@ function initApp() {
                     <div class="loading-text">正在生成你的专属报告...</div>
                 </div>
             </transition>
-            <template v-if="currentView === 'home'">
+
+            <!-- 放弃确认对话框 -->
+            <transition name="fade">
+                <div v-if="showAbandonConfirm" class="loading-overlay" style="background: rgba(0,0,0,0.5);">
+                    <div class="card" style="max-width:320px; margin:20px; animation: popIn 0.2s ease-out;">
+                        <div style="text-align:center; padding:10px 0 20px;">
+                            <div style="font-size:48px; margin-bottom:10px;">💔</div>
+                            <h3 style="margin:0 0 8px; color:#5b4c44;">确定要放弃吗？</h3>
+                            <p style="color:#999; font-size:14px; line-height:1.5; margin:0;">已填写的进度将不会被保存</p>
+                        </div>
+                        <div class="btn-group">
+                            <button class="secondary" @click="cancelAbandon"><i class="fa fa-times"></i> 继续答题</button>
+                            <button style="background: linear-gradient(135deg, #ff6b6b, #ee5a5a);" @click="confirmAbandon"><i class="fa fa-check"></i> 确定放弃</button>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- ==================== 压力测试视图 ==================== -->
+            <!-- 压力测试场景选择 -->
+            <template v-if="stressView === 'select'">
+                <div class="header" style="background: linear-gradient(135deg, #3b2a25, #5e3a30);">
+                    <h2 style="color:#fff;">🌊 压力测试</h2>
+                    <p style="color:#ddd;">选择你想测试的压力场景</p>
+                </div>
+                <div class="card">
+                    <div style="margin-bottom:16px;">
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:8px;">选择场景分类（可多选）</div>
+                        <div style="color:#999; font-size:13px;">选择你感兴趣的场景，了解你在压力下的反应模式</div>
+                    </div>
+                    
+                    <div v-for="(cat, catIdx) in stressCategories" :key="catIdx" 
+                         class="stress-cat-item" :class="{selected: cat.selected}"
+                         @click="toggleStressCategory(cat.name)">
+                        <div class="stress-cat-name">{{ cat.name }}</div>
+                        <div class="stress-cat-count">{{ cat.questions.length }}道题</div>
+                    </div>
+                    
+                    <div v-if="stressShowPrompt" style="background:#fff5f0; padding:12px; border-radius:12px; margin:16px 0; font-size:13px; color:#5b4c44;">
+                        <div style="font-weight:600; margin-bottom:6px;">💡 提示</div>
+                        <div>建议先完成日常测试，压力测试会对比你在日常与压力下的表现差异~</div>
+                    </div>
+                    
+                    <div class="btn-group" style="margin-top:20px;">
+                        <button @click="stressView='home'" class="secondary" style="flex:1; margin-right:12px;"><i class="fa fa-arrow-left"></i> 返回</button>
+                        <button @click="startStressTest" :disabled="stressSelectedCategories.length === 0" style="flex:1; background: linear-gradient(135deg, #3b2a25, #5e3a30);">
+                            开始测试
+                        </button>
+                    </div>
+                </div>
+            </template>
+            
+            <!-- 压力测试答题 -->
+            <template v-else-if="stressView === 'quiz'">
+                <div class="header" style="background: linear-gradient(135deg, #3b2a25, #5e3a30);">
+                    <div class="progress-bar" style="width: 60%;">
+                        <div class="progress-fill" :style="{width: ((stressCurrentIndex + 1) / stressCurrentQuestions.length * 100) + '%'}"></div>
+                    </div>
+                    <div style="font-size:13px; color:#ddd; margin-bottom:8px;">场景 {{ stressCurrentIndex + 1 }} / {{ stressCurrentQuestions.length }}</div>
+                    <div style="font-size:12px; color:#ccc; margin-top:8px;">📍 {{ stressCurrentQuestions[stressCurrentIndex].category }}</div>
+                </div>
+                
+                <div class="card">
+                    <div class="question-text">{{ stressCurrentQuestions[stressCurrentIndex].scenario }}</div>
+                    
+                    <div class="options-container">
+                        <div v-for="(opt, optIdx) in stressCurrentQuestions[stressCurrentIndex].options" 
+                             :key="optIdx" 
+                             class="option" 
+                             :class="{selected: stressSelectedIdx === optIdx}"
+                             @click="selectStressOption(optIdx)">
+                            <span class="option-text">{{ opt.text }}</span>
+                            <span class="reaction-tag" :style="{background: getReactionColor(opt.reaction), color:'#3b2a25'}">→ {{ opt.reaction }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button @click="resetStressTest" class="secondary"><i class="fa fa-home"></i> 返回首页</button>
+                        <button @click="nextStressQuestion" :disabled="stressSelectedIdx === -1">
+                            {{ stressCurrentIndex < stressCurrentQuestions.length - 1 ? '下一题' : '生成报告' }}
+                            <i class="fa fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+            
+            <!-- 压力测试结果 -->
+            <template v-else-if="stressView === 'result'">
+                <div class="header" style="background: linear-gradient(135deg, #3b2a25, #5e3a30);">
+                    <h2 style="color:#fff;">🌊 压力测试结果</h2>
+                    <p style="color:#ddd;">你在压力下的真实反应模式</p>
+                </div>
+                
+                <div class="card">
+                    <!-- 核心发现 -->
+                    <div v-if="stressResult && stressResult.interpretation" class="positive-view-card" style="background: linear-gradient(135deg, #fff5f0 0%, #fff9f7 100%); border-left: 3px solid #5e3a30;">
+                        <div class="positive-view-label">💡 核心发现</div>
+                        <div style="font-weight:700; font-size:16px; color:#5e3a30; margin-bottom:8px;">{{ stressResult.interpretation.title }}</div>
+                        <div class="positive-view-text">{{ stressResult.interpretation.text }}</div>
+                    </div>
+                    
+                    <!-- 日常 vs 压力对比 -->
+                    <div style="margin-top:16px;">
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">📊 日常 vs 压力对比</div>
+                        
+                        <div v-for="dim in scoreDimensions" :key="dim.key" class="score-item">
+                            <div class="dim-name">{{ dim.icon }} {{ dim.label }}</div>
+                            <div style="flex:1;">
+                                <div style="display:flex; justify-content: space-between; margin-bottom:4px;">
+                                    <span style="font-size:12px; color:#666;">日常：{{ formatNumber(stressDailyScores[dim.key]) }}分</span>
+                                    <span style="font-size:12px; color:#666;">压力：{{ formatNumber(stressResult.scores[dim.key]) }}分</span>
+                                </div>
+                                <div style="display:flex; gap:6px;">
+                                    <div style="flex:1; background:#f0e2da; border-radius:6px; overflow:hidden; height:8px;">
+                                        <div :style="{width: (stressDailyScores[dim.key] / dim.max * 100) + '%', background: dim.color, height: '100%', opacity:0.6}"></div>
+                                    </div>
+                                    <div style="flex:1; background:#f0e2da; border-radius:6px; overflow:hidden; height:8px;">
+                                        <div :style="{width: (stressResult.scores[dim.key] / dim.max * 100) + '%', background: dim.color, height: '100%'}"></div>
+                                    </div>
+                                </div>
+                                <div v-if="stressResult.amplification" style="font-size:11px; margin-top:4px; color: stressResult.amplification[dim.key] >= 0.3 ? '#ee5a5a' : (stressResult.amplification[dim.key] <= -0.2 ? '#98d2c0' : '#999');">
+                                    {{ stressResult.amplification[dim.key] >= 0.3 ? '📈 ' : (stressResult.amplification[dim.key] <= -0.2 ? '📉 ' : '') }}
+                                    变化幅度：{{ (stressResult.amplification[dim.key] * 100).toFixed(0) }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 压力放大系数 -->
+                    <div style="margin-top:16px;">
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">🔥 压力放大系数</div>
+                        <div v-for="dim in scoreDimensions" :key="dim.key" style="margin-bottom:8px;">
+                            <div style="display:flex; justify-content: space-between; font-size:13px;">
+                                <span>{{ dim.icon }} {{ dim.label }}</span>
+                                <span :style="{color: stressResult.amplification[dim.key] >= 0.3 ? '#ee5a5a' : (stressResult.amplification[dim.key] <= -0.2 ? '#98d2c0' : '#666')}">
+                                    {{ stressResult.amplification[dim.key] >= 0.3 ? '📈 ' : (stressResult.amplification[dim.key] <= -0.2 ? '📉 ' : '') }}
+                                    {{ (stressResult.amplification[dim.key] * 100).toFixed(0) }}%
+                                </span>
+                            </div>
+                            <div style="background:#f0e2da; border-radius:6px; overflow:hidden; height:8px; margin-top:4px;">
+                                <div :style="{width: (Math.min(Math.max(stressResult.amplification[dim.key] + 0.5, 0), 1) * 100) + '%', 
+                                             background: stressResult.amplification[dim.key] >= 0.3 ? '#ff6b6b' : (stressResult.amplification[dim.key] <= -0.2 ? '#98d2c0' : dim.color), 
+                                             height: '100%', transition:'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)'}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 反应类型统计 -->
+                    <div v-if="stressResult && stressResult.reactions" style="margin-top:16px;">
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">⚡ 你的反应光谱</div>
+                        <div style="display:flex; flex-wrap: wrap; gap:8px;">
+                            <span v-for="(count, reaction) in stressResult.reactions" :key="reaction" 
+                                  class="reaction-tag" 
+                                  :style="{background: getReactionColor(reaction), color:'#3b2a25', padding:'8px 14px;'}">
+                                {{ reaction }} × {{ count }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- 场景预警 -->
+                    <div v-if="stressResult && stressResult.weakScenarios && stressResult.weakScenarios.length" style="margin-top:16px;">
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:12px;">⚠️ 需要注意的场景</div>
+                        <div style="background:#fff5f0; padding:12px; border-radius:12px;">
+                            <div v-for="(ws, idx) in stressResult.weakScenarios" :key="idx" style="margin:4px 0; color:#5b4c44; font-size:13px;">
+                                <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ff6b6b; margin-right:8px;"></span>
+                                {{ ws }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="divider-line" style="margin:16px 0;"></div>
+                    
+                    <div class="btn-group">
+                        <button @click="resetStressTest" class="secondary"><i class="fa fa-refresh"></i> 再测一次</button>
+                        <button @click="resetStressTest"><i class="fa fa-home"></i> 返回首页</button>
+                    </div>
+                </div>
+            </template>
+            
+            <!-- ==================== 主测试视图 ==================== -->
+            <template v-else-if="currentView === 'home'">
                 <div class="header">
                     <div class="hearts-container">
                         <span v-for="h in floatingHearts" :key="h.id" class="floating-heart"
@@ -2772,7 +3625,18 @@ function initApp() {
                 </div>
                 <div class="card" style="text-align:center">
                     <div class="question-text">30道情景题<br>发现你的恋爱相处模式</div>
-                    <button @click="startTest" style="width:80%; margin-top:16px">开始测试</button>
+                    <button @click="startTest" style="width:80%; margin-top:16px">开始日常测试</button>
+                    
+                    <div class="divider-line"></div>
+                    
+                    <div style="margin-bottom:10px; color:#5b4c44; font-weight:600; font-size:15px;">🌊 压力测试</div>
+                    <div style="font-size:13px; color:#999; margin-bottom:14px; line-height:1.6;">
+                        测试你在压力下的真实反应模式
+                    </div>
+                    <button @click="startStressTestPage" class="secondary" style="width:80%; background: linear-gradient(135deg, #3b2a25, #5e3a30); color:#fff;">
+                        <i class="fa fa-bolt"></i> 开始压力测试
+                    </button>
+                    
                     <button v-if="history.length" @click="currentView='history'" class="ghost" style="width:80%; margin-top:12px">
                         <i class="fa fa-history"></i> 查看历史记录
                     </button>
@@ -2865,8 +3729,8 @@ function initApp() {
                                 </div>
                                 <div class="btn-group">
                                     <button v-if="currentIndex > 0" class="secondary" @click="goBack"><i class="fa fa-arrow-left"></i> 上一题</button>
+                                    <button class="secondary" @click="abandonTest"><i class="fa fa-times"></i> 放弃</button>
                                     <button @click="nextQuestion" :disabled="selectedIdx === -1">{{ isBonusQuestion ? '完成测试' : '下一题' }} <i class="fa fa-arrow-right"></i></button>
-                                    <button class="secondary" @click="retest"><i class="fa fa-times"></i> 放弃</button>
                                 </div>
                             </div>
                         </transition>
@@ -3044,17 +3908,17 @@ function initApp() {
                     </div>
                     <div v-for="(item, idx) in history" :key="idx" class="history-item" @click="loadHistoryById(item.id)">
                         <div class="history-header">
-                            <span class="history-type">{{ typeDetails[item.type] ? typeDetails[item.type].emoji : '' }} {{ typeDetails[item.type] ? typeDetails[item.type].name : '' }}{{ item.gender ? (item.gender === 'male' ? ' 👦' : ' 👧') : '' }}<span v-if="item.mbti && item.mbti.code" style="margin-left:8px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;background:linear-gradient(135deg,#98D2C0,#F7C59F,#B5C9E2,#FFA07A);color:#fff;">{{ item.mbti.code }}</span>
+                            <span class="history-type">{{ item.type === 'stress' ? '🌊 压力测试' : (typeDetails[item.type] ? typeDetails[item.type].emoji + ' ' + typeDetails[item.type].name : '') }}{{ item.gender ? (item.gender === 'male' ? ' 👦' : ' 👧') : '' }}<span v-if="item.mbti && item.mbti.code" style="margin-left:8px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;background:linear-gradient(135deg,#98D2C0,#F7C59F,#B5C9E2,#FFA07A);color:#fff;">{{ item.mbti.code }}</span>
                             <div style="display:flex;gap:8px;align-items:center;">
                                 <span class="history-date">{{ item.date || formatDate(item.id) }}</span>
                                 <button style="border:0;background:transparent;color:#aaa;cursor:pointer;font-size:13px;padding:2px 6px;" @click.stop="deleteHistoryById(item.id)"><i class="fa fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="history-scores">
-                            <span class="history-score-tag">😰 {{ item.scores.anxiety }}</span>
-                            <span class="history-score-tag">🏃 {{ item.scores.avoidance }}</span>
-                            <span class="history-score-tag">🌿 {{ item.scores.secure }}</span>
-                            <span class="history-score-tag">✨ {{ item.scores.guide }}</span>
+                            <span class="history-score-tag">😰 {{ (item.scores || item.stressScores).anxiety }}</span>
+                            <span class="history-score-tag">🏃 {{ (item.scores || item.stressScores).avoidance }}</span>
+                            <span class="history-score-tag">🌿 {{ (item.scores || item.stressScores).secure }}</span>
+                            <span class="history-score-tag">✨ {{ (item.scores || item.stressScores).guide }}</span>
                         </div>
                     </div>
                     <div style="display:flex; margin-top:16px;">
@@ -3063,6 +3927,8 @@ function initApp() {
                     </div>
                 </div>
             </template>
+
+
 
             <div id="posterContainer" class="poster-hidden" style="width:340px; background:#fffaf5; padding:24px; border-radius:40px;">
                 <div style="text-align:center; font-size:12px; color:#ff8a6f; letter-spacing:2px; margin-bottom:4px;">LOVE PERSONALITY</div>
@@ -3081,12 +3947,13 @@ function initApp() {
         </div>
     `
     }).mount('#app');
+    window._appStarted = true;
 }
 
-// 启动应用
-document.addEventListener('DOMContentLoaded', initApp);
-// 如果DOM已加载，直接调用
-if (document.readyState === 'interactive' || document.readyState === 'complete') {
+// 启动应用 - 使用标志变量防止重复初始化
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
     initApp();
 }
 </script>
