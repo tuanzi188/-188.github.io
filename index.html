@@ -15,7 +15,7 @@
     <meta property="og:type" content="website">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: data: blob:; img-src 'self' data: https: blob:; font-src 'self' https: data:; connect-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; form-action 'none'; base-uri 'self'; frame-ancestors 'self'">
+    <!-- CSP deliberately omitted for file:// protocol compatibility -->
     <title>恋爱人格测试 - 30道情景题</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdn.bootcdn.net">
@@ -23,9 +23,6 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://cdn.bootcdn.net">
     <link rel="dns-prefetch" href="https://unpkg.com">
-    
-    <!-- 样式与脚本 - 多CDN备用 -->
-    <link id="font-awesome-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
     
     <!-- 核心脚本 - 优先使用jsdelivr，备用其他CDN -->
     <script id="vue-script"></script>
@@ -241,7 +238,7 @@
             --shadow-btn: 0 4px 12px rgba(255,138,111,0.3);
             --transition-fast: 0.2s ease;
             --transition-normal: 0.3s ease;
-            --color-anxiety: #F7C59F;
+            --color-anxiety: #966946;
             --color-avoidance: #B5C9E2;
             --color-secure: #98D2C0;
             --color-guide: #FFA07A;
@@ -1566,18 +1563,17 @@ const stressQuestions = [
         ]
     },
     {
-        {
-    id: 'external_1',
-    category: '外部压力',
-    scenario: '你们计划买房，但对方突然说家里要用钱，首付要推迟。',
-    weight: 2,
-    options: [
-        { text: '特别焦虑不安，忍不住怀疑对方是不是不想和你结婚', scores: { anxiety: 2 } },
-        { text: '心里很失落，默默降低期待，悄悄为自己打算', scores: { avoidance: 2 } },
-        { text: '冷静沟通，一起商量调整计划，重新安排进度', scores: { guide: 2 } },
-        { text: '坦然接受事实，信任对方，慢慢推进就好', scores: { secure: 2 } }
-    ]
-},
+        id: 'external_1',
+        category: '外部压力',
+        scenario: '你们计划买房，但对方突然说家里要用钱，首付要推迟。',
+        weight: 2,
+        options: [
+            { text: '很焦虑，开始担心TA是不是不想结婚了', scores: { anxiety: 2 }, reaction: '恐慌' },
+            { text: '心里很失望，但什么也不说，开始认真考虑分开', scores: { avoidance: 2 }, reaction: '后撤' },
+            { text: '一起商量「那我们重新制定一个计划」', scores: { guide: 2 }, reaction: '破局' },
+            { text: '理解对方，一起面对问题，家人才是最重要的', scores: { secure: 2 }, reaction: '共担' }
+        ]
+    },
     {
         id: 'external_2', category: '外部压力',
         scenario: '因为工作调动，你们要异地至少1年，对方说「要不我们先分开吧」。',
