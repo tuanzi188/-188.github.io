@@ -456,6 +456,23 @@
             border-radius: 20px;
         }
 
+        .score-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: #fffaf8;
+        }
+
+        .score-item .dim-name {
+            min-width: 80px;
+            font-weight: 600;
+            color: #5e3a30;
+            font-size: 13px;
+        }
+
         .option-item {
             background: var(--bg-option);
             border-radius: 48px;
@@ -1253,7 +1270,8 @@ const STORAGE_KEYS = {
     TEST_HISTORY: 'testHistory',
     LOVE_TEST_RESULT: 'loveTestResult',
     BONUS_ANSWER: 'bonusAnswer',
-    LOVE_TEST_HISTORY: 'loveTestHistory'
+    LOVE_TEST_HISTORY: 'loveTestHistory',
+    STRESS_HISTORY: 'stressHistory'
 };
 
 const PERSONALITY_TYPES = {
@@ -1353,29 +1371,19 @@ function analyzeScorePattern(scores) {
     const total = dims.reduce((s, d) => s + d.score, 0);
     const dominance = sorted[0].score - sorted[1].score;
     const isDominant = dominance >= 4;
-    const isConflicted = (scores.anxiety || 0) >= 8 && (scores.avoidance || 0) >= 8;
     const healthyScore = (scores.secure || 0) + (scores.guide || 0);
     const healthyRatio = healthyScore / (total || 1);
 
-    return { sorted, max, min, range, total, dominance, isDominant, isConflicted, healthyScore, healthyRatio, primary: sorted[0], secondary: sorted[1] };
+    return { sorted, max, min, range, total, dominance, isDominant, healthyScore, healthyRatio, primary: sorted[0], secondary: sorted[1] };
 }
 
 function generatePersonalizedInterpretation(scores) {
     if (!scores) return '';
     const p = analyzeScorePattern(scores);
-    const { sorted, isDominant, isConflicted, healthyRatio, primary, secondary, range, dominance } = p;
+    const { sorted, isDominant, healthyRatio, primary, secondary, range, dominance } = p;
     const a = scores.anxiety || 0, v = scores.avoidance || 0, s = scores.secure || 0, g = scores.guide || 0;
 
-    // ===== 第一层：恐惧型（焦虑+回避双高）=====
-    if (isConflicted) {
-        const fearLevel = (a + v) / 2;
-        if (fearLevel >= 12) {
-            return `你的内心像「拉锯战场」——焦虑在说"快抓住TA"，回避在喊"快逃"。这种矛盾让你在感情里忽冷忽热，连自己都觉得累。看见这种张力就是改变的开始，试着在安全的关系里，允许自己先停一停，不抓也不逃。`;
-        }
-        return `你同时具备"想靠近"和"想逃跑"两种冲动，这种矛盾会让你在关系里反复试探。你的敏感是天赋，自我保护也是必要的，关键是找到那个"既亲密又安全"的中间地带。`;
-    }
-
-    // ===== 第二层：双高健康组合 =====
+    // ===== 第一层：双高健康组合 =====
     if (primary.key === 'secure' && secondary.key === 'guide' && secondary.score >= 8) {
         return `你是罕见的「安全引导型」✨——内心有稳稳的锚，又有带动关系的能力。你不是在"找"安全感，而是自带安全感。这种组合让你既能享受亲密，又不迷失自我，是关系中的"温柔领导者"。`;
     }
@@ -2068,19 +2076,171 @@ function getDailyTip() {
     return dailyTips[idx];
 }
 
+// 维度映射
+const dimensionKeys = ['secure', 'anxiety', 'avoidance', 'guide'];
+const dimensionShort = { secure: 'S', anxiety: 'A', avoidance: 'V', guide: 'G' };
+const dimensionFull = { S: 'secure', A: 'anxiety', V: 'avoidance', G: 'guide' };
+
+// 单维度主导名称
+const dominantNames = {
+    secure: '安全型',
+    anxiety: '焦虑型',
+    avoidance: '回避型',
+    guide: '引导型'
+};
+
+// 双维度组合名称
+const comboNames = {
+    secure: {
+        anxiety: '温柔靠山',
+        avoidance: '佛系恋人',
+        guide: '理想室友'
+    },
+    anxiety: {
+        secure: '撒娇精',
+        avoidance: '傲娇怪',
+        guide: '恋爱劳模'
+    },
+    avoidance: {
+        secure: '闷葫芦',
+        anxiety: '冰山脸',
+        guide: '冷都男女'
+    },
+    guide: {
+        secure: '暖宝宝',
+        anxiety: '情绪消防员',
+        avoidance: '船长'
+    }
+};
+
+function unifiedPersonalityType(scores) {
+    const dimensions = ['secure', 'anxiety', 'avoidance', 'guide'];
+    // 稳定排序：先按分数降序，分数相同时按维度固定优先级排序
+    const sorted = [...dimensions].sort((a, b) => {
+        const scoreDiff = scores[b] - scores[a];
+        if (scoreDiff !== 0) return scoreDiff;
+        // 分数相同时，按维度的固定优先级排序
+        const priority = { secure: 4, guide: 3, anxiety: 2, avoidance: 1 };
+        return priority[b] - priority[a];
+    });
+    
+    const [first, second] = sorted;
+    const firstScore = scores[first];
+    const secondScore = scores[second];
+    const gap = firstScore - secondScore;
+    const range = firstScore - scores[sorted[3]];
+    
+    // ===== 新增：同分检测 =====
+    // 检查是否有多个维度与最高分相同
+    const maxScore = firstScore;
+    const maxDims = sorted.filter(d => scores[d] === maxScore);
+    
+    if (maxDims.length >= 2) {
+        // 双核/多核型
+        const shortCodes = maxDims.map(d => dimensionShort[d]).join('');
+        return {
+            type: maxDims[0],
+            label: shortCodes,
+            name: maxDims.length === 2 ? '双核型' : '多核型',
+            subtype: 'multi-core',
+            shortCode: shortCodes,
+            tiedDimensions: maxDims,
+            warning: `${maxDims.map(d => dominantNames[d]).join('、')} 分数相同，你同时具备这些特质`
+        };
+    }
+    
+    // 原有逻辑继续...
+    if (range <= 3) {
+        return { 
+            type: 'balanced', 
+            label: 'EQ', 
+            name: '均衡型', 
+            subtype: null,
+            shortCode: 'EQ'
+        };
+    }
+    
+    if (gap >= 6 && firstScore >= 12) {
+        // 单维度主导
+        const short = dimensionShort[first];
+        return { 
+            type: first, 
+            label: short + '+', 
+            name: dominantNames[first],
+            subtype: 'dominant',
+            shortCode: short + 'P'
+        };
+    }
+    
+    if (gap >= 3) {
+        // 双维度组合，但主次分明
+        const short1 = dimensionShort[first];
+        const short2 = dimensionShort[second];
+        return { 
+            type: first, 
+            label: short1 + short2, 
+            name: comboNames[first][second],
+            subtype: 'dual',
+            shortCode: short1 + short2
+        };
+    }
+    
+    // 模糊地带，归入主维度但提示次维度影响
+    const short1 = dimensionShort[first];
+    const short2 = dimensionShort[second];
+    return { 
+        type: first, 
+        label: short1 + short2, 
+        name: comboNames[first][second], 
+        warning: '次维度影响较强',
+        subtype: 'mild',
+        shortCode: short1 + short2
+    };
+}
+
 function getPersonalityType(scores) {
-    const { anxiety, avoidance, secure, guide } = scores;
-    const total = anxiety + avoidance + secure + guide;
-    const high = total * 0.30;
-    if (anxiety >= high && avoidance >= high) return "fearful";
-    if (guide >= high && guide >= anxiety && guide >= avoidance && guide >= secure) return "guide";
-    if (secure >= high && secure >= anxiety && secure >= avoidance && secure >= guide) return "secure";
-    if (anxiety > avoidance) return "anxious";
-    if (avoidance > anxiety) return "avoidant";
-    return "secure";
+    const result = unifiedPersonalityType(scores);
+    return result.type;
 }
 
 const typeDetails = {
+    balanced: {
+        name: "均衡型恋人",
+        emoji: "⚖️",
+        desc: "你各方面都很均衡，没有明显的短板，是关系中的百搭选手。和谁都能相处，但需要找到能激发你独特性的人。",
+        color: "#9B9B9B",
+        positiveView: "你没有明显的短板，但也意味着没有「招牌菜」。伴侣会觉得你「挺好的」，但偶尔想不起你最打动人的瞬间。你不是某一种味道，你是百搭的底色。",
+        traits: ["各方面均衡发展", "没有明显的短板", "能适应各种关系模式", "情绪稳定，心态开放"],
+        strengths: ["能与各种类型的人相处", "没有明显的致命伤", "关系适应能力强", "情绪保持中庸"],
+        growth: ["需要找到自己的独特性", "不要总是迎合对方", "可以更有主见一些", "找到能激发你独特魅力的人"],
+        compatibility: {
+            best: {
+                title: "🌟 最佳适配：引导型恋人",
+                why: "对方能给关系带来方向，你能提供稳定的支持，是很好的互补",
+                scenario: "对方安排约会，你只需要开心跟着；对方想推进关系，你能很好地配合"
+            },
+            complementary: {
+                title: "💫 互补适配：任何有特点的类型",
+                why: "你的均衡能很好地平衡对方的特点",
+                warning: "⚠️ 注意不要在关系中失去自我"
+            },
+            challenge: {
+                title: "⚡️ 注意挑战：与同样均衡的人",
+                why: "两个人都太均衡，关系可能会缺少火花",
+                tip: "可以主动创造一些惊喜和变化"
+            }
+        },
+        idealPartner: "引导型或安全型恋人",
+        scenarioAdvice: [
+            { scene: "冷战场景", reaction: "能灵活应对，既不激进也不逃避", tip: "可以更主动一些，打破僵局" },
+            { scene: "对方加班晚归", reaction: "心态平稳，既关心也不过度", tip: "可以偶尔表达更强烈一些的情感" },
+            { scene: "送礼不合适", reaction: "能体谅也能沟通", tip: "可以更明确地表达自己的喜好" }
+        ],
+        genderAdvice: {
+            male: "作为均衡型男生，你是很好的伴侣选择。建议找到一个能欣赏你平稳的女生，同时也可以更有个性一些。",
+            female: "作为均衡型女生，你是很多人想要的理想对象。建议不要总是迎合，找到能让你展现独特性的人。"
+        }
+    },
     guide: {
         name: "引导型恋人",
         emoji: "✨",
@@ -2270,10 +2430,6 @@ const typeDetails = {
 
 const labelDefinitions = {
     EQ: { code: 'EQ', label: '全能选手', labelEn: 'All-Rounder', type: 'secure', pattern: 'eq', subLabels: ['情绪稳定器', '主动破冰'], oneLiner: '你像恋爱界的瑞士军刀，什么场面都能接得住', description: '你没有明显的短板，但也意味着没有「招牌菜」。伴侣会觉得你「挺好的」，但偶尔想不起你最打动人的瞬间。你不是某一种味道，你是百搭的底色。', highlight: ['第一次见对方朋友，你自然地接住了所有话题', '吵架时你既不逃避也不逼问，就静静地陪着', '对方说「随便吃啥」，你能迅速列出三个选项并分析优缺点'], blindspot: '⚠️ 你的「全能」可能变成「没有特点」\n💡 偶尔暴露一个明确的偏好，会让对方更记得住你', idealPartner: '任何类型都能相处，但和引导型在一起最互补', color: null },
-    SAV: { code: 'SAV', label: '温柔纠结鬼', labelEn: 'Gentle Worrier', type: 'secure', pattern: 'three', subLabels: ['细节控', '边界感强'], oneLiner: '想靠近又害怕，想放手又不舍', description: '你像一杯温吞水——不烫不凉，但让人着急。你的温柔是真的，纠结也是真的。你既想要亲密，又害怕受伤，还想保持体面。', highlight: ['对方没回消息，你忍了两个小时才问「在忙吗」', '吵架后你想和好，但不想先开口，于是发了条朋友圈仅对方可见', '你说「随便」，其实心里有一个明确的答案'], blindspot: '⚠️ 你的「纠结」会让伴侣摸不着头脑\n💡 试着说「我其实想要X，但怕你不高兴」，比「随便」更动人', idealPartner: '引导型恋人——能帮你做决定，又不强迫你', color: '#98D2C0' },
-    SAG: { code: 'SAG', label: '恋爱班长', labelEn: 'Class Monitor', type: 'guide', pattern: 'three', subLabels: ['情绪稳定器', '关系经营高手'], oneLiner: '管得宽但管得好，大家都服你', description: '你是那个会记得所有人生日、组织聚会、调解矛盾的人。累，但不可或缺。你的安全感来自「被需要」，而不是「被宠爱」。', highlight: ['朋友吵架，你自然成为调解人', '约会前你查了餐厅、路线、甚至停车位', '对方说「我不知道怎么办」，你已经列了三个方案'], blindspot: '⚠️ 你的「靠谱」可能变成「老妈子」\n💡 偶尔说「这次你来定」，让对方也体验一下被需要', idealPartner: '安全型恋人——能欣赏你的付出，也能在你累的时候接手', color: '#FFA07A' },
-    SVG: { code: 'SVG', label: '人间清醒', labelEn: 'Sober Lover', type: 'guide', pattern: 'three', subLabels: ['情绪稳定器', '不粘人'], oneLiner: '爱得明白，分得清楚，从不失控', description: '你像一杯冰美式——清醒、提神、不甜。有人爱你这份利落，有人嫌你不够热。你知道自己要什么，也知道什么时候该止损。', highlight: ['对方说「我配不上你」，你没有挽留，只说「你想清楚就好」', '你能一眼看出朋友的关系问题，但对方问你时你说「你自己决定」', '你说「我爱你」，但从不加「永远」'], blindspot: '⚠️ 你的「清醒」可能变成「冷漠」\n💡 偶尔说一次「我不想失去你」，不会降低你的格调', idealPartner: '安全型或引导型——能跟上你的节奏，也能给你温度', color: '#B5C9E2' },
-    AVG: { code: 'AVG', label: '矛盾艺术家', labelEn: 'Contradiction Artist', type: 'guide', pattern: 'three', subLabels: ['细节控', '主动破冰'], oneLiner: '你的恋爱像抽象画，别人看不懂，你自己也解释不清', description: '你同时具备三种相反的力量：想抓住、想逃跑、还想带路。你的关系总是充满戏剧性——今天热情似火，明天冷若冰霜，后天又突然规划未来。', highlight: ['凌晨三点给对方写小作文，早上醒来全删了', '你说「我们分手吧」，对方真走了你又追出去', '你讨厌被管，但对方不管你又觉得不被爱'], blindspot: '⚠️ 你的「矛盾」会消耗伴侣的耐心\n💡 找一个安全型恋人，TA的稳定能接住你的波动', idealPartner: '安全型恋人——情绪稳定，不被你的波动带跑', color: '#F7C59F' },
     SP: { code: 'S+', label: '定海神针', labelEn: 'Anchor', type: 'secure', pattern: 'dominant', subLabels: ['情绪恒温室', '关系压舱石'], oneLiner: '天塌下来你顶，顶完还能笑一笑', description: '你是伴侣的「紧急联系人」，是吵架后第一个被想起的人。你的稳定是礼物，但偶尔也想被人稳稳接住。你总是那个「没事，有我在」的人。', highlight: ['对方半夜打电话哭，你听完说「明天我陪你去解决」', '群体慌乱时，你是那个说「先吃饭，吃完再说」的人', '你说「我没事」的时候，通常是真的没事'], blindspot: '⚠️ 你的「稳定」可能被当作「理所当然」\n💡 偶尔说「我今天也需要你」，不会破坏你的形象', idealPartner: '任何类型都需要你，但焦虑型最依赖你', color: '#98D2C0' },
     AP: { code: 'A+', label: '人形雷达', labelEn: 'Human Radar', type: 'anxious', pattern: 'dominant', subLabels: ['情绪放大器', '连接饥渴症'], oneLiner: '对方叹口气，你已经脑补完一部剧', description: '你的敏感是超能力，也是耗电模式。你能察觉到伴侣还没说出口的需求，但也容易把「没事」听成「有事」。你的爱很满，但杯子总是晃。', highlight: ['对方换了个头像，你研究了三天是不是有新情况', '你说「你忙吧」，其实是想听「不忙，陪你」', '你能记住三个月前对方随口提的喜好，并在生日时送上'], blindspot: '⚠️ 你的「雷达」会误报，消耗双方电量\n💡 把「你是不是不爱我了」换成「我需要你确认一下」，效果完全不同', idealPartner: '安全型恋人——能给你稳定回应，不接你的焦虑球', color: '#F7C59F' },
     VP: { code: 'V+', label: '独行侠', labelEn: 'Lone Wolf', type: 'avoidant', pattern: 'dominant', subLabels: ['自我保护协议', '低能耗模式'], oneLiner: '恋爱可以谈，但别挡我路', description: '你需要大量独处空间，像猫一样——想蹭你的时候来，不想的时候别追。伴侣要学会「不追」的艺术。你的独立是魅力，也是围墙。', highlight: ['对方说「我想天天见面」，你说「一周三次刚好」', '吵架后你需要三天独处，对方以为你要分手', '你说「我爱你」，但从不说「我需要你」'], blindspot: '⚠️ 你的「独立」可能被当作「不爱」\n💡 偶尔说「今天想你了」，不会让你失去自我', idealPartner: '安全型恋人——给你空间，但不觉得你冷', color: '#B5C9E2' },
@@ -2299,68 +2455,61 @@ function getLabelSystem(scores) {
     var g = scores.guide || 0;
     var dims = { S: s, A: a, V: v, G: g };
     var sorted = Object.keys(dims).sort(function(x, y) { return dims[y] - dims[x]; });
-    var maxVal = dims[sorted[0]];
-    var minVal = dims[sorted[3]];
-    var range = maxVal - minVal;
-    function getSecondKey(firstKey) {
-        for (var i = 1; i < sorted.length; i++) {
-            if (sorted[i] !== firstKey) return sorted[i];
-        }
-        return sorted[1];
-    }
-
-    var secondKey = getSecondKey(sorted[0]);
-    var secondVal = dims[secondKey];
+    
     var dimSubLabels = {
         S: ['情绪稳定器', '自愈力MAX'],
         A: ['细节控', '共情雷达'],
         V: ['边界感强', '不粘人'],
         G: ['主动破冰', '关系经营高手']
     };
-
-    if (range <= 2) {
-        var eqDef = JSON.parse(JSON.stringify(labelDefinitions.EQ));
-        eqDef.subLabels = [dimSubLabels[sorted[3]][0], dimSubLabels[sorted[2]][0]];
-        return eqDef;
+    
+    // dimension key (e.g. 'secure') 到 full name 的映射
+    const dimToFullName = {
+        secure: '安全型',
+        anxiety: '焦虑型',
+        avoidance: '回避型',
+        guide: '引导型'
+    };
+    
+    // 使用新的统一判定系统
+    const result = unifiedPersonalityType(scores);
+    const shortCode = result.shortCode;
+    
+    let labelDef;
+    
+    if (result.subtype === 'multi-core') {
+        // 双核/多核型，生成动态标签
+        const tiedDims = result.tiedDimensions;
+        const tiedFullNames = tiedDims.map(d => dimToFullName[d]);
+        
+        labelDef = JSON.parse(JSON.stringify(labelDefinitions.EQ));
+        labelDef.code = shortCode;
+        labelDef.label = result.name;
+        labelDef.labelEn = 'Multi-Core';
+        labelDef.type = tiedDims[0];
+        labelDef.pattern = 'multi';
+        labelDef.oneLiner = `${tiedFullNames.join(' + ')} 双轨并行，你同时拥有这些特质`;
+        labelDef.description = `你同时具备${tiedFullNames.join('和')}的特质，就像一台双引擎飞机，动力更强但也需要更多协调。你的恋爱风格不是单一维度，而是多个维度的精彩组合。`;
+        labelDef.highlight = [
+            `你同时展现出${tiedFullNames.join('和')}的特点`,
+            `不同场景下，你会自然切换不同的特质`,
+            `你能理解多种不同类型的恋人，兼容性很强`
+        ];
+        labelDef.blindspot = `⚠️ 多个特质同时发挥作用时，可能会让自己或对方感到困惑\n💡 试着在不同场景下明确哪一个特质主导，会让关系更清晰`;
+        labelDef.idealPartner = `能欣赏你多面性的安全型恋人`;
+        labelDef.color = null;
+    } else if (labelDefinitions[shortCode]) {
+        // 正常情况，使用预定义的标签
+        labelDef = JSON.parse(JSON.stringify(labelDefinitions[shortCode]));
+    } else {
+        // 兜底，使用 EQ
+        labelDef = JSON.parse(JSON.stringify(labelDefinitions.EQ));
     }
-
-    var threeCombos = [
-        { keys: ['S','A','V'], code: 'SAV', exclude: 'G' },
-        { keys: ['S','A','G'], code: 'SAG', exclude: 'V' },
-        { keys: ['S','V','G'], code: 'SVG', exclude: 'A' },
-        { keys: ['A','V','G'], code: 'AVG', exclude: 'S' }
-    ];
-    for (var tc = 0; tc < threeCombos.length; tc++) {
-        var combo = threeCombos[tc];
-        var trioVals = combo.keys.map(function(k) { return dims[k]; });
-        var trioMax = Math.max.apply(null, trioVals);
-        var trioMin = Math.min.apply(null, trioVals);
-        if (trioMax - trioMin <= 2 && dims[combo.exclude] <= trioMin - 3) {
-            var threeDef = JSON.parse(JSON.stringify(labelDefinitions[combo.code]));
-            var trioSorted = combo.keys.slice().sort(function(x, y) { return dims[y] - dims[x]; });
-            threeDef.subLabels = [dimSubLabels[trioSorted[1]][0], dimSubLabels[trioSorted[2]][0]];
-            return threeDef;
-        }
-    }
-
-    if (maxVal - secondVal >= 5 && maxVal >= 15) {
-        var domMap = { S: 'SP', A: 'AP', V: 'VP', G: 'GP' };
-        var domCode = domMap[sorted[0]];
-        if (domCode && labelDefinitions[domCode]) {
-            return JSON.parse(JSON.stringify(labelDefinitions[domCode]));
-        }
-    }
-
-    var dualCode = sorted[0] + secondKey;
-    if (labelDefinitions[dualCode]) {
-        var dualDef = JSON.parse(JSON.stringify(labelDefinitions[dualCode]));
-        dualDef.subLabels = [dimSubLabels[secondKey][0], dimSubLabels[secondKey][1]];
-        return dualDef;
-    }
-
-    var fallbackMap = { S: 'SP', A: 'AP', V: 'VP', G: 'GP' };
-    var fbCode = fallbackMap[sorted[0]];
-    return JSON.parse(JSON.stringify(labelDefinitions[fbCode] || labelDefinitions.GV));
+    
+    // 更新子标签，使用得分最高的两个维度的标签
+    labelDef.subLabels = [dimSubLabels[sorted[0]][0], dimSubLabels[sorted[1]][0]];
+    
+    return labelDef;
 }
 
 const scoreDimensions = [
@@ -2576,7 +2725,7 @@ function initApp() {
         const dailyTip = computed(() => getDailyTip());
         const genderAdviceText = computed(() => {
             if (!resultType.value || !gender.value) return '';
-            const detail = typeDetails[resultType.value];
+            const detail = currentTypeDetails.value;
             if (!detail || !detail.genderAdvice) return '';
             var base = detail.genderAdvice[gender.value] || '';
             if (!finalScores.value) return base;
@@ -2594,7 +2743,7 @@ function initApp() {
         });
 
         const secondaryType = computed(() => {
-            if (!finalScores.value || !resultType.value) return null;
+            if (!finalScores.value) return null;
             const scores = finalScores.value;
             const typeKeyMap = { anxiety: 'anxious', avoidance: 'avoidant', secure: 'secure', guide: 'guide' };
             const sorted = scoreDimensions.slice().sort((a, b) => scores[b.key] - scores[a.key]);
@@ -2610,6 +2759,100 @@ function initApp() {
                 }
             }
             return null;
+        });
+
+        const personalityResult = computed(() => {
+            if (!finalScores.value) return null;
+            try {
+                return unifiedPersonalityType(finalScores.value);
+            } catch (e) {
+                return null;
+            }
+        });
+
+        const currentTypeDetails = computed(() => {
+            const pResult = personalityResult.value;
+            if (!pResult) {
+                return typeDetails[resultType.value] || typeDetails.secure;
+            }
+            if (pResult.subtype !== 'multi-core') {
+                return typeDetails[resultType.value] || typeDetails.secure;
+            }
+            const tiedDims = pResult.tiedDimensions;
+            const dimToFullName = {
+                secure: '安全型',
+                anxiety: '焦虑型',
+                avoidance: '回避型',
+                guide: '引导型'
+            };
+            const tiedFullNames = tiedDims.map(d => dimToFullName[d]);
+            const baseDetail = typeDetails[tiedDims[0]] || typeDetails.secure;
+            const combinedName = tiedFullNames.join(' + ');
+            const multiCoreDetail = {
+                name: `${combinedName} 双核型`,
+                emoji: tiedDims.length === 2 ? '⚡' : '🌟',
+                desc: `你同时具备 ${combinedName} 的特质，就像一台双引擎飞机，动力更强但也需要更多协调。你的恋爱风格不是单一维度，而是多个维度的精彩组合。`,
+                color: null,
+                positiveView: `多维度的特质让你能灵活适应不同的关系场景，理解多种类型的伴侣，这是非常难得的优势！`,
+                traits: [
+                    `同时展现出 ${tiedFullNames.join('和')} 的特点`,
+                    `不同场景下会自然切换不同的特质`,
+                    `能理解多种不同类型的恋人，兼容性很强`,
+                    `关系中的表现更加丰富和立体`
+                ],
+                strengths: [
+                    `兼容性强，能与多种类型的人和谐相处`,
+                    `思维更加灵活，不容易陷入单一模式`,
+                    `对他人的理解更加全面和包容`,
+                    `在复杂的关系场景中更有优势`
+                ],
+                growth: [
+                    `多个特质同时发挥作用时，可能会让自己或对方感到困惑`,
+                    `试着在不同场景下明确哪一个特质主导，会让关系更清晰`,
+                    `学会整合不同维度的优势，而不是让它们相互冲突`,
+                    `适当的一致性会让伴侣更有安全感`
+                ],
+                compatibility: {
+                    best: {
+                        title: `🌟 最佳适配：安全型恋人`,
+                        why: `安全型的稳定能给你一个舒适的基础，让你可以自由发挥其他特质的优势，不用担心对方被你的多面性搞晕`,
+                        scenario: `你偶尔展现出不同的特质，对方不会觉得奇怪，反而觉得你很有趣，能稳稳接住你的各种状态`
+                    },
+                    complementary: {
+                        title: `💫 互补适配：引导型恋人`,
+                        why: `对方能帮你在不同特质之间找到平衡点，给你方向感，让你的多面性不会变成混乱`,
+                        warning: `⚠️ 但注意不要过度依赖对方的引导，保留自己的主动性`
+                    },
+                    challenge: {
+                        title: `⚡️ 注意挑战：单一特质过强的人`,
+                        why: `对方可能无法理解你为什么会在不同状态间切换，觉得你「多变」「难以捉摸」`,
+                        tip: `提前和对方沟通你的特点，让TA知道这是你的正常状态，而不是「善变」`
+                    }
+                },
+                idealPartner: `能欣赏你多面性的安全型或引导型恋人`,
+                scenarioAdvice: [
+                    {
+                        scene: `对方对你的「多变」感到困惑`,
+                        reaction: `坦诚地告诉对方「我在不同情况下会有不同的状态，但我的心意是确定的」`,
+                        tip: `可以用具体的例子解释，让对方更容易理解`
+                    },
+                    {
+                        scene: `不同特质之间产生冲突`,
+                        reaction: `停下来问问自己「此刻我最想要什么」，优先让一个特质主导`,
+                        tip: `不要试图同时满足所有特质的需求，那样只会让你和对方都很累`
+                    },
+                    {
+                        scene: `对方喜欢稳定的相处模式`,
+                        reaction: `和对方约定一些「稳定时刻」，在这些时刻保持一致的状态，给对方安全感`,
+                        tip: `稳定和多样可以并存，关键是双方都清楚彼此的预期`
+                    }
+                ],
+                genderAdvice: {
+                    male: `作为 ${combinedName} 双维度的男生，你的多面性是很大的魅力！建议找一个心智成熟、能欣赏你不同侧面的女生，她会像挖宝藏一样发现你越来越多的优点。`,
+                    female: `作为 ${combinedName} 双维度的女生，你丰富而立体，很有吸引力！建议找一个自信、不害怕你多面性的男生，他会觉得和你在一起永远不会无聊。`
+                }
+            };
+            return multiCoreDetail;
         });
 
         const labelResult = computed(function() {
@@ -2712,7 +2955,19 @@ function initApp() {
         }
 
         function loadHistory() {
-            history.value = safeStorageGet(STORAGE_KEYS.TEST_HISTORY, []);
+            const dailyHistory = safeStorageGet(STORAGE_KEYS.TEST_HISTORY, []);
+            const stressHistory = safeStorageGet(STORAGE_KEYS.STRESS_HISTORY, []);
+            
+            // 合并两种历史记录，并标记类型
+            const mergedHistory = [
+                ...dailyHistory.map(item => ({ ...item, category: 'daily' })),
+                ...stressHistory.map(item => ({ ...item, category: 'stress' }))
+            ];
+            
+            // 按时间倒序排列
+            mergedHistory.sort((a, b) => Number(b.id) - Number(a.id));
+            
+            history.value = mergedHistory;
         }
 
         function saveToHistory(type, scores) {
@@ -2754,41 +3009,83 @@ function initApp() {
         }
 
         function loadHistoryById(id) {
-            const hist = safeStorageGet(STORAGE_KEYS.TEST_HISTORY, []);
-            const target = hist.find((item) => item.id === id);
+            // 先从日常测试历史找
+            let target = safeStorageGet(STORAGE_KEYS.TEST_HISTORY, []).find((item) => item.id === id);
+            let category = 'daily';
+            
+            // 如果没找到，从压力测试历史找
+            if (!target) {
+                target = safeStorageGet(STORAGE_KEYS.STRESS_HISTORY, []).find((item) => item.id === id);
+                category = 'stress';
+            }
+            
             if (!target) {
                 showToast('记录不存在或已删除');
                 return;
             }
+            
             trackingHistoryId.value = id;
-            gender.value = target.gender;
-            resultType.value = target.type;
-            finalScores.value = { 
-                anxiety: target.scores.anxiety, 
-                avoidance: target.scores.avoidance, 
-                secure: target.scores.secure, 
-                guide: target.scores.guide, 
-                mbti: target.mbti 
-            };
-            if (target.bonusAnswer) safeStorageSet(STORAGE_KEYS.BONUS_ANSWER, target.bonusAnswer);
-            currentView.value = 'result';
-            nextTick(function() {
-                var chartDom = document.getElementById('radarChart');
-                if (!chartDom) return;
-                if (radarChartInstance) { try { radarChartInstance.dispose(); } catch(e) {} }
-                radarChartInstance = echarts.init(chartDom);
-                radarChartInstance.setOption({
-                    radar: { indicator: scoreDimensions.map((d) => ({name: d.label, max: d.max})), shape: 'circle', splitNumber: 4, axisName: {color: '#5e2e2e', fontSize: 11}, splitArea: {areaStyle: {color: ['#fff5f0', '#fff5f0']}}, axisLine: {lineStyle: {color: '#f9c9c2'}}, splitLine: {lineStyle: {color: '#f9c9c2'}}},
-                    series: [{type: 'radar', data: [{value: scoreDimensions.map((d) => finalScores.value[d.key]), areaStyle: {color: 'rgba(249,201,194,0.3)'}, lineStyle: {color: '#f9c9c2'}, itemStyle: {color: '#f9c9c2'}}]}]
+            
+            if (category === 'daily') {
+                // 加载日常测试结果
+                gender.value = target.gender;
+                resultType.value = target.type;
+                finalScores.value = { 
+                    anxiety: target.scores.anxiety, 
+                    avoidance: target.scores.avoidance, 
+                    secure: target.scores.secure, 
+                    guide: target.scores.guide, 
+                    mbti: target.mbti 
+                };
+                if (target.bonusAnswer) safeStorageSet(STORAGE_KEYS.BONUS_ANSWER, target.bonusAnswer);
+                currentView.value = 'result';
+                nextTick(function() {
+                    var chartDom = document.getElementById('radarChart');
+                    if (!chartDom) return;
+                    if (radarChartInstance) { try { radarChartInstance.dispose(); } catch(e) {} }
+                    radarChartInstance = echarts.init(chartDom);
+                    radarChartInstance.setOption({
+                        radar: { indicator: scoreDimensions.map((d) => ({name: d.label, max: d.max})), shape: 'circle', splitNumber: 4, axisName: {color: '#5e2e2e', fontSize: 11}, splitArea: {areaStyle: {color: ['#fff5f0', '#fff5f0']}}, axisLine: {lineStyle: {color: '#f9c9c2'}}, splitLine: {lineStyle: {color: '#f9c9c2'}}},
+                        series: [{type: 'radar', data: [{value: scoreDimensions.map((d) => finalScores.value[d.key]), areaStyle: {color: 'rgba(249,201,194,0.3)'}, lineStyle: {color: '#f9c9c2'}, itemStyle: {color: '#f9c9c2'}}]}]
+                    });
                 });
-            });
+            } else {
+                // 加载压力测试结果
+                stressFinalScores.value = target.stressScores;
+                stressResult.value = target.result;
+                if (target.dailyScores) {
+                    stressDailyScores.value = target.dailyScores;
+                }
+                stressView.value = 'result';
+            }
         }
 
         function deleteHistoryById(id) {
-            const hist = safeStorageGet(STORAGE_KEYS.TEST_HISTORY, []).filter((item) => item.id !== id);
-            safeStorageSet(STORAGE_KEYS.TEST_HISTORY, hist);
-            history.value = hist;
-            showToast('已删除');
+            // 尝试从两种历史记录中删除
+            let deleted = false;
+            
+            // 从日常测试历史删除
+            let dailyHist = safeStorageGet(STORAGE_KEYS.TEST_HISTORY, []);
+            const originalDailyLength = dailyHist.length;
+            dailyHist = dailyHist.filter((item) => item.id !== id);
+            if (dailyHist.length !== originalDailyLength) {
+                safeStorageSet(STORAGE_KEYS.TEST_HISTORY, dailyHist);
+                deleted = true;
+            }
+            
+            // 从压力测试历史删除
+            let stressHist = safeStorageGet(STORAGE_KEYS.STRESS_HISTORY, []);
+            const originalStressLength = stressHist.length;
+            stressHist = stressHist.filter((item) => item.id !== id);
+            if (stressHist.length !== originalStressLength) {
+                safeStorageSet(STORAGE_KEYS.STRESS_HISTORY, stressHist);
+                deleted = true;
+            }
+            
+            if (deleted) {
+                loadHistory(); // 重新加载历史记录
+                showToast('已删除');
+            }
         }
 
         function startTest() {
@@ -2871,17 +3168,29 @@ function initApp() {
             if (stressSelectedIdx.value === -1) return;
             
             const question = stressCurrentQuestions.value[stressCurrentIndex.value];
-            stressAnswers.value.push({
+            const answer = {
                 questionId: question.id,
                 question: question,
                 scores: question.options[stressSelectedIdx.value].scores,
                 reaction: question.options[stressSelectedIdx.value].reaction,
                 optionIndex: stressSelectedIdx.value
-            });
+            };
+            
+            // 如果当前索引已有答案，替换它；否则添加新答案
+            if (stressAnswers.value.length > stressCurrentIndex.value) {
+                stressAnswers.value[stressCurrentIndex.value] = answer;
+            } else {
+                stressAnswers.value.push(answer);
+            }
             
             if (stressCurrentIndex.value < stressCurrentQuestions.value.length - 1) {
                 stressCurrentIndex.value++;
-                stressSelectedIdx.value = -1;
+                // 检查下一题是否已有答案
+                if (stressAnswers.value.length > stressCurrentIndex.value) {
+                    stressSelectedIdx.value = stressAnswers.value[stressCurrentIndex.value].optionIndex;
+                } else {
+                    stressSelectedIdx.value = -1;
+                }
             } else {
                 generateStressResult();
             }
@@ -2891,15 +3200,10 @@ function initApp() {
         const prevStressQuestion = () => {
             if (stressCurrentIndex.value === 0) return;
             
-            // 移除当前题的答案
-            if (stressAnswers.value.length > 0) {
-                stressAnswers.value.pop();
-            }
-            
             stressCurrentIndex.value--;
             
             // 恢复上一题的选项
-            if (stressAnswers.value.length > 0) {
+            if (stressAnswers.value.length > stressCurrentIndex.value) {
                 const prevAnswer = stressAnswers.value[stressCurrentIndex.value];
                 if (prevAnswer) {
                     stressSelectedIdx.value = prevAnswer.optionIndex;
@@ -2951,20 +3255,24 @@ function initApp() {
             try {
                 const record = {
                     id: 'stress_' + Date.now(),
+                    date: new Date().toLocaleDateString(),
                     timestamp: Date.now(),
                     type: 'stress',
                     dailyScores: stressDailyScores.value ? { ...stressDailyScores.value } : null,
                     stressScores: stressFinalScores.value ? { ...stressFinalScores.value } : null,
-                    amplification: stressResult.value && stressResult.value.amplification ? { ...stressResult.value.amplification } : null,
-                    weakScenarios: [...(stressResult.value && stressResult.value.weakScenarios || [])],
-                    strongScenarios: [...(stressResult.value && stressResult.value.strongScenarios || [])],
+                    result: stressResult.value ? { ...stressResult.value } : null,
                     selectedCategories: [...stressSelectedCategories.value],
-                    interpretation: stressResult.value && stressResult.value.interpretation ? { ...stressResult.value.interpretation } : null,
                     answers: [...stressAnswers.value]
                 };
                 
-                history.value.unshift(record);
-                safeStorageSet(STORAGE_KEYS.history, history.value);
+                // 保存到压力测试专用历史
+                const stressHist = safeStorageGet(STORAGE_KEYS.STRESS_HISTORY, []);
+                stressHist.unshift(record);
+                if (stressHist.length > 10) stressHist.splice(10);
+                safeStorageSet(STORAGE_KEYS.STRESS_HISTORY, stressHist);
+                
+                // 更新内存中的历史记录
+                loadHistory();
             } catch (e) {
                 console.error('保存压力测试历史失败:', e);
             }
@@ -3250,7 +3558,7 @@ function initApp() {
         function generatePoster() {
             const container = document.getElementById('posterContainer');
             if (!container) return;
-            const detail = typeDetails[resultType.value];
+            const detail = currentTypeDetails.value;
             if (!detail) {
                 showToast('海报数据不完整，请重试');
                 return;
@@ -3383,7 +3691,7 @@ function initApp() {
         }
 
         function shareResult() {
-            const typeName = typeDetails[resultType.value]?.name || '';
+            const typeName = currentTypeDetails.value?.name || typeDetails[resultType.value]?.name || '';
             if (navigator.share) {
                 navigator.share({
                     title: '我的恋爱人格测试',
@@ -3444,13 +3752,12 @@ function initApp() {
             if (finalScores.value) {
                 stressDailyScores.value = { ...finalScores.value };
             }
-            currentView.value = 'home';
             stressView.value = 'select';
         }
 
         function clearHistory() {
             history.value = [];
-            [STORAGE_KEYS.TEST_HISTORY, STORAGE_KEYS.LOVE_TEST_HISTORY, STORAGE_KEYS.LOVE_TEST_RESULT].forEach(key => {
+            [STORAGE_KEYS.TEST_HISTORY, STORAGE_KEYS.LOVE_TEST_HISTORY, STORAGE_KEYS.LOVE_TEST_RESULT, STORAGE_KEYS.STRESS_HISTORY].forEach(key => {
                 try { localStorage.removeItem(key); } catch(e) { /* ignore */ }
             });
             showToast('历史记录已清空');
@@ -3474,6 +3781,37 @@ function initApp() {
         function getDimScoreStyle(mult) {
             if (Math.abs(mult - 1) < 0.1) return 'border:2px solid #52c41a; border-radius:6px;';
             return '';
+        }
+
+        function getHistoryTypeInfo(item) {
+            if (item.type === 'stress' || !item.scores) {
+                return { emoji: '', name: '' };
+            }
+            // 尝试通过分数判断是否为双核/多核型
+            try {
+                const personalityResult = unifiedPersonalityType(item.scores);
+                if (personalityResult.subtype === 'multi-core') {
+                    const dimToFullName = {
+                        secure: '安全型',
+                        anxiety: '焦虑型',
+                        avoidance: '回避型',
+                        guide: '引导型'
+                    };
+                    const tiedFullNames = personalityResult.tiedDimensions.map(d => dimToFullName[d]);
+                    return {
+                        emoji: personalityResult.tiedDimensions.length === 2 ? '⚡' : '🌟',
+                        name: `${tiedFullNames.join(' + ')} 双核型`
+                    };
+                }
+            } catch (e) {
+                // 忽略错误，使用默认值
+            }
+            // 使用 typeDetails 作为后备方案
+            const detail = typeDetails[item.type];
+            return {
+                emoji: detail?.emoji || '',
+                name: detail?.name || ''
+            };
         }
 
         onMounted(function() {
@@ -3511,7 +3849,8 @@ function initApp() {
                     genderAdviceText, testDuration, formatScore, formatNumber, secondaryType, labelResult, bonusResult, trackingHistoryId, isHistoryView, formatDuration, getScoreLevel, getHeaderStyle, getMbtiSectionStyle, formatBlindspot,
                     estimatedTimeLeft, isLoading, personalizedInterpretation, tensionAnalysis, showAbandonConfirm,
                     startTest, confirmGender, goBack, selectOption, nextQuestion, retest, goHome, goToStressTest, shareResult,
-                    generatePoster, typeDetails, formatDate, loadHistoryById, deleteHistoryById, clearHistory, abandonTest, confirmAbandon, cancelAbandon,
+                    generatePoster, typeDetails, currentTypeDetails, personalityResult, formatDate, loadHistoryById, deleteHistoryById, clearHistory, abandonTest, confirmAbandon, cancelAbandon,
+                    getHistoryTypeInfo,
                     
                     // 压力测试
                     stressView, stressSelectedCategories, stressCurrentIndex, stressSelectedIdx, stressAnswers, 
@@ -3874,9 +4213,9 @@ function initApp() {
                     <div style="position:absolute;top:10px;right:10px;">
                         <span v-if="isHistoryView" style="background:#fff;border-radius:10px;padding:2px 10px;font-size:11px;color:#aaa;">📜 历史记录</span>
                     </div>
-                    <div class="result-emoji">{{ typeDetails[resultType] ? typeDetails[resultType].emoji : '' }}</div>
+                    <div class="result-emoji">{{ currentTypeDetails ? currentTypeDetails.emoji : '' }}</div>
                     <h2>你的恋爱人格</h2>
-                    <div class="result-type">{{ typeDetails[resultType] ? typeDetails[resultType].name : '' }}</div>
+                    <div class="result-type">{{ currentTypeDetails ? currentTypeDetails.name : '' }}</div>
                 </div>
 
                 <div v-if="finalScores.mbti" class="mbti-section" :style="getMbtiSectionStyle(finalScores.mbti)">
@@ -3890,10 +4229,10 @@ function initApp() {
                 </div>
 
                 <div class="card">
-                    <div class="result-desc">{{ typeDetails[resultType] ? typeDetails[resultType].desc : '' }}</div>
-                    <div v-if="typeDetails[resultType] && typeDetails[resultType].positiveView" class="positive-view-card">
+                    <div class="result-desc">{{ currentTypeDetails ? currentTypeDetails.desc : '' }}</div>
+                    <div v-if="currentTypeDetails && currentTypeDetails.positiveView" class="positive-view-card">
                         <div class="positive-view-label">💡 正向解读</div>
-                        <div class="positive-view-text">{{ typeDetails[resultType].positiveView }}</div>
+                        <div class="positive-view-text">{{ currentTypeDetails.positiveView }}</div>
                     </div>
 
                     <div v-if="finalScores.mbti" class="mbti-detail-section">
@@ -3911,23 +4250,23 @@ function initApp() {
                         </div>
                     </div>
 
-                    <div v-if="typeDetails[resultType] && typeDetails[resultType].compatibility && typeof typeDetails[resultType].compatibility === 'object'" class="compatibility-section">
+                    <div v-if="currentTypeDetails && currentTypeDetails.compatibility && typeof currentTypeDetails.compatibility === 'object'" class="compatibility-section">
                         <div class="compatibility-card best">
-                            <div class="compatibility-title">{{ typeDetails[resultType].compatibility.best.title }}</div>
-                            <div class="compatibility-why">{{ typeDetails[resultType].compatibility.best.why }}</div>
-                            <div class="compatibility-scenario">💭 相处示例：{{ typeDetails[resultType].compatibility.best.scenario }}</div>
+                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.best.title }}</div>
+                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.best.why }}</div>
+                            <div class="compatibility-scenario">💭 相处示例：{{ currentTypeDetails.compatibility.best.scenario }}</div>
                         </div>
                         
                         <div class="compatibility-card complementary">
-                            <div class="compatibility-title">{{ typeDetails[resultType].compatibility.complementary.title }}</div>
-                            <div class="compatibility-why">{{ typeDetails[resultType].compatibility.complementary.why }}</div>
-                            <div v-if="typeDetails[resultType].compatibility.complementary.warning" class="compatibility-warning">{{ typeDetails[resultType].compatibility.complementary.warning }}</div>
+                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.complementary.title }}</div>
+                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.complementary.why }}</div>
+                            <div v-if="currentTypeDetails.compatibility.complementary.warning" class="compatibility-warning">{{ currentTypeDetails.compatibility.complementary.warning }}</div>
                         </div>
                         
                         <div class="compatibility-card challenge">
-                            <div class="compatibility-title">{{ typeDetails[resultType].compatibility.challenge.title }}</div>
-                            <div class="compatibility-why">{{ typeDetails[resultType].compatibility.challenge.why }}</div>
-                            <div v-if="typeDetails[resultType].compatibility.challenge.tip" class="compatibility-tip">💡 {{ typeDetails[resultType].compatibility.challenge.tip }}</div>
+                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.challenge.title }}</div>
+                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.challenge.why }}</div>
+                            <div v-if="currentTypeDetails.compatibility.challenge.tip" class="compatibility-tip">💡 {{ currentTypeDetails.compatibility.challenge.tip }}</div>
                         </div>
                     </div>
 
@@ -3990,15 +4329,15 @@ function initApp() {
                                 <div v-if="detailTab === 'traits'">
                                     <div class="detail-card">
                                         <h4>🌟 核心特质</h4>
-                                        <ul><li v-for="t in (typeDetails[resultType] ? typeDetails[resultType].traits : [])" :key="t">{{ t }}</li></ul>
+                                        <ul><li v-for="t in (currentTypeDetails ? currentTypeDetails.traits : [])" :key="t">{{ t }}</li></ul>
                                     </div>
                                     <div class="detail-card">
                                         <h4>💪 你的优势</h4>
-                                        <ul><li v-for="s in (typeDetails[resultType] ? typeDetails[resultType].strengths : [])" :key="s">{{ s }}</li></ul>
+                                        <ul><li v-for="s in (currentTypeDetails ? currentTypeDetails.strengths : [])" :key="s">{{ s }}</li></ul>
                                     </div>
                                     <div class="detail-card">
                                         <h4>🌱 成长空间</h4>
-                                        <ul><li v-for="g in (typeDetails[resultType] ? typeDetails[resultType].growth : [])" :key="g">{{ g }}</li></ul>
+                                        <ul><li v-for="g in (currentTypeDetails ? currentTypeDetails.growth : [])" :key="g">{{ g }}</li></ul>
                                     </div>
                                 </div>
                                 <div v-if="detailTab === 'advice'">
@@ -4006,9 +4345,9 @@ function initApp() {
                                         <h4>{{ gender === 'male' ? '👦 给男生的专属建议' : '👧 给女生的专属建议' }}</h4>
                                         <p>{{ genderAdviceText }}</p>
                                     </div>
-                                    <div v-if="typeDetails[resultType] && typeDetails[resultType].scenarioAdvice" class="detail-card">
+                                    <div v-if="currentTypeDetails && currentTypeDetails.scenarioAdvice" class="detail-card">
                                         <h4>🎭 场景化建议</h4>
-                                        <div v-for="(sa, saIdx) in typeDetails[resultType].scenarioAdvice" :key="saIdx" class="scenario-advice-item">
+                                        <div v-for="(sa, saIdx) in currentTypeDetails.scenarioAdvice" :key="saIdx" class="scenario-advice-item">
                                             <div class="scenario-advice-scene">{{ sa.scene }}</div>
                                             <div class="scenario-advice-reaction"><strong>你的反应：</strong>{{ sa.reaction }}</div>
                                             <div class="scenario-advice-tip"><strong>优化做法：</strong>{{ sa.tip }}</div>
@@ -4043,7 +4382,11 @@ function initApp() {
                     </div>
                     <div v-for="(item, idx) in history" :key="idx" class="history-item" @click="loadHistoryById(item.id)">
                         <div class="history-header">
-                            <span class="history-type">{{ item.type === 'stress' ? '🌊 压力测试' : (typeDetails[item.type] ? typeDetails[item.type].emoji + ' ' + typeDetails[item.type].name : '') }}{{ item.gender ? (item.gender === 'male' ? ' 👦' : ' 👧') : '' }}<span v-if="item.mbti && item.mbti.code" style="margin-left:8px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;background:linear-gradient(135deg,#98D2C0,#F7C59F,#B5C9E2,#FFA07A);color:#fff;">{{ item.mbti.code }}</span>
+                            <span class="history-type">
+                                {{ item.type === 'stress' ? '🌊 压力测试' : (getHistoryTypeInfo(item).emoji + ' ' + getHistoryTypeInfo(item).name) }}
+                                {{ item.gender ? (item.gender === 'male' ? ' 👦' : ' 👧') : '' }}
+                                <span v-if="item.mbti && item.mbti.code" style="margin-left:8px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;background:linear-gradient(135deg,#98D2C0,#F7C59F,#B5C9E2,#FFA07A);color:#fff;">{{ item.mbti.code }}</span>
+                            </span>
                             <div style="display:flex;gap:8px;align-items:center;">
                                 <span class="history-date">{{ item.date || formatDate(item.id) }}</span>
                                 <button style="border:0;background:transparent;color:#aaa;cursor:pointer;font-size:13px;padding:2px 6px;" @click.stop="deleteHistoryById(item.id)"><i class="fa fa-trash"></i></button>
