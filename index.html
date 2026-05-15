@@ -454,6 +454,15 @@
             height: 100%;
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 20px;
+            position: relative;
+        }
+        .progress-bar.progress-complete {
+            animation: progressGlow 1s ease;
+        }
+        @keyframes progressGlow {
+            0% { box-shadow: 0 0 0 0 rgba(255,138,111,0.4); }
+            50% { box-shadow: 0 0 20px 10px rgba(255,138,111,0.2); }
+            100% { box-shadow: 0 0 0 0 rgba(255,138,111,0); }
         }
 
         .score-item {
@@ -558,6 +567,147 @@
             padding: 4px 10px;
             border-radius: 20px;
         }
+
+        /* ==================== 场景卡片样式（紧凑版）==================== */
+        .scenario-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .scenario-card {
+            background: #fff;
+            border: 2px solid #f0e2da;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(94, 58, 48, 0.1);
+            border-color: #d9a090;
+        }
+
+        .scenario-card.selected {
+            border-color: #5e3a30;
+            box-shadow: 0 4px 12px rgba(94, 58, 48, 0.15);
+        }
+
+        .scenario-visual {
+            height: 70px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .scenario-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+            opacity: 0.85;
+            z-index: 1;
+        }
+
+        .scenario-visual .visual-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            opacity: 0.15;
+        }
+
+        .scenario-overlay {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            padding: 3px 10px;
+            border-radius: 16px;
+            z-index: 2;
+        }
+
+        .scenario-overlay .question-count {
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .scenario-info {
+            padding: 10px 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            z-index: 2;
+        }
+
+        .scenario-info h4 {
+            margin: 0 0 4px 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #5b4c44;
+        }
+
+        .scenario-info p {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .scenario-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: auto;
+        }
+
+        .scenario-tags span {
+            font-size: 10px;
+            color: #777;
+            background: #f5e8e0;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .check-indicator {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #5e3a30;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 3;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            animation: checkPop 0.3s ease;
+        }
+
+        @keyframes checkPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
         .option-prefix {
             font-weight: bold;
             background: #fff0e6;
@@ -575,8 +725,6 @@
         .option-item.selected .option-prefix {
             background: var(--primary);
             color: white;
-            transform: scale(1.1);
-            -webkit-transform: scale(1.1);
         }
         .option-text { flex: 1; font-size: 16px; color: #4a2e26; line-height: 1.4; }
         
@@ -1531,6 +1679,18 @@ const stressQuestions = [
         ]
     },
     {
+        id: 'boundary_3',
+        category: '边界冲突',
+        scenario: "对方习惯事事替你做决定，从不顾及你内心真实想法与喜好。",
+        weight: 2,
+        options: [
+            { text: "既不想被安排，又害怕直言后惹对方不快", scores: { anxiety: 2 }, reaction: '纠结隐忍' },
+            { text: "渐渐懒得争辩迎合，表面顺从配合，内心慢慢拉开距离", scores: { avoidance: 2 }, reaction: '内心疏离' },
+            { text: "直接明确拒绝独断安排，主动定下凡事互相商议的相处模式", scores: { guide: 2 }, reaction: '强势立规' },
+            { text: "说出自己的喜好与选择，坚守主见，互不勉强彼此", scores: { secure: 2 }, reaction: '从容表态' }
+        ]
+    },
+    {
         id: 'intimacy_1', category: '情感落差',
         scenario: '你生病发烧到38度，对方只是微信说了「多喝热水」，然后继续打游戏。',
         weight: 2,
@@ -1565,6 +1725,18 @@ const stressQuestions = [
         ]
     },
     {
+        id: 'gap_1',
+        category: '情感落差',
+        scenario: "热恋期过后，对方态度明显变淡，再也没有从前那般热情主动。",
+        weight: 2,
+        options: [
+            { text: "难以接受这种变化，心里十分失落，频繁纠结对方是否不爱了", scores: { anxiety: 2 }, reaction: '满心失落' },
+            { text: "看清态度变化后，收回自己的真心，不再一如既往热忱付出", scores: { avoidance: 2 }, reaction: '收回热忱' },
+            { text: "坦诚说出自己的感受，一起找回舒服长久的相处状态", scores: { guide: 2 }, reaction: '坦诚倾诉' },
+            { text: "明白感情终会归于平淡，放平心态接纳正常的状态转变", scores: { secure: 2 }, reaction: '接纳平淡' }
+        ]
+    },
+    {
         id: 'external_1',
         category: '外部压力',
         scenario: '你们计划买房，但对方突然说家里要用钱，首付要推迟。',
@@ -1586,6 +1758,18 @@ const stressQuestions = [
             { text: '嘴上说着没关系，心里却悄悄降低期待，不再规划未来', scores: { avoidance: 2 } },
             { text: '先陪TA吃顿饭、聊聊天，等TA缓过来再聊工作的事', scores: { guide: 2 } },
             { text: '先好好安抚对方情绪，告诉TA我愿意一直陪着你', scores: { secure: 2 } }
+        ]
+    },
+    {
+        id: 'pressure_5',
+        category: '外部压力',
+        scenario: "对方身边出现优质异性追求者，让你倍感感情危机。",
+        weight: 2,
+        options: [
+            { text: "极度缺乏安全感，整日胡思乱想，害怕对方动心变心", scores: { anxiety: 2 }, reaction: '惴惴不安' },
+            { text: "不愿表露在意，故作无所谓，悄悄降低自己的情感投入", scores: { avoidance: 2 }, reaction: '故作淡然' },
+            { text: "大方表明自己的在意，和对方明确划清与异性的距离", scores: { guide: 2 }, reaction: '明确立场' },
+            { text: "信任彼此之间的感情，自信从容，不会无端猜忌内耗", scores: { secure: 2 }, reaction: '自信笃定' }
         ]
     },
     {
@@ -1641,7 +1825,7 @@ const stressQuestions = [
         { text: '被伤透后慢慢死心，也学着收起热情不再主动', scores: { avoidance: 2 }, reaction: '关闭内心' },
         { text: '直接指出这种冷暴力伤人，约定有问题要用语言沟通', scores: { guide: 2 }, reaction: '破局' },
         { text: '清楚这是对方的情绪问题，不会全盘否定自己', scores: { secure: 2 }, reaction: '自洽' }
-    ]
+        ]
     }
 ];
 
@@ -1650,69 +1834,196 @@ const stressQuestions = [
 //   统一倍率：>1.3 显著放大 | >0.9 基本持平/增强
 //   相对阈值：用个人四维均值 avg 替代固定 >5/>8/>10
 const stressDynamicInterpretations = [
+    // ===== 第一层：强制优先规则（不可被覆盖）=====
     {
-        id: 'rule_8',
-        priority: 10,
-        condition: (daily, stress, avg) =>
+        id: 'emergency_fearful',
+        priority: 100,
+        forceMatch: true,
+        condition: (daily, stress, avg) => 
             daily.anxiety > avg * 0.7 && daily.avoidance > avg * 0.7 &&
-            stress.anxiety > daily.anxiety * 1.3 &&
-            stress.avoidance > daily.avoidance * 1.3,
+            stress.anxiety > daily.anxiety * 1.3 && stress.avoidance > daily.avoidance * 1.3,
         title: "「全面失控」型",
-        text: "你在压力下会同时启动焦虑和回避——心里急得要死，表面却冷漠得要死。这种矛盾会让伴侣很困惑：「TA到底在不在乎？」——你在乎，太在乎了，只是你不知道该怎么表达。"
+        text: "你在压力下会同时启动焦虑和回避——心里急得要死，表面却冷漠得要死。这种矛盾会让伴侣很困惑：「TA到底在不在乎？」——你在乎，太在乎了，只是你不知道该怎么表达。",
+        matchScore: (daily, stress, avg) => {
+            const anxietyBoost = Math.min((stress.anxiety / Math.max(daily.anxiety, 0.1) - 1) / 0.5, 1);
+            const avoidanceBoost = Math.min((stress.avoidance / Math.max(daily.avoidance, 0.1) - 1) / 0.5, 1);
+            return (anxietyBoost + avoidanceBoost) / 2;
+        }
     },
+    
+    // ===== 第二层：高优先级规则（需竞争匹配度）=====
     {
-        id: 'rule_4',
-        priority: 8,
-        condition: (daily, stress, avg) =>
-            daily.anxiety > avg * 0.7 &&
-            stress.anxiety > daily.anxiety * 1.3,
+        id: 'anxiety_amplifier',
+        priority: 80,
+        condition: (daily, stress, avg) => daily.anxiety > avg * 0.7 && stress.anxiety > daily.anxiety * 1.3,
         title: "压力下的「情绪放大器」",
-        text: "你的焦虑在压力下会指数级放大。平时的小不安会变成大恐慌。建议提前和伴侣约定「安全词」，当你开始过度反应时，TA可以温柔提醒。"
+        text: "你的焦虑在压力下会指数级放大。平时的小不安会变成大恐慌。建议提前和伴侣约定「安全词」，当你开始过度反应时，TA可以温柔提醒。",
+        matchScore: (daily, stress, avg) => {
+            const boost = stress.anxiety / Math.max(daily.anxiety, 0.1);
+            return Math.min((boost - 1) / 2, 1);
+        }
     },
+    
     {
-        id: 'rule_2',
-        priority: 7,
-        condition: (daily, stress, avg) =>
-            daily.avoidance > avg * 0.7 &&
-            stress.avoidance > daily.avoidance * 1.3,
+        id: 'avoidance_withdrawer',
+        priority: 70,
+        condition: (daily, stress, avg) => daily.avoidance > avg * 0.7 && stress.avoidance > daily.avoidance * 1.3,
         title: "压力下的「断联专家」",
-        text: "你越难受，越会消失。这不是不爱，是你的生存本能。但伴侣会解读为冷暴力。你需要提前告诉对方：「我消失时，不是在惩罚你，是在恢复自己。」"
+        text: "你越难受，越会消失。这不是不爱，是你的生存本能。但伴侣会解读为冷暴力。你需要提前告诉对方：「我消失时，不是在惩罚你，是在恢复自己。」",
+        matchScore: (daily, stress, avg) => {
+            const boost = stress.avoidance / Math.max(daily.avoidance, 0.1);
+            return Math.min((boost - 1) / 2, 1);
+        }
     },
+    
+    // ===== 新增：安全+引导双高组合（原系统缺失）=====
+    {
+        id: 'secure_guide_synergy',
+        priority: 65,
+        condition: (daily, stress, avg) => 
+            daily.secure > avg * 0.8 && daily.guide > avg * 0.8 &&
+            stress.guide > daily.guide * 1.1,
+        title: "「稳中带舵」型",
+        text: "你平时既稳定又有主见，压力下反而更想掌控局面。这不是焦虑，而是你的「危机领导力」被激活了。但要注意：不是所有人都想在危机中被「带领」，有些人只想被「拥抱」。",
+        matchScore: (daily, stress, avg) => {
+            const guideBoost = stress.guide / Math.max(daily.guide, 0.1);
+            const secureStability = 1 - Math.abs(stress.secure - daily.secure) / Math.max(daily.secure, 1);
+            return (Math.min((guideBoost - 1) / 0.5, 1) + secureStability) / 2;
+        }
+    },
+    
+    // ===== 新增：安全型日常 + 焦虑压力（原系统缺失）=====
+    {
+        id: 'secure_surface_anxiety_under',
+        priority: 60,
+        condition: (daily, stress, avg) => 
+            daily.secure > avg && daily.anxiety < avg * 0.5 &&
+            stress.anxiety > daily.anxiety * 2,
+        title: "平静湖面下的暗涌",
+        text: "你平时给人很稳的印象，但压力下会突然变得敏感多疑。伴侣可能会困惑：「TA平时不这样啊？」——这不是伪装，是你的应激保护机制启动了。",
+        matchScore: (daily, stress, avg) => {
+            const dailySecureRatio = daily.secure / (avg * 2);
+            const anxietyContrast = Math.min(stress.anxiety / Math.max(daily.anxiety, 0.5) / 3, 1);
+            return (dailySecureRatio + anxietyContrast) / 2;
+        }
+    },
+    
+    // ===== 新增：引导型日常 + 回避压力（原系统缺失）=====
+    {
+        id: 'guide_avoidance_conflict',
+        priority: 55,
+        condition: (daily, stress, avg) => 
+            daily.guide > avg * 0.8 && daily.avoidance < avg * 0.5 &&
+            stress.avoidance > daily.avoidance * 2,
+        title: "「想带却逃」型",
+        text: "你平时习惯带领关系，但压力下却想撤退。这种矛盾让你既自责又疲惫：「我应该解决问题，但我现在只想消失。」——允许自己偶尔不做「领导者」，也是一种成长。",
+        matchScore: (daily, stress, avg) => {
+            const guideDominance = daily.guide / (avg * 1.5);
+            const avoidanceSurge = Math.min(stress.avoidance / Math.max(daily.avoidance, 0.5) / 2, 1);
+            return (guideDominance + avoidanceSurge) / 2;
+        }
+    },
+    
+    // ===== 新增：均衡型日常 + 任意维度显著变化 =====
+    {
+        id: 'balanced_shift',
+        priority: 50,
+        condition: (daily, stress, avg) => {
+            const dailyRange = Math.max(daily.anxiety, daily.avoidance, daily.secure, daily.guide) - 
+                               Math.min(daily.anxiety, daily.avoidance, daily.secure, daily.guide);
+            return dailyRange < avg * 0.3;
+        },
+        title: "「本色出演」型",
+        text: "你的各项特质很均衡，压力下也没有某个维度特别失控。这种「一致性」说明你很了解自己——无论顺境逆境，你都是那个稳定的你。",
+        matchScore: (daily, stress, avg) => {
+            const dailyValues = Object.values(daily);
+            const stressValues = Object.values(stress);
+            const dailyRange = Math.max(...dailyValues) - Math.min(...dailyValues);
+            const stressRange = Math.max(...stressValues) - Math.min(...stressValues);
+            const dailyBalance = 1 - Math.min(dailyRange / (avg * 2), 1);
+            const stressBalance = 1 - Math.min(stressRange / (avg * 2), 1);
+            return (dailyBalance + stressBalance) / 2;
+        }
+    },
+    
     {
         id: 'rule_guide',
-        priority: 6,
+        priority: 45,
         condition: (daily, stress, avg) =>
             daily.guide > avg * 0.7 &&
             stress.guide > daily.guide * 1.1,
         title: "压力下更强主导",
-        text: "你在压力下不但不退缩，反而更主动。这种「危机指挥官」能力让人安心，但要注意：不是所有人都想在危机中被「带领」，有些人只想被「拥抱」。"
+        text: "你在压力下不但不退缩，反而更主动。这种「危机指挥官」能力让人安心，但要注意：不是所有人都想在危机中被「带领」，有些人只想被「拥抱」。",
+        matchScore: (daily, stress, avg) => {
+            const boost = stress.guide / Math.max(daily.guide, 0.1);
+            return Math.min((boost - 1) / 1.5, 1);
+        }
     },
-    {
-        id: 'rule_1',
-        priority: 5,
-        condition: (daily, stress, avg) =>
-            daily.secure > avg * 1.0 &&
-            stress.anxiety > daily.anxiety * 1.3,
-        title: "平静湖面下的暗涌",
-        text: "你平时给人很稳的印象，但压力下会突然变得敏感多疑。伴侣可能会困惑：「TA平时不这样啊？」——这不是伪装，是你的应激保护机制启动了。"
-    },
+    
     {
         id: 'rule_5',
-        priority: 4,
+        priority: 40,
         condition: (daily, stress, avg) =>
             daily.secure > avg * 0.7 &&
             stress.secure > daily.secure * 0.9,
         title: "「稳如泰山」型",
-        text: "无论日常还是压力，你都能保持稳定的情绪输出。这是极其稀缺的品质。你的伴侣很幸运，但别忘了——你也需要被照顾。"
+        text: "无论日常还是压力，你都能保持稳定的情绪输出。这是极其稀缺的品质。你的伴侣很幸运，但别忘了——你也需要被照顾。",
+        matchScore: (daily, stress, avg) => {
+            const stability = stress.secure / Math.max(daily.secure, 0.1);
+            return Math.min(stability, 1);
+        }
     },
+    
+    // ===== 兜底规则 =====
     {
-        id: 'rule_7',
+        id: 'default_consistent',
         priority: 1,
         condition: () => true,
         title: "「内外一致」型",
-        text: "你在日常和压力下的表现相对一致，这说明你对自己很接纳。无论表现如何，这都是真实的你——继续保持这份真实就好。"
+        text: "你在日常和压力下的表现相对一致，这说明你对自己很接纳。无论表现如何，这都是真实的你——继续保持这份真实就好。",
+        matchScore: () => 0.1
     }
 ];
+
+// ==================== 压力场景元数据 ====================
+const stressCategoryMeta = {
+    '信任危机': {
+        icon: '🔒',
+        description: '关于忠诚、边界和安全感的测试',
+        tags: ['安全感', '边界', '试探'],
+        color: '#ff6b6b'
+    },
+    '边界冲突': {
+        icon: '🚧',
+        description: '测试你如何处理空间和边界矛盾',
+        tags: ['空间', '边界', '尊重'],
+        color: '#ff9a6b'
+    },
+    '情感落差': {
+        icon: '💔',
+        description: '期待与现实不对等时的反应模式',
+        tags: ['期待', '回应', '失望'],
+        color: '#f7c59f'
+    },
+    '冲突处理': {
+        icon: '⚔️',
+        description: '面对正面冲突时的应对方式',
+        tags: ['沟通', '冲突', '解决'],
+        color: '#ff6b9d'
+    },
+    '外部压力': {
+        icon: '🌊',
+        description: '外界干扰时的关系稳定性测试',
+        tags: ['压力', '外部', '应对'],
+        color: '#6bb3ff'
+    },
+    '关系升级': {
+        icon: '💍',
+        description: '承诺和未来规划时的压力反应',
+        tags: ['承诺', '未来', '规划'],
+        color: '#b5c9e2'
+    }
+};
 
 // ==================== 压力场景描述映射 ====================
 const stressWeakScenarioDescriptions = {
@@ -1732,6 +2043,115 @@ const stressStrongScenarioDescriptions = {
     '外部压力': '当外界因素（家庭、经济、社交）介入关系时，你的应对能力相对稳定，可以聚焦两人关系',
     '关系升级': '在涉及未来规划、承诺的压力场景中，你的状态相对稳定，可以给彼此多一些时间'
 };
+
+// ==================== 动态文案生成系统 V3 ====================
+// 当规则库无法完美匹配时，基于实际数据动态生成解读
+function generateDynamicInterpretation(daily, stress, avg) {
+    const changes = [];
+    const dimensions = [
+        { key: 'anxiety', label: '焦虑', icon: '😰', color: '#F7C59F' },
+        { key: 'avoidance', label: '回避', icon: '🏃', color: '#B5C9E2' },
+        { key: 'secure', label: '安全', icon: '🌿', color: '#98D2C0' },
+        { key: 'guide', label: '引导', icon: '✨', color: '#FFA07A' }
+    ];
+    
+    // 计算各维度变化
+    dimensions.forEach(dim => {
+        const dailyScore = daily[dim.key] || 0;
+        const stressScore = stress[dim.key] || 0;
+        let ratio;
+        if (dailyScore > 0) {
+            ratio = stressScore / dailyScore;
+        } else if (stressScore > 0) {
+            ratio = 999;
+        } else {
+            ratio = 1;
+        }
+        
+        const changePct = ((ratio - 1) * 100).toFixed(0);
+        
+        if (ratio > 1.15) {
+            changes.push({
+                dim: dim.label,
+                icon: dim.icon,
+                key: dim.key,
+                direction: 'up',
+                magnitude: ratio,
+                changePct: '+' + changePct + '%',
+                text: `${dim.icon} 你的${dim.label}倾向在压力下增强了 ${changePct}%`
+            });
+        } else if (ratio < 0.85) {
+            changes.push({
+                dim: dim.label,
+                icon: dim.icon,
+                key: dim.key,
+                direction: 'down',
+                magnitude: 1 / ratio,
+                changePct: changePct + '%',
+                text: `${dim.icon} 你的${dim.label}倾向在压力下减弱了 ${Math.abs(changePct)}%`
+            });
+        }
+    });
+    
+    changes.sort((a, b) => b.magnitude - a.magnitude);
+    
+    if (changes.length === 0) {
+        return {
+            title: "「稳如磐石」型",
+            text: `无论日常还是压力，你的各项特质都保持稳定（变化幅度 < 15%）。这种「一致性」说明你的内心有很强的整合能力——顺境逆境，你都是那个真实的你。\n\n💡 你的稳定性是亲密关系中极其稀缺的品质，伴侣会因为你而感到安心。但别忘了，偶尔也允许自己波动一下，完美稳定有时候也会让人觉得「距离感」。`,
+            confidence: 'high',
+            isDynamic: true
+        };
+    }
+    
+    const topChange = changes[0];
+    const titleMap = {
+        'up': {
+            'anxiety': "压力下的「情绪放大器」",
+            'avoidance': "压力下的「断联专家」",
+            'secure': "压力下更「稳得住」",
+            'guide': "压力下的「危机指挥官」"
+        },
+        'down': {
+            'anxiety': "压力下「更放得下」",
+            'avoidance': "压力下「更愿意靠近」",
+            'secure': "压力下「灵活应变」",
+            'guide': "压力下「学会放手」"
+        }
+    };
+    
+    const title = titleMap[topChange.direction]?.[topChange.key] || "「多维变化」型";
+    
+    let text = `你在压力下的反应模式很有特点：\n\n`;
+    changes.slice(0, 3).forEach(c => {
+        text += `• ${c.text}\n`;
+    });
+    
+    const upDims = changes.filter(c => c.direction === 'up').map(c => c.key);
+    const downDims = changes.filter(c => c.direction === 'down').map(c => c.key);
+    
+    if (upDims.includes('anxiety') && upDims.includes('avoidance')) {
+        text += `\n💡 **内心拉扯预警**：同时增强焦虑和回避说明你在压力下容易「想抓住又想逃跑」。这种矛盾会让伴侣困惑。建议提前和TA约定一个「安全信号」（比如一句特定的话），让TA知道你需要被拥抱而不是被追问。`;
+    } else if (upDims.includes('guide') && downDims.includes('secure')) {
+        text += `\n💡 **过度掌控预警**：你越想掌控局面，内心越不安。提醒自己在「带领」之前，先「稳住」自己。试着对伴侣说「我现在有点乱，需要你先抱抱我」，而不是立刻进入「解决问题模式」。`;
+    } else if (upDims.includes('anxiety') && downDims.includes('secure')) {
+        text += `\n💡 **安全感波动**：你平时很稳，但压力下容易不安。这不是「你变了」，而是你的应激保护机制启动了。提前告诉伴侣：「我压力大时可能会多想，那时候你只需要确认一下就好。」`;
+    } else if (changes.length === 1) {
+        text += `\n💡 你的变化很聚焦，这说明你的压力反应模式很清晰——了解它，就是掌控它的第一步。试着在${topChange.dim}升高时，用深呼吸或写下来代替立刻反应。`;
+    } else if (upDims.length > downDims.length) {
+        text += `\n💡 你在压力下整体更「活跃」了——多个维度都在增强。这说明你是个「高敏感」的人，压力下能量会外放。给自己设定一个「冷静期」（比如15分钟），避免在情绪峰值做决定。`;
+    } else {
+        text += `\n💡 你的压力反应是多维度的，没有单一标签能概括你。这种复杂性正是你独特的地方——接纳它，然后选择最适合的应对策略。建议每次压力事件后，花2分钟记录「我当时做了什么、效果如何」，逐步建立自我认知。`;
+    }
+    
+    return {
+        title,
+        text,
+        confidence: changes.length >= 2 ? 'medium' : 'high',
+        isDynamic: true,
+        changes: changes.map(c => ({ dim: c.dim, direction: c.direction, changePct: c.changePct }))
+    };
+}
 
 // ==================== 压力测试核心算法 ====================
 function calculateStressPattern(answers, dailyScores) {
@@ -2734,6 +3154,8 @@ function initApp() {
         const stressResult = ref(null);
         const stressDailyScores = ref(null);
         const stressShowPrompt = ref(false);
+        const stressShowDetail = ref(false);
+        const stressDetailTab = ref('scenarios');
         let stressTimer = null;
 
         let radarChartInstance = null;
@@ -3204,7 +3626,13 @@ function initApp() {
             return cats.map(cat => ({
                 name: cat,
                 questions: stressQuestions.filter(q => q.category === cat),
-                selected: stressSelectedCategories.value.includes(cat)
+                selected: stressSelectedCategories.value.includes(cat),
+                ...(stressCategoryMeta[cat] || {
+                    icon: '📋',
+                    description: '压力场景测试',
+                    tags: ['压力', '测试'],
+                    color: '#999'
+                })
             }));
         });
         
@@ -3261,12 +3689,10 @@ function initApp() {
                 optionIndex: stressSelectedIdx.value
             };
             
-            // 如果当前索引已有答案，替换它；否则添加新答案
-            if (stressAnswers.value.length > stressCurrentIndex.value) {
-                stressAnswers.value[stressCurrentIndex.value] = answer;
-            } else {
-                stressAnswers.value.push(answer);
-            }
+            // 在当前索引位置保存答案，并清理后续所有答案
+            stressAnswers.value[stressCurrentIndex.value] = answer;
+            // 关键修复：截断当前索引之后的所有答案，防止旧答案残留
+            stressAnswers.value = stressAnswers.value.slice(0, stressCurrentIndex.value + 1);
             
             if (stressCurrentIndex.value < stressCurrentQuestions.value.length - 1) {
                 stressCurrentIndex.value++;
@@ -3308,14 +3734,62 @@ function initApp() {
                     const pattern = calculateStressPattern(stressAnswers.value, stressDailyScores.value);
                     let interpretation = null;
                     
-                    // 匹配动态文案（按优先级从高到低，命中即终止）
-                    const sortedRules = [...stressDynamicInterpretations].sort((a, b) => (b.priority || 1) - (a.priority || 1));
+                    // 三层匹配系统
                     const avg = (dailyScores.anxiety + dailyScores.avoidance + dailyScores.secure + dailyScores.guide) / 4;
+                    const sortedRules = [...stressDynamicInterpretations].sort((a, b) => (b.priority || 1) - (a.priority || 1));
+                    
+                    // 第一层：强制优先规则
                     for (const rule of sortedRules) {
-                        if (rule.condition(dailyScores, pattern.scores, avg)) {
+                        if (rule.forceMatch && rule.condition(dailyScores, pattern.scores, avg)) {
                             interpretation = { title: rule.title, text: rule.text };
+                            console.log('[压力匹配] 第一层命中:', rule.id);
                             break;
                         }
+                    }
+                    
+                    // 第二层：智能评分匹配
+                    if (!interpretation) {
+                        let bestMatch = null;
+                        let bestScore = -1;
+                        const scoredMatches = [];
+                        
+                        for (const rule of sortedRules) {
+                            if (rule.forceMatch) continue;
+                            if (rule.condition(dailyScores, pattern.scores, avg)) {
+                                let score = 0;
+                                if (rule.matchScore) {
+                                    score = rule.matchScore(dailyScores, pattern.scores, avg);
+                                } else {
+                                    score = (rule.priority || 1) / 100;
+                                }
+                                
+                                const priorityWeight = Math.min((rule.priority || 1) / 50, 1.5);
+                                score *= priorityWeight;
+                                
+                                scoredMatches.push({ rule, score });
+                                
+                                if (score > bestScore) {
+                                    bestScore = score;
+                                    bestMatch = rule;
+                                }
+                            }
+                        }
+                        
+                        if (bestMatch) {
+                            interpretation = { title: bestMatch.title, text: bestMatch.text };
+                            console.log('[压力匹配] 第二层命中:', bestMatch.id, '分数:', bestScore.toFixed(3));
+                        }
+                    }
+                    
+                    // 第三层：动态文案生成兜底
+                    if (!interpretation) {
+                        console.log('[压力匹配] 第三层：动态生成');
+                        const dynamicResult = generateDynamicInterpretation(dailyScores, pattern.scores, avg);
+                        interpretation = { 
+                            title: dynamicResult.title, 
+                            text: dynamicResult.text,
+                            isDynamic: dynamicResult.isDynamic 
+                        };
                     }
                     
                     stressResult.value = {
@@ -3855,12 +4329,16 @@ function initApp() {
 
         // 压力结果展示辅助函数
         function getChangeLabel(mult) {
+            if (!isFinite(mult)) return '新增';
+            if (mult > 10) return '↑↑';
             if (mult > 1.1) return '×' + mult.toFixed(1);
             if (mult < 0.9) return '×' + mult.toFixed(1);
             return '×1.0';
         }
         function getMultiplierLabel(mult) {
-            return '×' + mult.toFixed(1);
+            if (!isFinite(mult)) return '新增';
+            if (mult > 10) return '显著增加';
+            return '×' + Math.min(mult, 10).toFixed(1);
         }
         function getChangeColor(mult, dimColor) {
             if (mult >= 1.2) return '#ee5a5a';
@@ -3953,7 +4431,7 @@ function initApp() {
                     
                     // 压力测试
                     stressView, stressSelectedCategories, stressCurrentIndex, stressSelectedIdx, stressAnswers, 
-                    stressFinalScores, stressResult, stressDailyScores,
+                    stressFinalScores, stressResult, stressDailyScores, stressShowDetail, stressDetailTab,
                     stressCategories, stressCurrentQuestions,
                     toggleStressCategory, startStressTest, selectStressOption, nextStressQuestion, prevStressQuestion,
                     resetStressTest, startStressTestPage, stressShowPrompt, goToDailyTest, goToStressTest,
@@ -3971,8 +4449,8 @@ function initApp() {
 
             <!-- 放弃确认对话框 -->
             <transition name="fade">
-                <div v-if="showAbandonConfirm" class="loading-overlay" style="background: rgba(0,0,0,0.5); padding-top: 8vh;">
-                    <div class="card" style="max-width:320px; margin:20px; animation: popIn 0.2s ease-out;">
+                <div v-if="showAbandonConfirm" class="loading-overlay" style="background: rgba(0,0,0,0.5);">
+                    <div class="card" style="max-width:320px; margin:0; min-height:auto; animation: popIn 0.2s ease-out;">
                         <div style="text-align:center; padding:10px 0 20px;">
                             <div style="font-size:48px; margin-bottom:10px;">💔</div>
                             <h3 style="margin:0 0 8px; color:#5b4c44;">确定要放弃吗？</h3>
@@ -3989,7 +4467,7 @@ function initApp() {
             <!-- 日常测试提醒对话框 -->
             <transition name="fade">
                 <div v-if="stressShowPrompt" class="loading-overlay" style="background: rgba(0,0,0,0.5);">
-                    <div class="card" style="max-width:340px; animation: popIn 0.2s ease-out;">
+                    <div class="card" style="max-width:340px; margin:0; min-height:auto; animation: popIn 0.2s ease-out;">
                         <div style="text-align:center; padding:10px 0 20px;">
                             <div style="font-size:56px; margin-bottom:12px;">💡</div>
                             <h3 style="margin:0 0 8px; color:#5b4c44;">先完成日常测试哦~</h3>
@@ -4007,25 +4485,40 @@ function initApp() {
             <!-- ==================== 压力测试视图 ==================== -->
             <!-- 压力测试场景选择 -->
             <template v-if="stressView === 'select'">
-                <div class="header" style="background: linear-gradient(135deg, #3b2a25, #5e3a30);">
-                    <h2 style="color:#fff;">🌊 压力测试</h2>
-                    <p style="color:#ddd;">选择你想测试的压力场景</p>
+                <div class="header" style="background: linear-gradient(135deg, #3b2a25, #5e3a30); padding:24px 20px;">
+                    <h2 style="color:#fff; font-size:20px;">🌊 压力测试</h2>
+                    <p style="color:#ddd; margin-top:4px; font-size:13px;">选择你想测试的压力场景</p>
                 </div>
-                <div class="card">
-                    <div style="margin-bottom:16px;">
-                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:8px;">选择场景分类（最少选 3 个）</div>
-                        <div style="color:#999; font-size:13px;">选择 3 个或更多你感兴趣的压力场景，获得更全面的分析</div>
+                <div class="card" style="min-height:auto; padding:20px;">
+                    <div style="margin-bottom:14px;">
+                        <div style="color:#5b4c44; font-weight:600; font-size:15px; margin-bottom:6px;">选择场景分类（最少选 3 个）</div>
+                        <div style="color:#999; font-size:12px;">选择 3 个或更多你感兴趣的压力场景，获得更全面的分析</div>
                     </div>
                     
-                    <div v-for="(cat, catIdx) in stressCategories" :key="catIdx" 
-                         class="stress-cat-item" :class="{selected: cat.selected}"
-                         @click="toggleStressCategory(cat.name)">
-                        <div class="stress-cat-name">{{ cat.name }}</div>
-                        <div class="stress-cat-count">{{ cat.questions.length }}道题</div>
+                    <div class="scenario-cards">
+                        <div v-for="(cat, catIdx) in stressCategories" :key="catIdx" 
+                             class="scenario-card" :class="{ selected: cat.selected }"
+                             @click="toggleStressCategory(cat.name)">
+                            <div class="scenario-visual">
+                                <div class="visual-bg" :style="{ background: cat.color }"></div>
+                                {{ cat.icon }}
+                                <div class="scenario-overlay">
+                                    <span class="question-count">{{ cat.questions.length }} 题</span>
+                                </div>
+                            </div>
+                            <div class="scenario-info">
+                                <h4>{{ cat.name }}</h4>
+                                <p>{{ cat.description }}</p>
+                                <div class="scenario-tags">
+                                    <span v-for="(tag, tagIdx) in cat.tags" :key="tagIdx">{{ tag }}</span>
+                                </div>
+                            </div>
+                            <div class="check-indicator" v-if="cat.selected">✓</div>
+                        </div>
                     </div>
                     
-                    <div class="btn-group" style="margin-top:20px;">
-                        <button @click="stressView='home'" class="secondary" style="flex:1; margin-right:12px;"><i class="fa fa-arrow-left"></i> 返回</button>
+                    <div class="btn-group" style="margin-top:18px;">
+                        <button @click="stressView='home'" class="secondary" style="flex:1; margin-right:10px;"><i class="fa fa-arrow-left"></i> 返回</button>
                         <button @click="startStressTest" :disabled="stressSelectedCategories.length < 3" style="flex:1; background: linear-gradient(135deg, #3b2a25, #5e3a30);">
                             开始测试 ({{ stressSelectedCategories.length }}/3+)
                         </button>
@@ -4036,8 +4529,10 @@ function initApp() {
             <!-- 压力测试答题 -->
             <template v-else-if="stressView === 'quiz'">
                 <div class="header" style="background: linear-gradient(135deg, #3b2a25, #5e3a30);">
-                    <div class="progress-bar" style="width: 60%;">
-                        <div class="progress-fill" :style="{width: ((stressCurrentIndex + 1) / stressCurrentQuestions.length * 100) + '%'}"></div>
+                    <div class="progress" style="width: 60%;">
+                        <div class="progress-bar" 
+                            :class="{'progress-complete': stressCurrentIndex === stressCurrentQuestions.length - 1}"
+                            :style="{width: ((stressCurrentIndex + 1) / stressCurrentQuestions.length * 100) + '%'}"></div>
                     </div>
                     <div style="font-size:13px; color:#ddd; margin-bottom:8px;">场景 {{ stressCurrentIndex + 1 }} / {{ stressCurrentQuestions.length }}</div>
                     <div style="font-size:12px; color:#ccc; margin-top:8px;">📍 {{ stressCurrentQuestions[stressCurrentIndex].category }}</div>
@@ -4099,14 +4594,24 @@ function initApp() {
                                     </span>
                                     <span style="font-size:12px; color:#666;">压力 <b>{{ formatNumber(stressResult.scores[dim.key]) }}</b>分</span>
                                 </div>
-                                <div style="background:#f0e2da; border-radius:6px; overflow:hidden; height:12px; position:relative;">
-                                    <!-- 日常基线 -->
-                                    <div :style="{position:'absolute', left:0, top:0, bottom:0, width: (stressDailyScores[dim.key] / dim.max * 100) + '%', background: dim.color, opacity:0.35, borderRadius:'6px'}"></div>
-                                    <!-- 压力对比标记 -->
-                                    <div :style="{position:'absolute', left:0, top:0, bottom:0, width: (stressResult.scores[dim.key] / dim.max * 100) + '%', background: dim.color, borderRadius:'6px', display:'flex', alignItems:'center', justifyContent:'flex-end', paddingRight:'2px'}">
-                                        <span v-if="Math.abs(stressResult.amplification[dim.key] - 1) > 0.05" style="font-size:8px; color:#fff; line-height:1;">
-                                            {{ stressResult.amplification[dim.key] > 1 ? '↑' : '↓' }}
-                                        </span>
+                                <div style="display:flex; gap:8px;">
+                                    <!-- 日常柱形 -->
+                                    <div style="flex:1;">
+                                        <div style="font-size:10px; color:#999; margin-bottom:2px;">日常</div>
+                                        <div style="background:#f0e2da; border-radius:6px; overflow:hidden; height:14px;">
+                                            <div :style="{width: (stressDailyScores[dim.key] / dim.max * 100) + '%', background: dim.color, opacity:0.45, height:'100%', borderRadius:'6px', transition:'width 0.3s ease'}"></div>
+                                        </div>
+                                    </div>
+                                    <!-- 压力柱形 -->
+                                    <div style="flex:1;">
+                                        <div style="font-size:10px; color:#999; margin-bottom:2px;">压力</div>
+                                        <div style="background:#f0e2da; border-radius:6px; overflow:hidden; height:14px; position:relative;">
+                                            <div :style="{width: (stressResult.scores[dim.key] / dim.max * 100) + '%', background: dim.color, height:'100%', borderRadius:'6px', transition:'width 0.3s ease', display:'flex', alignItems:'center', justifyContent:'flex-end', paddingRight:'4px'}">
+                                                <span v-if="Math.abs(stressResult.amplification[dim.key] - 1) > 0.05" style="font-size:9px; color:#fff; line-height:1;">
+                                                    {{ stressResult.amplification[dim.key] > 1 ? '↑' : '↓' }}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div v-if="stressResult.scores[dim.key] === 0 && dim.key === 'secure'" style="font-size:11px; margin-top:4px; color:#999;">
@@ -4282,7 +4787,9 @@ function initApp() {
                             <span>{{ Math.round(((currentIndex + 1) / totalSteps) * 100) }}%</span>
                         </div>
                         <div class="progress">
-                            <div class="progress-bar" :style="{width: ((currentIndex + 1)/totalSteps)*100 + '%'}"></div>
+                            <div class="progress-bar" 
+                                :class="{'progress-complete': currentIndex === totalSteps - 1}"
+                                :style="{width: ((currentIndex + 1)/totalSteps)*100 + '%'}"></div>
                         </div>
                     </div>
                     <div style="text-align:center; padding:0 20px 4px; font-size:12px; color:#c4a89e;">请选择你最真实的反应，而不是你认为正确的做法</div>
@@ -4349,26 +4856,6 @@ function initApp() {
                         </div>
                     </div>
 
-                    <div v-if="currentTypeDetails && currentTypeDetails.compatibility && typeof currentTypeDetails.compatibility === 'object'" class="compatibility-section">
-                        <div class="compatibility-card best">
-                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.best.title }}</div>
-                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.best.why }}</div>
-                            <div class="compatibility-scenario">💭 相处示例：{{ currentTypeDetails.compatibility.best.scenario }}</div>
-                        </div>
-                        
-                        <div class="compatibility-card complementary">
-                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.complementary.title }}</div>
-                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.complementary.why }}</div>
-                            <div v-if="currentTypeDetails.compatibility.complementary.warning" class="compatibility-warning">{{ currentTypeDetails.compatibility.complementary.warning }}</div>
-                        </div>
-                        
-                        <div class="compatibility-card challenge">
-                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.challenge.title }}</div>
-                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.challenge.why }}</div>
-                            <div v-if="currentTypeDetails.compatibility.challenge.tip" class="compatibility-tip">💡 {{ currentTypeDetails.compatibility.challenge.tip }}</div>
-                        </div>
-                    </div>
-
                     <div v-if="bonusResult" class="positive-view-card" style="margin-top:16px;">
                         <div class="positive-view-label">✨ 你的恋爱心声</div>
                         <div class="positive-view-text">{{ bonusResult }}</div>
@@ -4419,9 +4906,10 @@ function initApp() {
                             <span>📖 查看更多细节</span>
                             <span class="arrow" :class="{open: showDetail}">▼</span>
                         </button>
-                        <div class="detail-content" :style="{maxHeight: showDetail ? '1300px' : '0', opacity: showDetail ? 1 : 0}">
+                        <div class="detail-content" :style="{maxHeight: showDetail ? '2000px' : '0', opacity: showDetail ? 1 : 0}">
                             <div class="detail-tabs">
                                 <button class="detail-tab-btn" :class="{active: detailTab === 'traits'}" @click="detailTab = 'traits'">🌟 特质与优势</button>
+                                <button class="detail-tab-btn" :class="{active: detailTab === 'compatibility'}" @click="detailTab = 'compatibility'">💞 适配恋人</button>
                                 <button class="detail-tab-btn" :class="{active: detailTab === 'advice'}" @click="detailTab = 'advice'">💡 相处建议</button>
                             </div>
                             <div class="detail-tab-content">
@@ -4437,6 +4925,25 @@ function initApp() {
                                     <div class="detail-card">
                                         <h4>🌱 成长空间</h4>
                                         <ul><li v-for="g in (currentTypeDetails ? currentTypeDetails.growth : [])" :key="g">{{ g }}</li></ul>
+                                    </div>
+                                </div>
+                                <div v-if="detailTab === 'compatibility'">
+                                    <div v-if="currentTypeDetails && currentTypeDetails.compatibility && typeof currentTypeDetails.compatibility === 'object'">
+                                        <div class="compatibility-card best">
+                                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.best.title }}</div>
+                                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.best.why }}</div>
+                                            <div class="compatibility-scenario">💭 相处示例：{{ currentTypeDetails.compatibility.best.scenario }}</div>
+                                        </div>
+                                        <div class="compatibility-card complementary">
+                                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.complementary.title }}</div>
+                                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.complementary.why }}</div>
+                                            <div v-if="currentTypeDetails.compatibility.complementary.warning" class="compatibility-warning">{{ currentTypeDetails.compatibility.complementary.warning }}</div>
+                                        </div>
+                                        <div class="compatibility-card challenge">
+                                            <div class="compatibility-title">{{ currentTypeDetails.compatibility.challenge.title }}</div>
+                                            <div class="compatibility-why">{{ currentTypeDetails.compatibility.challenge.why }}</div>
+                                            <div v-if="currentTypeDetails.compatibility.challenge.tip" class="compatibility-tip">💡 {{ currentTypeDetails.compatibility.challenge.tip }}</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div v-if="detailTab === 'advice'">
