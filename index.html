@@ -586,14 +586,14 @@
             flex: 1;
             background: var(--primary);
             border: none;
-            padding: 16px 20px;
-            border-radius: 80px;
-            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             color: white;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-btn);
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(255,138,111,0.25);
             user-select: none;
             -webkit-user-select: none;
             touch-action: manipulation;
@@ -601,28 +601,41 @@
             outline: none;
             -webkit-appearance: none;
             appearance: none;
-            min-height: 50px;
+            min-height: 44px;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255,138,111,0.35);
         }
         button:active { 
-            transform: scale(0.96); 
-            -webkit-transform: scale(0.96);
+            transform: translateY(0) scale(0.98); 
+            -webkit-transform: translateY(0) scale(0.98);
         }
         button:disabled {
             opacity: 0.45;
             cursor: not-allowed;
             box-shadow: none;
+            transform: none !important;
         }
         button:disabled:active { transform: none; }
         button.secondary {
-            background: #e9d9d0;
+            background: #f5efe8;
             color: #6f4e41;
             box-shadow: none;
+            border: 1px solid #e5ddd5;
+        }
+        button.secondary:hover {
+            background: #efe6dd;
+            transform: translateY(-1px);
         }
         button.ghost {
             background: transparent;
             color: var(--primary);
             box-shadow: none;
             border: 1.5px solid var(--primary);
+        }
+        button.ghost:hover {
+            background: rgba(255,138,111,0.08);
         }
 
         .result-type {
@@ -1622,12 +1635,12 @@ const stressQuestions = [
     },
     {
         id: 'conflict_2', category: '冲突处理',
-        scenario: '吵架时对方总翻旧账「你上次也这样」「你从来都不改」。',
+        scenario: '一有矛盾对方就刻意冷淡、不回应、不解释，用冷态度惩罚你。',
         weight: 2,
-        options: [ { text: '心里又委屈又难受，很怕被全盘否定，情绪一下子就崩了', scores: { anxiety: 2 }, reaction: '崩溃' },
-        { text: '不想继续争辩拉扯，干脆沉默不想说话，只想尽快结束争吵', scores: { avoidance: 2 }, reaction: '逃离' },
-        { text: '温和打断，跟对方约定：只聊当下这件事，不扯过往旧账', scores: { guide: 2 }, reaction: '破局' },
-        { text: '先不跟着情绪对抗，等对方平复下来再好好理性沟通', scores: { secure: 2 }, reaction: '自洽' }
+        options: [ { text: '陷入极度不安，不断反思是不是自己做错了什么', scores: { anxiety: 2 }, reaction: '崩溃' },
+        { text: '被伤透后慢慢死心，也学着收起热情不再主动', scores: { avoidance: 2 }, reaction: '关闭内心' },
+        { text: '直接指出这种冷暴力伤人，约定有问题要用语言沟通', scores: { guide: 2 }, reaction: '破局' },
+        { text: '清楚这是对方的情绪问题，不会全盘否定自己', scores: { secure: 2 }, reaction: '自洽' }
     ]
     }
 ];
@@ -3824,7 +3837,12 @@ function initApp() {
             if (finalScores.value) {
                 stressDailyScores.value = { ...finalScores.value };
             }
+            // 直接设置 stressView 为 select，压力测试视图会优先显示
             stressView.value = 'select';
+            // 重置 currentView 以避免干扰
+            currentView.value = 'home';
+            // 滚动到页面顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function clearHistory() {
@@ -3970,8 +3988,8 @@ function initApp() {
 
             <!-- 日常测试提醒对话框 -->
             <transition name="fade">
-                <div v-if="stressShowPrompt" class="loading-overlay" style="background: rgba(0,0,0,0.5); padding-top: 8vh;">
-                    <div class="card" style="max-width:340px; margin:20px; animation: popIn 0.2s ease-out;">
+                <div v-if="stressShowPrompt" class="loading-overlay" style="background: rgba(0,0,0,0.5);">
+                    <div class="card" style="max-width:340px; animation: popIn 0.2s ease-out;">
                         <div style="text-align:center; padding:10px 0 20px;">
                             <div style="font-size:56px; margin-bottom:12px;">💡</div>
                             <h3 style="margin:0 0 8px; color:#5b4c44;">先完成日常测试哦~</h3>
