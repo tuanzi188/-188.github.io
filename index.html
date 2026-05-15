@@ -1646,14 +1646,15 @@ const stressQuestions = [
         ]
     },
     {
-        id: 'trust_3', category: '信任危机',
-        scenario: 'TA最近频繁和某个人聊微信，手机还总对着你倒扣着，聊天记录一滑就删。',
+        id: 'trust_3',
+        category: '信任危机',
+        scenario: "对方答应好你的事屡次落空，一次次随口失信没有兑现。",
         weight: 2,
         options: [
-            { text: '崩溃质问，要求看手机，不给看就分手', scores: { anxiety: 2 } , reaction: '崩溃' },
-            { text: '假装没发现，但内心已经准备好随时离开', scores: { avoidance: 2 } , reaction: '逃离' },
-            { text: '直接说「我注意到你最近有些不一样，我们聊聊吧」', scores: { guide: 2 } , reaction: '破局' },
-            { text: '选择相信，给TA空间，等TA愿意说时自然会说', scores: { secure: 2 } , reaction: '自洽' }
+            { text: "极度不满对方行为，认为TA并不爱自己", scores: { anxiety: 2 }, reaction: '满心患失' },
+            { text: "慢慢不再抱有期待，不再主动期待对方许下任何承诺", scores: { avoidance: 2 }, reaction: '收回期待' },
+            { text: "认真和对方谈及此事，约定做事尽量说到做到守住信用", scores: { guide: 2 }, reaction: '建立约定' },
+            { text: "看淡随口许诺，看清行事风格，理性调整自己的心态", scores: { secure: 2 }, reaction: '理性看淡' }
         ]
     },
     {
