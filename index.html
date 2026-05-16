@@ -1432,7 +1432,8 @@ const STORAGE_KEYS = {
     LOVE_TEST_RESULT: 'loveTestResult',
     BONUS_ANSWER: 'bonusAnswer',
     LOVE_TEST_HISTORY: 'loveTestHistory',
-    STRESS_HISTORY: 'stressHistory'
+    STRESS_HISTORY: 'stressHistory',
+    TEST_PROGRESS: 'testProgress' // 新增：答题进度保存
 };
 
 const PERSONALITY_TYPES = {
@@ -3462,6 +3463,136 @@ function initApp() {
             toastTimer = setTimeout(function() { toastMsg.value = ''; }, duration);
         }
 
+        // ==================== 答题进度自动保存功能 ====================
+        
+        /**
+         * 自动保存答题进度
+         * 在用户选择选项或切换题目时调用
+         */
+        function autoSaveProgress() {
+            try {
+                // 只有在答题过程中才保存（不在首页、结果页等）
+                if (currentView.value !== 'test' || currentIndex.value === undefined) {
+                    return;
+                }
+                
+                const progress = {
+                    currentIndex: currentIndex.value,
+                    answers: JSON.parse(JSON.stringify(answers.value)), // 深拷贝
+                    startTestTime: startTestTime.value,
+                    gender: gender.value,
+                    relationshipStage: relationshipStage.value,
+                    timestamp: Date.now(),
+                    version: 1 // 版本号，方便后续升级
+                };
+                
+                safeStorageSet(STORAGE_KEYS.TEST_PROGRESS, progress);
+                console.log('[进度保存] 已自动保存答题进度:', currentIndex.value + 1, '/', totalSteps);
+            } catch (e) {
+                console.warn('[进度保存] 保存失败:', e);
+            }
+        }
+        
+        /**
+         * 检查是否有未完成的答题进度
+         * 在页面加载时调用
+         */
+        function checkUnfinishedProgress() {
+            try {
+                const saved = safeStorageGet(STORAGE_KEYS.TEST_PROGRESS, null);
+                
+                if (!saved) {
+                    return false;
+                }
+                
+                // 检查是否在1小时内（避免恢复过旧的进度）
+                const hoursPassed = (Date.now() - saved.timestamp) / (1000 * 60 * 60);
+                if (hoursPassed > 1) {
+                    console.log('[进度恢复] 进度已过期（', hoursPassed.toFixed(1), '小时前）');
+                    clearSavedProgress();
+                    return false;
+                }
+                
+                // 检查进度是否有效
+                if (saved.currentIndex >= 0 && saved.currentIndex < totalSteps && 
+                    saved.answers && Array.isArray(saved.answers)) {
+                    return saved;
+                }
+                
+                return false;
+            } catch (e) {
+                console.warn('[进度恢复] 检查失败:', e);
+                return false;
+            }
+        }
+        
+        /**
+         * 恢复保存的答题进度
+         */
+        function restoreProgress(saved) {
+            try {
+                if (!saved) return;
+                
+                // 恢复数据
+                currentIndex.value = saved.currentIndex;
+                answers.value = saved.answers || [];
+                startTestTime.value = saved.startTestTime || Date.now();
+                gender.value = saved.gender || '';
+                relationshipStage.value = saved.relationshipStage || '';
+                
+                // 恢复当前题目的选中状态
+                if (currentIndex.value < answers.value.length) {
+                    const prevAnswer = answers.value[currentIndex.value];
+                    const currentQ = currentQuestion.value;
+                    
+                    if (currentQ && currentQ.options) {
+                        const matchIdx = currentQ.options.findIndex(opt => {
+                            return JSON.stringify(opt.scores) === JSON.stringify(prevAnswer);
+                        });
+                        selectedIdx.value = matchIdx >= 0 ? matchIdx : -1;
+                    }
+                } else {
+                    selectedIdx.value = -1;
+                }
+                
+                // 切换到答题视图
+                currentView.value = 'test';
+                
+                console.log('[进度恢复] 成功恢复到第', currentIndex.value + 1, '题');
+                showToast('已恢复上次的答题进度', 2000);
+            } catch (e) {
+                console.error('[进度恢复] 恢复失败:', e);
+                showToast('恢复进度失败，请重新开始', 2000);
+            }
+        }
+        
+        /**
+         * 清除保存的进度
+         * 在完成测试或用户主动放弃时调用
+         */
+        function clearSavedProgress() {
+            try {
+                localStorage.removeItem(STORAGE_KEYS.TEST_PROGRESS);
+                console.log('[进度清理] 已清除保存的进度');
+            } catch (e) {
+                console.warn('[进度清理] 清除失败:', e);
+            }
+        }
+        
+        /**
+         * 提示用户是否恢复进度
+         */
+        function promptRestoreProgress(saved) {
+            const completedCount = saved.answers ? saved.answers.length : 0;
+            const confirmMsg = `检测到你有未完成的测试（已完成 ${completedCount}/${totalSteps} 题），是否继续？`;
+            
+            if (confirm(confirmMsg)) {
+                restoreProgress(saved);
+            } else {
+                clearSavedProgress();
+            }
+        }
+
         function loadHistory() {
             const dailyHistory = safeStorageGet(STORAGE_KEYS.TEST_HISTORY, []);
             const stressHistory = safeStorageGet(STORAGE_KEYS.STRESS_HISTORY, []);
@@ -3911,6 +4042,9 @@ function initApp() {
             if (event) event.preventDefault();
             selectedIdx.value = idx;
             triggerHaptic();
+            
+            // 自动保存进度（用户选择选项时）
+            autoSaveProgress();
         }
 
         function nextQuestion() {
@@ -3932,6 +4066,9 @@ function initApp() {
                 const selectedValue = currentOpts[selectedIdx.value].value;
                 safeStorageSet(STORAGE_KEYS.BONUS_ANSWER, selectedValue);
             }
+            
+            // 自动保存进度（用户点击下一题时）
+            autoSaveProgress();
             
             if (currentIndex.value + 1 < totalSteps) {
                 requestAnimationFrame(function() {
@@ -4014,6 +4151,10 @@ function initApp() {
             
             resultType.value = getPersonalityType(totals);
             saveToHistory(resultType.value, totals);
+            
+            // 测试完成，清除保存的进度
+            clearSavedProgress();
+            
             isLoading.value = false;
             showToast('测试完成！');
             currentView.value = VIEW_STATES.RESULT;
@@ -4267,8 +4408,131 @@ function initApp() {
             showAbandonConfirm.value = true;
         }
 
-        function confirmAbandon() {
+        /**
+         * 保存当前已答的结果（部分完成）
+         */
+        function savePartialResult() {
+            try {
+                // 至少需要回答5题才能生成有意义的结果
+                if (answers.value.length < 5) {
+                    showToast('答题数量太少，无法生成结果', 2000);
+                    return false;
+                }
+                
+                // 计算当前已答题目的分数
+                const totals = {
+                    [DIMENSION_KEYS.ANXIETY]: 0,
+                    [DIMENSION_KEYS.AVOIDANCE]: 0,
+                    [DIMENSION_KEYS.SECURE]: 0,
+                    [DIMENSION_KEYS.GUIDE]: 0
+                };
+                
+                let answeredCount = 0;
+                for (let i = 0; i < answers.value.length; i++) {
+                    const ans = answers.value[i];
+                    if (!ans) continue;
+                    
+                    const q = i < questions.length ? questions[i] : bonusQuestion;
+                    const weight = q.weight || 1;
+                    
+                    Object.keys(totals).forEach(key => {
+                        if (ans[key]) totals[key] += ans[key] * weight;
+                    });
+                    answeredCount++;
+                }
+                
+                // Round to 1 decimal place
+                Object.keys(totals).forEach(key => {
+                    totals[key] = Math.round(totals[key] * 10) / 10;
+                });
+                
+                const duration = Math.round((Date.now() - startTestTime.value) / 1000);
+                const labelInfo = getLabelSystem(totals);
+                
+                finalScores.value = {
+                    ...totals,
+                    mbti: {
+                        code: labelInfo.code,
+                        label: labelInfo.label,
+                        labelEn: labelInfo.labelEn,
+                        color: labelInfo.color || '#FFA07A',
+                        subLabels: labelInfo.subLabels,
+                        oneLiner: labelInfo.oneLiner,
+                        description: labelInfo.description,
+                        highlight: labelInfo.highlight,
+                        blindspot: labelInfo.blindspot,
+                        idealPartner: labelInfo.idealPartner
+                    }
+                };
+                
+                resultType.value = getPersonalityType(totals);
+                testDuration.value = duration;
+                
+                // 保存到历史记录（标记为未完成）
+                const hist = safeStorageGet(STORAGE_KEYS.TEST_HISTORY, []);
+                const record = {
+                    id: Date.now().toString(),
+                    date: new Date().toLocaleDateString(),
+                    type: resultType.value,
+                    gender: gender.value,
+                    scores: { 
+                        anxiety: totals.anxiety, 
+                        avoidance: totals.avoidance, 
+                        secure: totals.secure, 
+                        guide: totals.guide 
+                    },
+                    mbti: finalScores.value.mbti,
+                    bonusAnswer: safeStorageGet(STORAGE_KEYS.BONUS_ANSWER, null),
+                    isPartial: true, // 标记为部分完成
+                    answeredCount: answeredCount,
+                    totalCount: totalSteps
+                };
+                
+                hist.unshift(record);
+                if (hist.length > 10) hist.splice(10);
+                safeStorageSet(STORAGE_KEYS.TEST_HISTORY, hist);
+                safeStorageSet(STORAGE_KEYS.LOVE_TEST_RESULT, record);
+                
+                console.log('[部分结果] 已保存部分完成的测试结果');
+                return true;
+            } catch (e) {
+                console.error('[部分结果] 保存失败:', e);
+                showToast('保存失败', 2000);
+                return false;
+            }
+        }
+
+        function confirmAbandon(saveResult = false) {
             showAbandonConfirm.value = false;
+            
+            // 如果用户选择保存结果
+            if (saveResult) {
+                const saved = savePartialResult();
+                if (saved) {
+                    showToast('已保存当前结果，可在历史记录中查看', 2000);
+                    // 清除进度并返回首页
+                    clearSavedProgress();
+                    
+                    // 返回首页
+                    currentView.value = 'home';
+                    answers.value = [];
+                    currentIndex.value = 0;
+                    selectedIdx.value = -1;
+                    finalScores.value = null;
+                    resultType.value = '';
+                    gender.value = '';
+                    showDetail.value = false;
+                    detailTab.value = 'traits';
+                    startTestTime.value = 0;
+                    testDuration.value = 0;
+                    trackingHistoryId.value = null;
+                    
+                    if (radarChartInstance) radarChartInstance.dispose();
+                    return;
+                }
+            }
+            
+            // 不保存，直接返回首页
             currentView.value = 'home';
             answers.value = [];
             currentIndex.value = 0;
@@ -4281,7 +4545,20 @@ function initApp() {
             startTestTime.value = 0;
             testDuration.value = 0;
             trackingHistoryId.value = null;
+            
+            // 放弃测试时清除保存的进度
+            clearSavedProgress();
+            
             if (radarChartInstance) radarChartInstance.dispose();
+        }
+        
+        /**
+         * 放弃并保存结果
+         */
+        function confirmAbandonAndSave() {
+            console.log('[放弃测试] 点击保存结果并退出');
+            console.log('[放弃测试] 当前已答题数:', answers.value.length);
+            confirmAbandon(true);
         }
 
         function cancelAbandon() {
@@ -4301,6 +4578,10 @@ function initApp() {
             startTestTime.value = 0;
             testDuration.value = 0;
             trackingHistoryId.value = null;
+            
+            // 重测时清除保存的进度
+            clearSavedProgress();
+            
             if (radarChartInstance) radarChartInstance.dispose();
         }
 
@@ -4394,6 +4675,16 @@ function initApp() {
 
         onMounted(function() {
             loadHistory();
+            
+            // 检查是否有未完成的答题进度
+            const savedProgress = checkUnfinishedProgress();
+            if (savedProgress) {
+                // 延迟一点显示提示，让页面先渲染完成
+                setTimeout(() => {
+                    promptRestoreProgress(savedProgress);
+                }, 500);
+            }
+            
             // 延迟加载ECharts等库，优化初始加载
             if (typeof echarts === 'undefined' && window.requestIdleCallback) {
                 window.requestIdleCallback(() => {
@@ -4427,7 +4718,7 @@ function initApp() {
                     genderAdviceText, testDuration, formatScore, formatNumber, secondaryType, labelResult, bonusResult, trackingHistoryId, isHistoryView, formatDuration, getScoreLevel, getHeaderStyle, getMbtiSectionStyle, formatBlindspot,
                     estimatedTimeLeft, isLoading, personalizedInterpretation, tensionAnalysis, showAbandonConfirm,
                     startTest, confirmGender, goBack, selectOption, nextQuestion, retest, goHome, goToStressTest, shareResult,
-                    generatePoster, typeDetails, currentTypeDetails, personalityResult, formatDate, loadHistoryById, deleteHistoryById, clearHistory, abandonTest, confirmAbandon, cancelAbandon,
+                    generatePoster, typeDetails, currentTypeDetails, personalityResult, formatDate, loadHistoryById, deleteHistoryById, clearHistory, abandonTest, confirmAbandon, confirmAbandonAndSave, cancelAbandon,
                     getHistoryTypeInfo,
                     
                     // 压力测试
@@ -4451,15 +4742,33 @@ function initApp() {
             <!-- 放弃确认对话框 -->
             <transition name="fade">
                 <div v-if="showAbandonConfirm" class="loading-overlay" style="background: rgba(0,0,0,0.5);">
-                    <div class="card" style="max-width:320px; margin:0; min-height:auto; animation: popIn 0.2s ease-out;">
+                    <div class="card" style="max-width:340px; margin:0; min-height:auto; animation: popIn 0.2s ease-out;">
                         <div style="text-align:center; padding:10px 0 20px;">
                             <div style="font-size:48px; margin-bottom:10px;">💔</div>
                             <h3 style="margin:0 0 8px; color:#5b4c44;">确定要放弃吗？</h3>
-                            <p style="color:#999; font-size:14px; line-height:1.5; margin:0;">已填写的进度将不会被保存</p>
+                            <p style="color:#999; font-size:14px; line-height:1.5; margin:0 0 12px;">已填写 {{ answers.length }} / {{ totalSteps }} 题</p>
+                            <div v-if="answers.length >= 5" style="background:#fff5f0; border-radius:12px; padding:12px; margin:12px 0;">
+                                <p style="color:#d2691e; font-size:13px; margin:0 0 8px; font-weight:500;">💡 提示：你可以选择保存当前结果</p>
+                                <p style="color:#999; font-size:12px; margin:0;">保存后可在历史记录中查看，但标记为"未完成"</p>
+                            </div>
                         </div>
-                        <div class="btn-group">
-                            <button class="secondary" @click="cancelAbandon"><i class="fa fa-times"></i> 继续答题</button>
-                            <button style="background: linear-gradient(135deg, #ff6b6b, #ee5a5a);" @click="confirmAbandon"><i class="fa fa-check"></i> 确定放弃</button>
+                        <div class="btn-group" style="flex-direction:column; gap:10px;">
+                            <button class="secondary" @click="cancelAbandon" style="width:100%;">
+                                <i class="fa fa-arrow-left"></i> 继续答题
+                            </button>
+                            <button 
+                                v-if="answers.length >= 5" 
+                                @click="confirmAbandonAndSave" 
+                                style="width:100%; background: linear-gradient(135deg, #FFA07A, #ff8a6f);"
+                            >
+                                <i class="fa fa-save"></i> 保存结果并退出
+                            </button>
+                            <button 
+                                @click="confirmAbandon(false)" 
+                                style="width:100%; background: linear-gradient(135deg, #ff6b6b, #ee5a5a);"
+                            >
+                                <i class="fa fa-times"></i> 不保存，直接退出
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -4993,6 +5302,7 @@ function initApp() {
                                 {{ item.type === 'stress' ? '🌊 压力测试' : (getHistoryTypeInfo(item).emoji + ' ' + getHistoryTypeInfo(item).name) }}
                                 {{ item.gender ? (item.gender === 'male' ? ' 👦' : ' 👧') : '' }}
                                 <span v-if="item.mbti && item.mbti.code" style="margin-left:8px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;background:linear-gradient(135deg,#98D2C0,#F7C59F,#B5C9E2,#FFA07A);color:#fff;">{{ item.mbti.code }}</span>
+                                <span v-if="item.isPartial" style="margin-left:6px;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:600;background:#ffe4e1;color:#d2691e;border:1px solid #ffb6c1;">未完成</span>
                             </span>
                             <div style="display:flex;gap:8px;align-items:center;">
                                 <span class="history-date">{{ item.date || formatDate(item.id) }}</span>
@@ -5004,6 +5314,9 @@ function initApp() {
                             <span class="history-score-tag">🏃 {{ (item.scores || item.stressScores).avoidance }}</span>
                             <span class="history-score-tag">🌿 {{ (item.scores || item.stressScores).secure }}</span>
                             <span class="history-score-tag">✨ {{ (item.scores || item.stressScores).guide }}</span>
+                        </div>
+                        <div v-if="item.isPartial && item.answeredCount" style="margin-top:6px;font-size:11px;color:#999;text-align:right;">
+                            已完成 {{ item.answeredCount }}/{{ item.totalCount }} 题
                         </div>
                     </div>
                     <div style="display:flex; margin-top:16px;">
